@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block titulo %}Grabaciones{% endblock %}
+
+{% block contenido %}
+<h1>Grabaciones</h1>
+
+<section class="tarjeta subida" aria-labelledby="titulo-subida">
+  <h2 id="titulo-subida">Subir archivos EDF</h2>
+  <p class="nota">La subida de archivos estará disponible próximamente.</p>
+</section>
+
+<section class="tarjeta" aria-labelledby="titulo-lista">
+  <h2 id="titulo-lista">Lista</h2>
+  {% if grabaciones %}
+    {# La tabla de grabaciones llega en la Fase 2. #}
+  {% else %}
+    <p class="vacio">Todavía no hay grabaciones.</p>
+  {% endif %}
+</section>
+{% endblock %}

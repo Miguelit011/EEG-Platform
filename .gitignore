@@ -1,0 +1,21 @@
+# Entorno y configuración local
+.venv/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Datos de participantes: viven en EEG_PLATFORM_DATOS, fuera del repo.
+# Estas reglas son una red de seguridad por si algo se escribe aquí por error.
+*.sqlite3
+*.sqlite3-journal
+*.edf
+*.bdf
+*.csv
+*.parquet
+*.joblib
+archivos/
+datos/
+EEG-Platform-datos/

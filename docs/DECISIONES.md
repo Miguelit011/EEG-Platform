@@ -13,3 +13,13 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 - **Modelos empaquetados con ficha generada, no escrita a mano.** `analisis/empaquetar_modelos.py` copia los `.joblib` sin tocarlos y toma las cifras de `resultados.json` y los nombres de clase de las constantes del código de entrenamiento. La carga comprueba el SHA-256.
 - **Ejemplo JSON anonimizado.** Es una grabación de train cuyo nombre se sustituye por `ejemplo_OA.edf`, porque va al repo y los participantes son menores.
 - **Python 3.10 y scikit-learn 1.7.2 fijados en `pyproject.toml`.** Son las versiones con que se guardaron los modelos; joblib no garantiza cargarlos con otras.
+
+## Fase 1 — Esqueleto (2026-10-15)
+
+- **`.venv` propio en EEG-Platform**, con Python 3.10 y `requirements.txt`. La web se instala y arranca desde su propia carpeta, que es lo más sencillo para el `iniciar.bat` de la Fase 8. EEG-Library entra en modo editable (`-e ../EEG-Library`).
+- **Versiones científicas fijadas a las de la Fase 0** (numpy, pandas, scipy, mne, mne-icalabel, onnxruntime, pyarrow, joblib y scikit-learn). Son las que dieron paridad exacta con `matriz_rf.parquet`; otras podrían cambiar los resultados.
+- **Carpeta de datos fuera del repo, comprobada al arrancar.** `EEG_PLATFORM_DATOS` (por defecto `../EEG-Platform-datos`) guarda la base SQLite y los archivos. Si apunta dentro del repo, Django no arranca, porque son datos de menores. El `.gitignore` añade una red de seguridad (`*.edf`, `*.sqlite3`, `*.csv`...).
+- **`.env` leído con diez líneas propias**, sin `python-dotenv`: es una dependencia menos. El entorno tiene prioridad sobre el archivo.
+- **Sin `admin` ni `auth`.** Login y usuarios están fuera de alcance; quitar las apps evita tablas y pantallas que nadie usaría.
+- **Calidad y Análisis desactivadas en la navegación** mientras no se elige una grabación: son pantallas por grabación.
+- **Django 5.2 (LTS)**, la última rama que admite Python 3.10.

@@ -5,7 +5,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | Fase | Qué | Repo | Estado |
 |---|---|---|---|
 | 0 | Contrato con la librería y modelos empaquetados | EEG-Library | [x] |
-| 1 | Esqueleto Django | EEG-Platform | [ ] |
+| 1 | Esqueleto Django | EEG-Platform | [x] |
 | 2 | Subida y lista de grabaciones | EEG-Platform | [ ] |
 | 3 | Procesado en segundo plano | EEG-Platform | [ ] |
 | 4 | Pantalla de calidad | EEG-Platform | [ ] |
@@ -71,7 +71,7 @@ Aceptación:
 - La matriz reconstruida con el lote sale idéntica a la actual.
 - Los tests existentes siguen pasando y los resultados del pipeline no cambian.
 
-## Fase 1 — Esqueleto
+## Fase 1 — Esqueleto — **hecha** (2026-10-15)
 **Objetivo:** proyecto Django vacío que arranca.
 
 Incluye:

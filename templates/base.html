@@ -1,0 +1,36 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}EEG-Platform{% endblock %} · EEG-Platform</title>
+  <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+  <header class="cabecera">
+    <a class="marca" href="{% url 'grabaciones:lista' %}">EEG-Platform</a>
+    <nav aria-label="Pantallas">
+      <ul>
+        <li><a href="{% url 'grabaciones:lista' %}"
+               {% if pantalla == 'grabaciones' %}aria-current="page"{% endif %}>Grabaciones</a></li>
+        {% if grabacion %}
+          <li><a href="#" {% if pantalla == 'calidad' %}aria-current="page"{% endif %}>Calidad</a></li>
+          <li><a href="#" {% if pantalla == 'analisis' %}aria-current="page"{% endif %}>Análisis</a></li>
+        {% else %}
+          <li><span class="desactivado" title="Elige una grabación en la lista">Calidad</span></li>
+          <li><span class="desactivado" title="Elige una grabación en la lista">Análisis</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <main class="contenido">
+    {% if messages %}
+      <ul class="mensajes">
+        {% for mensaje in messages %}<li class="{{ mensaje.tags }}">{{ mensaje }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
+</body>
+</html>

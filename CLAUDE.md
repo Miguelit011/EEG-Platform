@@ -46,4 +46,17 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 - El orden del pipeline está fijado en `ESTADO.md` (EEG-Library). La web solo expone parámetros que la librería ya admite, con sus valores por defecto.
 
 ## Comandos
-<!-- Se rellenan en la Fase 1: instalar, arrancar, tests, worker -->
+Desde la carpeta `EEG-Platform`, en PowerShell. Python 3.10 y EEG-Library clonada al lado (`..\EEG-Library`).
+
+- Instalar (una vez):
+  ```
+  & "$env:LOCALAPPDATA\Programs\Python\Python310\python.exe" -m venv .venv
+  .venv\Scripts\python.exe -m pip install -r requirements.txt
+  copy .env.example .env      # y ajustar EEG_PLATFORM_DATOS
+  .venv\Scripts\python.exe manage.py migrate
+  ```
+- Arrancar: `.venv\Scripts\python.exe manage.py runserver` y abrir http://127.0.0.1:8000/
+- Tests: `.venv\Scripts\python.exe -m pytest`
+- Worker: se añade en la Fase 3.
+
+Los datos (base SQLite, EDF y resultados) van a `EEG_PLATFORM_DATOS`; por defecto `..\EEG-Platform-datos`. Django no arranca si apunta dentro del repo.

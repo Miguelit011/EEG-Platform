@@ -1,0 +1,25 @@
+# Dependencias de EEG-Platform. Instalar con:
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+# (desde la carpeta EEG-Platform, con EEG-Library al lado).
+
+# Librería de procesado EEG, en modo editable: la web no copia su código.
+-e ../EEG-Library
+
+# Web
+Django>=5.2,<5.3
+
+# Tests
+pytest
+pytest-django
+
+# Versiones con las que se validó EEG-Library (Fase 0: paridad exacta con
+# matriz_rf.parquet). Fijarlas garantiza que la web procesa igual.
+numpy==2.2.6
+pandas==2.3.3
+scipy==1.15.3
+mne==1.12.1
+mne-icalabel==0.10.0
+onnxruntime==1.23.2
+pyarrow==25.0.1
+joblib==1.6.0
+scikit-learn==1.7.2
