@@ -12,6 +12,7 @@
   · {{ grabacion.duracion_texto }}
   · Lote {{ grabacion.lote_id }}
   · <a href="{% url 'grabaciones:calidad' grabacion.pk %}">Ver calidad de la señal</a>
+  {% if resumen %}· <a class="boton" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}">Descargar CSV de esta grabación</a>{% endif %}
 </p>
 
 {% if not resumen %}

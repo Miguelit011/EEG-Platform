@@ -10,7 +10,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 3 | Procesado en segundo plano | EEG-Platform | [x] |
 | 4 | Pantalla de calidad | EEG-Platform | [x] |
 | 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [x] |
-| 6 | Exportación CSV | EEG-Platform | [ ] |
+| 6 | Exportación CSV | EEG-Platform | [x] |
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [ ] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [ ] |
 
@@ -142,7 +142,7 @@ Aceptación:
 - Los electrodos descartados aparecen marcados y no se colorean.
 - Hay leyenda con la escala.
 
-## Fase 6 — Exportación CSV
+## Fase 6 — Exportación CSV — **hecha** (2026-10-16; pendiente: que Rosa/Ana lo confirmen en SPSS)
 **Objetivo:** que los investigadores puedan hacer sus análisis en Excel o SPSS.
 
 Incluye:

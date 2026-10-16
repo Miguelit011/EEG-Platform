@@ -81,3 +81,18 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 - **Avisos:** los de pocos electrodos buenos (mismos umbrales que la Fase 4), el del paso banda 3–30 Hz (se detecta porque el filtro empieza por encima del inicio de delta) y el de zonas sin electrodos válidos.
 - **Sin bloque de modelos ni descarga CSV todavía:** son las Fases 7 y 6.
 - **Fixtures de test comunes** en `tests/auxiliar.py` (el fixture de la Fase 0 y variantes: descartados, CAR, ICA, paso banda), compartidos con los tests de calidad.
+
+## Fase 6 — Exportación CSV (2026-10-16)
+
+- **Un solo formato: el de Excel en español.** Separador `;`, decimal `,`, UTF-8 con BOM y saltos de línea de Windows. Es lo que Excel abre con doble clic en un Windows en español (su separador de lista es `;`), y el BOM hace que las tildes salgan bien sin asistente. Se descartó ofrecer un segundo formato: complica la interfaz y, si hace falta otro (SPSS o R con configuración internacional), se cambia en `settings` (`CSV_SEPARADOR`, `CSV_DECIMAL`, `CSV_CODIFICACION`).
+- **Comprobado abriéndolo con Excel 16 de verdad** (por COM, con la configuración regional es-ES): 167 columnas, números como números (`0,28684` es un `Double`), celdas vacías vacías, tildes y «ñ» correctas, texto que empieza por `=` sin evaluarse como fórmula. **No se ha podido probar con SPSS**: queda pendiente que Rosa o Ana lo abran (según su configuración regional puede pedir el asistente de importación).
+- **Una fila por grabación procesada; el CSV de una grabación y el del lote tienen las mismas columnas.** El del lote incluye solo las procesadas; el botón dice cuántas y se desactiva si no hay ninguna. Exportar una grabación sin procesar vuelve a la lista con un mensaje, no descarga un CSV vacío.
+- **Columnas y valores salen de un único sitio** (`exportacion._celdas`): encabezado, filas y documentación no pueden desincronizarse. Los valores vienen de las mismas funciones que la pantalla (`resumen_analisis`, `resumen_calidad`), así que el CSV y lo que se ve coinciden; un test lo comprueba valor a valor contra el JSON.
+- **Nombres de columna sin tildes ni espacios** (`rel_AF3_alfa`, `zona_frontal_delta_logabs`, `cabeza_beta_rel`), válidos como nombres de variable en SPSS y R, y estables. 167 columnas: identificación, calidad y procesado aplicado, toda la cabeza, por zona, por electrodo y trazabilidad.
+- **Potencia relativa como proporción de 0 a 1** (el valor de la librería, sin transformar; la pantalla la muestra en %) y **absoluta como log10 de V²**: la notación científica de los V² (`1,16E-10`) se maneja mal con coma decimal en Excel y SPSS.
+- **Celda vacía = sin dato,** nunca un cero: electrodos descartados, zonas sin electrodos válidos, notch no aplicado. Los descartados no exportan potencia por la misma razón que no se muestra en pantalla.
+- **Sin «fatiga» en ninguna columna;** no se exportan las 70 características de los modelos (ni `indice_theta_alfa`).
+- **Paso banda en dos columnas numéricas** (`banda_min_hz`, `banda_max_hz`) en vez de «1-30»: Excel puede convertir un texto como «1-30» en una fecha.
+- **Booleanos como 1/0** (`car_aplicada`, `remuestreada`), que SPSS trata como numéricos.
+- **Protección contra fórmulas:** si un nombre de archivo o una condición empieza por `=`, `+`, `-` o `@`, se antepone una comilla, para que Excel no lo ejecute como fórmula. Son textos que escribe el usuario.
+- **`docs/COLUMNAS_CSV.md` se genera con `manage.py documentar_csv`** a partir de las columnas, no se escribe a mano, y un test falla si está desactualizado. Las columnas de los modelos (Fase 7) se añadirán en `exportacion.py` sin tocar las actuales.

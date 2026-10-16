@@ -26,6 +26,11 @@
         <span>{{ p.procesadas }} de {{ p.total }} procesadas
           {% if p.con_error %}· {{ p.con_error }} con error{% endif %}
           {% if p.pendientes %}· {{ p.pendientes }} pendientes{% endif %}</span>
+        {% if p.procesadas %}
+          <a class="boton" href="{% url 'grabaciones:csv_lote' lote.pk %}">Descargar CSV del lote ({{ p.procesadas }} procesadas)</a>
+        {% else %}
+          <span class="boton boton-desactivado" title="Aún no hay grabaciones procesadas">Descargar CSV del lote</span>
+        {% endif %}
         {% if lote.hay_fallidas_reintentables %}
           <form method="post" action="{% url 'grabaciones:reintentar_lote' lote.pk %}" class="en-linea">
             {% csrf_token %}<button type="submit" class="secundario">Reintentar las fallidas</button>
@@ -71,6 +76,7 @@
               {% if g.estado == "procesada" %}
                 <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
                 · <a href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
+                · <a href="{% url 'grabaciones:csv_grabacion' g.pk %}">CSV</a>
               {% else %}
                 <span class="desactivado" title="Disponible cuando la grabación se procese">—</span>
               {% endif %}

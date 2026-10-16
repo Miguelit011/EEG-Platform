@@ -145,6 +145,9 @@ th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(
 details summary { cursor: pointer; color: var(--acento); }
 details h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
 
+a.boton { display: inline-block; padding: 0.3rem 0.8rem; border: 1px solid var(--acento); background: var(--superficie); color: var(--acento); border-radius: 6px; text-decoration: none; }
+.boton-desactivado { display: inline-block; padding: 0.3rem 0.8rem; border: 1px dashed var(--borde); color: var(--texto-suave); border-radius: 6px; cursor: not-allowed; }
+
 button.secundario { background: var(--superficie); color: var(--acento); }
 .progreso-lote { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
 .progreso-lote progress { width: 12rem; }

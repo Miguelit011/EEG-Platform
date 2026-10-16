@@ -1,10 +1,12 @@
 from django.contrib import messages
 from django.db.models import Prefetch
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
+from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
 from grabaciones.models import Grabacion, Lote, Procesador
 from grabaciones.subida import LoteForm, guardar_lote
 
@@ -56,6 +58,32 @@ def analisis(request, pk):
     return render(request, "grabaciones/analisis.html", {
         "pantalla": "analisis", "grabacion": grabacion, "resumen": resumen,
     })
+
+
+def _descarga(grabaciones, nombre):
+    respuesta = HttpResponse(csv_de(grabaciones), content_type="text/csv; charset=utf-8")
+    respuesta["Content-Disposition"] = f'attachment; filename="{nombre}"'
+    return respuesta
+
+
+def csv_grabacion(request, pk):
+    """CSV de una grabación procesada (una fila)."""
+    grabacion = get_object_or_404(Grabacion, pk=pk)
+    if grabacion.estado != Grabacion.Estado.PROCESADA:
+        messages.error(request, "Solo se pueden exportar las grabaciones ya procesadas.")
+        return redirect("grabaciones:lista")
+    stem = nombre_de_archivo_seguro(grabacion.nombre_original.rsplit(".", 1)[0])
+    return _descarga([grabacion], f"eeg_{stem}.csv")
+
+
+def csv_lote(request, pk):
+    """CSV de las grabaciones procesadas de un lote (una fila por grabación)."""
+    lote = get_object_or_404(Lote, pk=pk)
+    procesadas = list(lote.grabaciones.filter(estado=Grabacion.Estado.PROCESADA))
+    if not procesadas:
+        messages.error(request, f"El lote {lote.pk} no tiene grabaciones procesadas que exportar.")
+        return redirect("grabaciones:lista")
+    return _descarga(procesadas, f"eeg_lote_{lote.pk}_{lote.fecha:%Y-%m-%d}.csv")
 
 
 @require_POST

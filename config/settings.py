@@ -125,6 +125,13 @@ PATRON_CONDICION = os.environ.get(
     r"task-(OA|OC|STROOP|PASAT|PVTB|MSIT|PVSAT)",
 )
 
+# Formato del CSV exportado: el de Excel en español (separador `;`, decimal `,`,
+# UTF-8 con BOM para que abra bien las tildes). Si en otro equipo se prefiere el
+# formato internacional: CSV_SEPARADOR = ",", CSV_DECIMAL = ".".
+CSV_SEPARADOR = ";"
+CSV_DECIMAL = ","
+CSV_CODIFICACION = "utf-8-sig"
+
 # Procesado en segundo plano (`manage.py procesar`): procesos en paralelo. Si no
 # se fija, el procesador lo calcula en cada equipo según sus hilos y su memoria
 # libre (ver grabaciones/recursos.py), porque la plataforma se usará en
