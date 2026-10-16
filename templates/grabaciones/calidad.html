@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block titulo %}Calidad · {{ grabacion.nombre_original }}{% endblock %}
+
+{% block contenido %}
+<p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
+<h1>Calidad de la señal</h1>
+<p class="subtitulo">
+  <strong>{{ grabacion.nombre_original }}</strong>
+  · Condición: {% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}
+  · {{ grabacion.duracion_texto }}
+  · Lote {{ grabacion.lote_id }}
+</p>
+
+{% if not resumen %}
+  <section class="tarjeta">
+    {% if grabacion.estado == "error" %}
+      <p class="aviso aviso-alerta" role="alert">Esta grabación no se pudo procesar: {{ grabacion.mensaje_error }}</p>
+    {% elif grabacion.estado == "procesada" %}
+      <p class="aviso aviso-alerta" role="alert">El resultado guardado no incluye la calidad por electrodo.</p>
+    {% else %}
+      <p class="aviso aviso-info" role="status">Esta grabación todavía no se ha procesado ({{ grabacion.get_estado_display|lower }}). La calidad aparecerá cuando termine.</p>
+    {% endif %}
+    <p><a href="{% url 'grabaciones:lista' %}">Volver a la lista</a></p>
+  </section>
+{% else %}
+
+<section class="tarjeta" aria-labelledby="titulo-resumen">
+  <h2 id="titulo-resumen">Resumen</h2>
+  <p class="titular titular-{{ resumen.nivel }}">{{ resumen.titular }}</p>
+  <p>{{ resumen.frase }}</p>
+  {% if resumen.aviso %}
+    <p class="aviso {% if resumen.nivel == 'critico' %}aviso-alerta{% else %}aviso-info{% endif %}" role="alert">
+      ⚠ {{ resumen.aviso }}
+      {% if resumen.car_omitida %}No se aplicó la CAR.{% endif %}
+      La grabación se procesa igualmente; interpreta sus resultados con cautela.
+    </p>
+  {% endif %}
+</section>
+
+<div class="dos-columnas">
+  <section class="tarjeta" aria-labelledby="titulo-mapa">
+    <h2 id="titulo-mapa">Mapa de electrodos</h2>
+    {% include "grabaciones/_mapa_cabeza.html" with puntos=resumen.electrodos mapa_titulo="Estado de los electrodos" mapa_descripcion=resumen.titular %}
+    <ul class="leyenda" aria-label="Leyenda">
+      <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><g class="punto punto-bueno"><circle cx="11" cy="11" r="9"/></g></svg> ✔ Bueno</li>
+      <li><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g class="punto punto-descartado"><polygon points="13,2 24,13 13,24 2,13"/></g></svg> ✖ Descartado</li>
+    </ul>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="titulo-tabla">
+    <h2 id="titulo-tabla">Electrodos</h2>
+    <div class="tabla-ancha">
+    <table>
+      <thead><tr><th>Electrodo</th><th>Zona</th><th>Estado</th><th>Motivo</th></tr></thead>
+      <tbody>
+      {% for e in resumen.electrodos %}
+        <tr class="{% if not e.bueno %}fila-descartado{% endif %}">
+          <th scope="row">{{ e.canal }}</th>
+          <td>{{ e.zona }}</td>
+          <td><span class="estado estado-calidad-{{ e.clase }}">{{ e.simbolo }} {{ e.estado }}</span></td>
+          <td>{% if e.motivo %}{{ e.motivo }}{% if e.ayuda %}<br><span class="nota">{{ e.ayuda }}</span>{% endif %}{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+</div>
+
+<section class="tarjeta" aria-labelledby="titulo-pipeline">
+  <h2 id="titulo-pipeline">Lo que aplicó el procesado</h2>
+  <dl class="datos">
+    {% for nombre, valor in resumen.pipeline %}
+      <dt>{{ nombre }}</dt><dd>{{ valor }}</dd>
+    {% endfor %}
+  </dl>
+  {% if grabacion.remuestreada %}
+    <p class="nota">La grabación original estaba a {{ grabacion.sfreq_original_hz|floatformat:"-1" }} Hz y se remuestreó a 256 Hz.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

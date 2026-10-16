@@ -57,6 +57,9 @@
             <td>
               <span class="estado estado-{{ g.estado }}">{{ g.get_estado_display }}</span>
               {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
+              {% with aviso=g.aviso_canales %}
+                {% if aviso.1 %}<br><span class="aviso-canales aviso-canales-{{ aviso.0 }}">⚠ {{ aviso.1 }}</span>{% endif %}
+              {% endwith %}
               {% if g.reintentable or g.reprocesable %}
                 <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
                   {% csrf_token %}
@@ -64,7 +67,13 @@
                 </form>
               {% endif %}
             </td>
-            <td><span class="desactivado" title="Disponible en la pantalla de calidad (Fase 4)">—</span></td>
+            <td>
+              {% if g.estado == "procesada" %}
+                <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
+              {% else %}
+                <span class="desactivado" title="Disponible cuando la grabación se procese">—</span>
+              {% endif %}
+            </td>
           </tr>
         {% endfor %}
         </tbody>

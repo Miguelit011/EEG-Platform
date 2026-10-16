@@ -3,6 +3,8 @@ from django.db import models
 from eeg_library.preprocesado.reader import TARGET_SFREQ
 from eeg_library.procesado.parametros import OPCIONES, PARAMETROS_ESTUDIO, normalizar_parametros
 
+from grabaciones.calidad import nivel_de_fiabilidad
+
 
 def _texto_banda(banda):
     return f"{banda[0]:g}-{banda[1]:g}"
@@ -102,12 +104,22 @@ class Grabacion(models.Model):
     estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.SUBIDA)
     mensaje_error = models.TextField(blank=True)
     resultado = models.JSONField(null=True, blank=True)
+    # Copia de `resultado["metadatos"]["n_canales_buenos"]`: la lista lo muestra sin
+    # cargar el JSON completo de cada grabación en cada actualización.
+    n_canales_buenos = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["id"]
 
     def __str__(self):
         return self.nombre_original
+
+    @property
+    def aviso_canales(self):
+        """(nivel, texto) de aviso por pocos electrodos buenos, como en la librería."""
+        if self.estado != self.Estado.PROCESADA:
+            return "normal", ""
+        return nivel_de_fiabilidad(self.n_canales_buenos)
 
     @property
     def reintentable(self):

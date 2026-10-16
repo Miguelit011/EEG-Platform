@@ -92,11 +92,45 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .lote { margin: 1rem 0 0.5rem; font-size: 1rem; }
 .tabla-ancha { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; }
+td:nth-child(3) { white-space: nowrap; }
 th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--borde); vertical-align: top; }
 .en-linea { display: flex; gap: 0.4rem; margin: 0; }
-.estado { font-weight: 600; }
+.estado { font-weight: 600; white-space: nowrap; }
 .estado-error::before { content: "✖ "; }
 .estado-procesada::before { content: "✔ "; }
+/* Calidad */
+.migas { margin: 0 0 0.25rem; }
+.subtitulo { color: var(--texto-suave); margin-top: 0; }
+.dos-columnas { display: grid; grid-template-columns: minmax(280px, 420px) 1fr; gap: 1.25rem; align-items: start; }
+@media (max-width: 800px) { .dos-columnas { grid-template-columns: 1fr; } }
+.titular { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.25rem; }
+.titular-aviso { color: #8a5300; }
+.titular-critico { color: #b3261e; }
+.aviso-canales { font-size: 0.85rem; }
+.aviso-canales-critico { color: #b3261e; font-weight: 600; }
+.aviso-canales-aviso { color: #8a5300; }
+.datos { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.25rem; margin: 0; }
+.datos dt { font-weight: 600; }
+.datos dd { margin: 0; }
+.fila-descartado { background: #fdf3e1; }
+.estado-calidad-descartado { font-weight: 700; color: #8a3a00; }
+.estado-calidad-bueno { color: #0b3a7d; }
+.leyenda { display: flex; gap: 1.5rem; list-style: none; padding: 0; margin: 0.5rem 0 0; }
+.leyenda li { display: flex; align-items: center; gap: 0.4rem; }
+
+/* Mapa de la cabeza (SVG): el estado se distingue por forma, símbolo y color */
+.mapa-cabeza { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+.mapa-cabeza-borde, .mapa-oreja { fill: var(--superficie); stroke: var(--texto-suave); stroke-width: 3; }
+.mapa-nariz { fill: none; stroke: var(--texto-suave); stroke-width: 3; stroke-linejoin: round; }
+.mapa-rotulo { fill: var(--texto-suave); font-size: 14px; }
+.punto-bueno circle { fill: #1f5fbf; stroke: #0b3a7d; stroke-width: 2; }
+.punto-descartado polygon { fill: #fff; stroke: #8a3a00; stroke-width: 3; stroke-dasharray: 5 3; }
+.punto-canal { font-size: 13px; font-weight: 700; }
+.punto-simbolo { font-size: 13px; font-weight: 700; }
+.punto-bueno text { fill: #fff; }
+.punto-descartado text { fill: #8a3a00; }
+.mapa-cabeza .punto { cursor: help; }
+
 button.secundario { background: var(--superficie); color: var(--acento); }
 .progreso-lote { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
 .progreso-lote progress { width: 12rem; }

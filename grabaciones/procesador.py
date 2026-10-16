@@ -62,12 +62,13 @@ def _reclamar():
 def _guardar(grabacion, salida):
     if salida["ok"]:
         grabacion.resultado = salida["resultado"]
+        grabacion.n_canales_buenos = salida["resultado"]["metadatos"]["n_canales_buenos"]
         grabacion.estado = Grabacion.Estado.PROCESADA
         grabacion.mensaje_error = ""
     else:
         grabacion.estado = Grabacion.Estado.ERROR
         grabacion.mensaje_error = salida["mensaje"]
-    grabacion.save(update_fields=["resultado", "estado", "mensaje_error"])
+    grabacion.save(update_fields=["resultado", "n_canales_buenos", "estado", "mensaje_error"])
 
 
 def _marcar_error_si_sigue_procesando(grabacion, mensaje):

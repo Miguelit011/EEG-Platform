@@ -1,7 +1,9 @@
 from django.contrib import messages
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from grabaciones.calidad import resumen_calidad
 from grabaciones.models import Grabacion, Lote, Procesador
 from grabaciones.subida import LoteForm, guardar_lote
 
@@ -11,7 +13,9 @@ CONDICIONES_SUGERIDAS = ["OA", "OC", "STROOP", "PASAT", "PVTB", "MSIT", "PVSAT"]
 def _contexto_lista():
     hay_cola = Grabacion.objects.filter(estado__in=Grabacion.ESTADOS_PENDIENTES).exists()
     return {
-        "lotes": Lote.objects.prefetch_related("grabaciones"),
+        # Sin el JSON de resultados: la lista se actualiza cada pocos segundos.
+        "lotes": Lote.objects.prefetch_related(
+            Prefetch("grabaciones", queryset=Grabacion.objects.defer("resultado"))),
         "hay_grabaciones": Grabacion.objects.exists(),
         "condiciones_sugeridas": CONDICIONES_SUGERIDAS,
         "hay_cola": hay_cola,
@@ -33,6 +37,15 @@ def lista(request):
 def lista_parcial(request):
     """Solo la lista, para que se actualice sola mientras hay cola."""
     return render(request, "grabaciones/_lista.html", _contexto_lista())
+
+
+def calidad(request, pk):
+    """Pantalla 2: calidad de la señal de una grabación, a partir de su JSON guardado."""
+    grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
+    resumen = resumen_calidad(grabacion.resultado) if grabacion.estado == "procesada" else None
+    return render(request, "grabaciones/calidad.html", {
+        "pantalla": "calidad", "grabacion": grabacion, "resumen": resumen,
+    })
 
 
 @require_POST

@@ -14,8 +14,9 @@
         <li><a href="{% url 'grabaciones:lista' %}"
                {% if pantalla == 'grabaciones' %}aria-current="page"{% endif %}>Grabaciones</a></li>
         {% if grabacion %}
-          <li><a href="#" {% if pantalla == 'calidad' %}aria-current="page"{% endif %}>Calidad</a></li>
-          <li><a href="#" {% if pantalla == 'analisis' %}aria-current="page"{% endif %}>Análisis</a></li>
+          <li><a href="{% url 'grabaciones:calidad' grabacion.pk %}"
+                 {% if pantalla == 'calidad' %}aria-current="page"{% endif %}>Calidad</a></li>
+          <li><span class="desactivado" title="Disponible en la Fase 5">Análisis</span></li>
         {% else %}
           <li><span class="desactivado" title="Elige una grabación en la lista">Calidad</span></li>
           <li><span class="desactivado" title="Elige una grabación en la lista">Análisis</span></li>

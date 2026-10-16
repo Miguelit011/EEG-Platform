@@ -8,7 +8,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 1 | Esqueleto Django | EEG-Platform | [x] |
 | 2 | Subida y lista de grabaciones | EEG-Platform | [x] |
 | 3 | Procesado en segundo plano | EEG-Platform | [x] |
-| 4 | Pantalla de calidad | EEG-Platform | [ ] |
+| 4 | Pantalla de calidad | EEG-Platform | [x] |
 | 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [ ] |
 | 6 | Exportación CSV | EEG-Platform | [ ] |
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [ ] |
@@ -118,7 +118,7 @@ Aceptación:
 - Un error en un archivo no detiene el resto.
 - Hay tests del procesado con un EDF pequeño.
 
-## Fase 4 — Pantalla de calidad
+## Fase 4 — Pantalla de calidad — **hecha** (2026-10-16)
 **Objetivo:** que el investigador vea si la grabación es aprovechable.
 
 Incluye la pantalla 2, construida solo a partir del JSON guardado. El mapa de electrodos se dibuja en SVG con posiciones fijas del Emotiv.

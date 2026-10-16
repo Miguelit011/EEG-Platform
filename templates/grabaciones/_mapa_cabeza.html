@@ -1,0 +1,29 @@
+{% comment %}
+Mapa de la cabeza (vista desde arriba, nariz hacia arriba), reutilizable.
+Recibe `puntos`: una lista de dicts con canal, cx, cy, forma ("circulo" o "rombo"),
+clase (estilo CSS), simbolo y titulo. El estado no depende solo del color: lo
+distinguen también la forma, el símbolo y el título.
+{% endcomment %}
+<svg class="mapa-cabeza" viewBox="0 0 400 440" role="img" aria-labelledby="mapa-titulo mapa-desc">
+  <title id="mapa-titulo">{{ mapa_titulo|default:"Mapa de la cabeza" }}</title>
+  <desc id="mapa-desc">{{ mapa_descripcion|default:"Posición de los 14 electrodos vista desde arriba, con la nariz hacia arriba." }}</desc>
+  <ellipse class="mapa-oreja" cx="34" cy="235" rx="14" ry="34"/>
+  <ellipse class="mapa-oreja" cx="366" cy="235" rx="14" ry="34"/>
+  <path class="mapa-nariz" d="M 176 72 L 200 36 L 224 72"/>
+  <circle class="mapa-cabeza-borde" cx="200" cy="235" r="165"/>
+  <text class="mapa-rotulo" x="200" y="22" text-anchor="middle">Frente</text>
+  <text class="mapa-rotulo" x="12" y="432">◄ Izquierda</text>
+  <text class="mapa-rotulo" x="388" y="432" text-anchor="end">Derecha ►</text>
+  {% for p in puntos %}
+  <g class="punto punto-{{ p.clase }}">
+    <title>{{ p.titulo }}</title>
+    {% if p.forma == "rombo" %}
+    <polygon points="{{ p.cx }},{{ p.cy|add:'-25' }} {{ p.cx|add:'25' }},{{ p.cy }} {{ p.cx }},{{ p.cy|add:'25' }} {{ p.cx|add:'-25' }},{{ p.cy }}"/>
+    {% else %}
+    <circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="21"/>
+    {% endif %}
+    <text class="punto-canal" x="{{ p.cx }}" y="{{ p.cy|add:'-2' }}" text-anchor="middle">{{ p.canal }}</text>
+    <text class="punto-simbolo" x="{{ p.cx }}" y="{{ p.cy|add:'12' }}" text-anchor="middle">{{ p.simbolo }}</text>
+  </g>
+  {% endfor %}
+</svg>
