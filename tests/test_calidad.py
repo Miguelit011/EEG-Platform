@@ -1,12 +1,9 @@
 """Pantalla de calidad: se construye solo a partir del JSON guardado de la grabación."""
 
 import contextlib
-import copy
 import io
-import json
 import math
 import re
-from pathlib import Path
 
 import mne
 import numpy as np
@@ -20,41 +17,11 @@ from eeg_library.preprocesado.referencing import aplicar_car
 from grabaciones import calidad
 from grabaciones.calidad import POSICIONES, nivel_de_fiabilidad, resumen_calidad
 from grabaciones.models import Grabacion, Lote
+from tests.auxiliar import FIXTURE, grabacion_con, mapa, variante
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
 
 pytestmark = USA_LA_WEB
-
-FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "analisis_grabacion.json")
-                     .read_text(encoding="utf-8"))
-MOTIVO = "Amplitud excesiva (z=5.00 > 3.00)"
-
-
-def variante(descartados=(), car=True, eliminadas=(), referencia="car_condicional"):
-    """El fixture con otros electrodos descartados, otra CAR o más componentes de ICA."""
-    r = copy.deepcopy(FIXTURE)
-    for canal, datos in r["calidad"].items():
-        malo = canal in descartados
-        datos["estado"] = "descartado" if malo else "bueno"
-        datos["motivo"] = MOTIVO if malo else None
-    r["metadatos"]["n_canales_buenos"] = len(CANALES_EPOC) - len(descartados)
-    r["parametros_aplicados"]["car_aplicada"] = car
-    r["parametros_aplicados"]["referencia"] = referencia
-    r["parametros_aplicados"]["ica"]["componentes_eliminadas"] = list(eliminadas)
-    return r
-
-
-def grabacion_con(resultado, estado="procesada"):
-    lote = Lote.objects.create()
-    return Grabacion.objects.create(
-        lote=lote, nombre_original="ejemplo_OA.edf", condicion="OA", estado=estado,
-        duracion_s=137.0, sfreq_original_hz=256.0, resultado=resultado,
-        n_canales_buenos=(resultado or {}).get("metadatos", {}).get("n_canales_buenos"))
-
-
-def mapa(html):
-    return re.search(r'<svg class="mapa-cabeza".*?</svg>', html, re.S).group(0)
-
 
 # ---------------------------------------------------------------------------
 # Datos de la pantalla (función pura)
@@ -271,7 +238,7 @@ def test_navegacion_de_la_pantalla(client):
     g = grabacion_con(FIXTURE)
     html = client.get(reverse("grabaciones:calidad", args=[g.pk])).content.decode()
     assert re.search(r'<a href="[^"]+calidad/"\s+aria-current="page">Calidad', html)
-    assert re.search(r'class="desactivado"[^>]*>Análisis<', html)   # llega en la Fase 5
+    assert re.search(r'<a href="[^"]+analisis/"[^>]*>Análisis</a>', html)
 
 
 def test_sin_recursos_externos_ni_fatiga(client):

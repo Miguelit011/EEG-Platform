@@ -131,6 +131,20 @@ th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(
 .punto-descartado text { fill: #8a3a00; }
 .mapa-cabeza .punto { cursor: help; }
 
+/* Análisis */
+.grafica { position: relative; height: 340px; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.fila-total th, .fila-total td { font-weight: 700; border-bottom: 2px solid var(--borde); }
+.botones-banda { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+.botones-banda label { padding: 0.3rem 0.9rem; border: 1px solid var(--acento); border-radius: 999px; color: var(--acento); cursor: pointer; background: var(--superficie); }
+.botones-banda label .nota { color: inherit; }
+.escala { display: flex; align-items: center; gap: 0.6rem; max-width: 420px; margin: 0.5rem auto 0; }
+.escala-barra { flex: 1; height: 14px; border-radius: 7px; border: 1px solid var(--borde); }
+.punto-valor circle { stroke: #1d2330; stroke-width: 1.5; }
+.punto-valor text { font-weight: 700; }
+details summary { cursor: pointer; color: var(--acento); }
+details h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
+
 button.secundario { background: var(--superficie); color: var(--acento); }
 .progreso-lote { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
 .progreso-lote progress { width: 12rem; }

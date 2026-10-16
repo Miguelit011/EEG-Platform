@@ -70,6 +70,7 @@
             <td>
               {% if g.estado == "procesada" %}
                 <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
+                · <a href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
               {% else %}
                 <span class="desactivado" title="Disponible cuando la grabación se procese">—</span>
               {% endif %}

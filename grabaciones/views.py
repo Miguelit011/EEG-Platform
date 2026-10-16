@@ -3,6 +3,7 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
 from grabaciones.models import Grabacion, Lote, Procesador
 from grabaciones.subida import LoteForm, guardar_lote
@@ -45,6 +46,15 @@ def calidad(request, pk):
     resumen = resumen_calidad(grabacion.resultado) if grabacion.estado == "procesada" else None
     return render(request, "grabaciones/calidad.html", {
         "pantalla": "calidad", "grabacion": grabacion, "resumen": resumen,
+    })
+
+
+def analisis(request, pk):
+    """Pantalla 3: análisis espectral de una grabación, a partir de su JSON guardado."""
+    grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
+    resumen = resumen_analisis(grabacion.resultado) if grabacion.estado == "procesada" else None
+    return render(request, "grabaciones/analisis.html", {
+        "pantalla": "analisis", "grabacion": grabacion, "resumen": resumen,
     })
 
 

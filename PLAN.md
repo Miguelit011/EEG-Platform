@@ -9,7 +9,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 2 | Subida y lista de grabaciones | EEG-Platform | [x] |
 | 3 | Procesado en segundo plano | EEG-Platform | [x] |
 | 4 | Pantalla de calidad | EEG-Platform | [x] |
-| 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [ ] |
+| 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [x] |
 | 6 | Exportación CSV | EEG-Platform | [ ] |
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [ ] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [ ] |
@@ -128,7 +128,7 @@ Aceptación:
 - Muestra correctamente grabaciones con 0, 1 o varios electrodos descartados.
 - Los colores no dependen solo del tono: el estado también se distingue por forma o texto.
 
-## Fase 5 — Pantalla de análisis y mapa de la cabeza
+## Fase 5 — Pantalla de análisis y mapa de la cabeza — **hecha** (2026-10-16)
 **Objetivo:** ver la actividad por banda y zona.
 
 Incluye:

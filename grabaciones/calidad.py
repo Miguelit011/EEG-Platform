@@ -66,7 +66,7 @@ def _ayuda(motivo):
     return ""
 
 
-def _punto(canal):
+def punto_svg(canal):
     """Píxeles del SVG, enteros: con la localización en español un decimal saldría con coma."""
     x, y = POSICIONES[canal]
     return round(CENTRO[0] + x * RADIO), round(CENTRO[1] - y * RADIO)
@@ -117,7 +117,7 @@ def resumen_calidad(resultado):
             continue
         datos = calidad[canal]
         bueno = datos.get("estado") == "bueno"
-        cx, cy = _punto(canal)
+        cx, cy = punto_svg(canal)
         electrodos.append({
             "canal": canal,
             "zona": (datos.get("region") or "").capitalize() or "—",

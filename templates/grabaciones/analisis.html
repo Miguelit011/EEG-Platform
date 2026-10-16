@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Análisis · {{ grabacion.nombre_original }}{% endblock %}
+
+{% block contenido %}
+<p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
+<h1>Análisis espectral</h1>
+<p class="subtitulo">
+  <strong>{{ grabacion.nombre_original }}</strong>
+  · Condición: {% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}
+  · {{ grabacion.duracion_texto }}
+  · Lote {{ grabacion.lote_id }}
+  · <a href="{% url 'grabaciones:calidad' grabacion.pk %}">Ver calidad de la señal</a>
+</p>
+
+{% if not resumen %}
+  <section class="tarjeta">
+    {% if grabacion.estado == "error" %}
+      <p class="aviso aviso-alerta" role="alert">Esta grabación no se pudo procesar: {{ grabacion.mensaje_error }}</p>
+    {% elif grabacion.estado == "procesada" %}
+      <p class="aviso aviso-alerta" role="alert">El resultado guardado no incluye la potencia por banda.</p>
+    {% else %}
+      <p class="aviso aviso-info" role="status">Esta grabación todavía no se ha procesado ({{ grabacion.get_estado_display|lower }}). El análisis aparecerá cuando termine.</p>
+    {% endif %}
+    <p><a href="{% url 'grabaciones:lista' %}">Volver a la lista</a></p>
+  </section>
+{% else %}
+
+{% for aviso in resumen.avisos %}
+  <p class="aviso {% if aviso.nivel == 'critico' %}aviso-alerta{% else %}aviso-info{% endif %}" role="alert">⚠ {{ aviso.texto }}</p>
+{% endfor %}
+
+<section class="tarjeta" aria-labelledby="titulo-barras">
+  <h2 id="titulo-barras">Potencia relativa por banda</h2>
+  <p class="nota">Porcentaje de la potencia total de 1 a 30 Hz que cae en cada banda. «Toda la cabeza» es la media de los {{ resumen.n_validos }} electrodos válidos.</p>
+  <div class="grafica">
+    <canvas id="grafica-bandas" role="img"
+            aria-label="Gráfica de barras de la potencia relativa por banda, para toda la cabeza y para cada zona. Los mismos datos están en la tabla siguiente."></canvas>
+  </div>
+  {{ resumen.grafica|json_script:"datos-grafica" }}
+</section>
+
+<section class="tarjeta" aria-labelledby="titulo-tabla-zonas">
+  <h2 id="titulo-tabla-zonas">Zonas × bandas (potencia relativa, %)</h2>
+  <div class="tabla-ancha">
+  <table>
+    <thead>
+      <tr><th>Zona</th><th>Electrodos válidos</th>{% for b in resumen.bandas %}<th>{{ b.nombre }} <span class="nota">{{ b.rango }}</span></th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      <tr class="fila-total">
+        <th scope="row">Toda la cabeza</th><td>{{ resumen.n_validos }} de {{ resumen.n_total }}</td>
+        {% for texto in resumen.cabeza_texto %}<td class="num">{{ texto }}</td>{% endfor %}
+      </tr>
+      {% for z in resumen.zonas %}
+      <tr>
+        <th scope="row">{{ z.nombre }}</th><td>{{ z.n_validos }} de {{ z.n_total }}</td>
+        {% for texto in z.rel_texto %}<td class="num">{{ texto }}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="nota">«—»: ningún electrodo válido en esa zona.</p>
+</section>
+
+<section class="tarjeta" aria-labelledby="titulo-mapa-bandas">
+  <h2 id="titulo-mapa-bandas">Mapa de la cabeza por banda</h2>
+  <div class="selector-banda">
+    {% for m in resumen.mapas %}
+      <input type="radio" name="banda-mapa" id="banda-{{ m.banda.clave }}" class="solo-lectores"
+             {% if m.banda.clave == resumen.banda_inicial %}checked{% endif %}>
+    {% endfor %}
+    <div class="botones-banda" role="group" aria-label="Banda">
+      {% for m in resumen.mapas %}
+        <label for="banda-{{ m.banda.clave }}">{{ m.banda.nombre }} <span class="nota">{{ m.banda.rango }}</span></label>
+      {% endfor %}
+    </div>
+    <div class="paneles">
+      {% for m in resumen.mapas %}
+      <div class="panel-banda" id="panel-{{ m.banda.clave }}">
+        {% include "grabaciones/_mapa_cabeza.html" with puntos=m.puntos mapa_id=m.banda.clave mapa_titulo="Potencia relativa de la banda "|add:m.banda.nombre mapa_descripcion="Cada círculo es un electrodo y lleva escrito su porcentaje; los rombos son electrodos descartados, sin dato." %}
+        <div class="escala">
+          <span>{% if m.minimo %}{{ m.minimo }} %{% else %}—{% endif %}</span>
+          <div class="escala-barra" style="background: {{ m.degradado }}" role="img"
+               aria-label="Escala de color: de {{ m.minimo }} % a {{ m.maximo }} %"></div>
+          <span>{% if m.maximo %}{{ m.maximo }} %{% else %}—{% endif %}</span>
+        </div>
+        <p class="nota">Valor de cada electrodo: % de la potencia total en {{ m.banda.nombre|lower }}.
+          La escala va del mínimo al máximo de <strong>esta</strong> banda en esta grabación, así que
+          el color no se puede comparar entre bandas. Cada círculo es un electrodo: no hay interpolación.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <style>
+    .panel-banda { display: none; }
+    {% for m in resumen.mapas %}
+    #banda-{{ m.banda.clave }}:checked ~ .paneles #panel-{{ m.banda.clave }} { display: block; }
+    #banda-{{ m.banda.clave }}:checked ~ .botones-banda label[for="banda-{{ m.banda.clave }}"] { background: var(--acento); color: #fff; border-color: var(--acento); }
+    #banda-{{ m.banda.clave }}:focus-visible ~ .botones-banda label[for="banda-{{ m.banda.clave }}"] { outline: 3px solid #f2b705; outline-offset: 2px; }
+    {% endfor %}
+  </style>
+</section>
+
+<section class="tarjeta" aria-labelledby="titulo-detalle">
+  <h2 id="titulo-detalle">Valores por electrodo y potencia absoluta</h2>
+  <details>
+    <summary>Mostrar tablas</summary>
+    <h3>Potencia relativa por electrodo (%)</h3>
+    <div class="tabla-ancha">
+    <table>
+      <thead><tr><th>Electrodo</th><th>Zona</th>{% for b in resumen.bandas %}<th>{{ b.nombre }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for e in resumen.electrodos %}
+        <tr class="{% if not e.valido %}fila-descartado{% endif %}">
+          <th scope="row">{{ e.canal }}</th><td>{{ e.zona|default:"—"|capfirst }}</td>
+          {% if e.valido %}{% for texto in e.rel_texto %}<td class="num">{{ texto }}</td>{% endfor %}
+          {% else %}<td colspan="{{ resumen.bandas|length }}">✖ Descartado: sin dato</td>{% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Potencia absoluta por zona (log<sub>10</sub> de V²)</h3>
+    <div class="tabla-ancha">
+    <table>
+      <thead><tr><th>Zona</th>{% for b in resumen.bandas %}<th>{{ b.nombre }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for z in resumen.zonas %}
+        <tr><th scope="row">{{ z.nombre }}</th>{% for texto in z.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}</tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Potencia absoluta por electrodo (log<sub>10</sub> de V²)</h3>
+    <div class="tabla-ancha">
+    <table>
+      <thead><tr><th>Electrodo</th>{% for b in resumen.bandas %}<th>{{ b.nombre }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for e in resumen.electrodos %}
+        <tr class="{% if not e.valido %}fila-descartado{% endif %}">
+          <th scope="row">{{ e.canal }}</th>
+          {% if e.valido %}{% for texto in e.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}
+          {% else %}<td colspan="{{ resumen.bandas|length }}">✖ Descartado: sin dato</td>{% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </details>
+</section>
+
+<script src="{% static 'vendor/chart.umd.js' %}"></script>
+<script src="{% static 'js/analisis.js' %}"></script>
+{% endif %}
+{% endblock %}
