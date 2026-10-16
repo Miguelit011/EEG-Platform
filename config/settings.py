@@ -125,6 +125,22 @@ PATRON_CONDICION = os.environ.get(
     r"task-(OA|OC|STROOP|PASAT|PVTB|MSIT|PVSAT)",
 )
 
+# Modelos que se muestran en la pantalla de análisis y se exportan al CSV. Para añadir
+# uno, copia su ficha .json y su .joblib a la carpeta de modelos (MODELOS_DIR) y añade
+# aquí una línea con el nombre de la ficha (ver docs/AÑADIR_UN_MODELO.md). Los tres
+# primeros son los del estudio, empaquetados en EEG-Library.
+MODELOS = [
+    "c1_oa_oc_logistica",
+    "c2_reposo_tarea_logistica",
+    "c3_tareas_logistica",
+]
+MODELOS_DIR = DATOS_DIR / "modelos"
+MODELOS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Un modelo que contradice la condición del archivo se destaca si su probabilidad para
+# la clase predicha es al menos esta.
+UMBRAL_DISCREPANCIA = 0.8
+
 # Formato del CSV exportado: el de Excel en español (separador `;`, decimal `,`,
 # UTF-8 con BOM para que abra bien las tildes). Si en otro equipo se prefiere el
 # formato internacional: CSV_SEPARADOR = ",", CSV_DECIMAL = ".".

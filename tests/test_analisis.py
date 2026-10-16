@@ -15,7 +15,7 @@ from eeg_library.procesado.matrix import REGIONES
 from grabaciones.analisis_espectral import (
     ESCALA, color_de_escala, color_de_texto, resumen_analisis)
 from grabaciones.models import Grabacion
-from tests.auxiliar import FIXTURE, grabacion_con, mapa, mapas, variante
+from tests.auxiliar import FIXTURE, grabacion_con, mapa, mapas, sin_bloque_de_modelos, variante
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
 
@@ -303,7 +303,7 @@ def test_sin_recursos_externos_ni_fatiga(client):
     for resultado in (FIXTURE, variante(), variante(CANALES_EPOC[5:], car=False)):
         html = client.get(url(grabacion_con(resultado))).content.decode()
         assert not re.search(r'(src|href)\s*=\s*["\'](https?:)?//', html, re.I)
-        assert "fatiga" not in html.lower()
+        assert "fatiga" not in sin_bloque_de_modelos(html).lower()
 
 
 def test_grabacion_procesada_de_verdad(client, tmp_path):

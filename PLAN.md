@@ -11,7 +11,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 4 | Pantalla de calidad | EEG-Platform | [x] |
 | 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [x] |
 | 6 | Exportación CSV | EEG-Platform | [x] |
-| 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [ ] |
+| 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [x] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [ ] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
@@ -155,7 +155,7 @@ Aceptación:
 - El CSV se abre bien en Excel y en SPSS.
 - Los nombres de columna son estables y están documentados.
 
-## Fase 7 — Modelos enchufables
+## Fase 7 — Modelos enchufables — **hecha** (2026-10-16)
 **Objetivo:** mostrar c1, c2 y c3, y que añadir un modelo nuevo no exija tocar la web.
 
 Incluye:

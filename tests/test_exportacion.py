@@ -58,9 +58,17 @@ def test_columnas_estables():
     assert nombres[53:61] == [
         "rel_AF3_delta", "rel_AF3_theta", "rel_AF3_alfa", "rel_AF3_beta",
         "logabs_AF3_delta", "logabs_AF3_theta", "logabs_AF3_alfa", "logabs_AF3_beta"]
-    assert nombres[-2:] == ["version_eeg_library", "fecha_analisis"]
-    # 8 + 9 + 4 + 4 zonas × 8 + 14 electrodos × 8 + 2
-    assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 == 167
+    assert nombres[165:167] == ["version_eeg_library", "fecha_analisis"]
+    # 8 + 9 + 4 + 4 zonas × 8 + 14 electrodos × 8 + 2, y al final los modelos (4 + 4 + 7)
+    assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 + 15 == 182
+    assert nombres[167:] == [
+        "c1_oa_oc_logistica_clase", "c1_oa_oc_logistica_p_OA", "c1_oa_oc_logistica_p_OC",
+        "c1_oa_oc_logistica_condicion_estimada",
+        "c2_reposo_tarea_logistica_clase", "c2_reposo_tarea_logistica_p_reposo",
+        "c2_reposo_tarea_logistica_p_tarea", "c2_reposo_tarea_logistica_condicion_estimada",
+        "c3_tareas_logistica_clase", "c3_tareas_logistica_p_STROOP", "c3_tareas_logistica_p_PASAT",
+        "c3_tareas_logistica_p_PVTB", "c3_tareas_logistica_p_MSIT", "c3_tareas_logistica_p_PVSAT",
+        "c3_tareas_logistica_condicion_estimada"]
 
 
 def test_nombres_validos_para_spss_y_sin_fatiga():

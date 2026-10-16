@@ -12,6 +12,7 @@ Formato pensado para Excel en España (`settings.CSV_*`): separador `;`, decimal
 
 import csv
 import io
+import re
 from collections import namedtuple
 
 from django.conf import settings
@@ -20,6 +21,7 @@ from eeg_library.preprocesado.quality import CANALES_EPOC
 from eeg_library.procesado.bands import BANDAS_DEFECTO
 from eeg_library.procesado.matrix import REGIONES
 
+from grabaciones import modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
 
@@ -46,6 +48,11 @@ def _texto(valor):
     """
     valor = "" if valor is None else str(valor)
     return "'" + valor if valor[:1] in ("=", "+", "-", "@", "\t", "\r") else valor
+
+
+def _nombre_de_columna(texto):
+    """Un nombre de clase como parte de un nombre de columna (sin tildes ni espacios)."""
+    return re.sub(r"[^A-Za-z0-9]+", "_", texto).strip("_") or "clase"
 
 
 def _booleano(valor):
@@ -147,6 +154,28 @@ def _celdas(grabacion=None):
               "texto", (metadatos.get("versiones") or {}).get("eeg_library", ""))
     yield col("fecha_analisis", tra, "Fecha y hora del procesado", "texto",
               metadatos.get("fecha_analisis", ""))
+
+    # Modelos (al final, para no mover las columnas anteriores). Las celdas van vacías si
+    # el modelo no se aplica a esta grabación o no está disponible con sus parámetros.
+    mod = "Modelos"
+    tarjetas = ({t["nombre"]: t for t in modelos.aplicar(resultado, g.condicion)["tarjetas"]}
+                if g is not None and resultado else {})
+    for nombre, ficha in modelos.registrados():
+        t = tarjetas.get(nombre)
+        activo = bool(t) and t["estado"] == "ok"
+        titulo = ficha.get("titulo", ficha["id"])
+        yield col(f"{ficha['id']}_clase", mod,
+                  f"{titulo}: clase predicha (vacía si el modelo no se aplica a la grabación)",
+                  "texto", t["clase"] if activo else "")
+        probabilidades = {p["nombre"]: p["p"] for p in t["probabilidades"]} if activo else {}
+        for clase in ficha["clases"]:
+            yield col(f"{ficha['id']}_p_{_nombre_de_columna(clase['nombre'])}", mod,
+                      f"{titulo}: probabilidad de la clase {clase['nombre']}", "proporción 0–1",
+                      _numero(probabilidades.get(clase["nombre"]), DECIMALES_REL))
+        yield col(f"{ficha['id']}_condicion_estimada", mod,
+                  f"{titulo}: 1 si se aplicó porque la condición de la grabación no se conocía "
+                  f"y se estimó; 0 si se conocía (vacía si el modelo no se aplica)", "1/0",
+                  _booleano(t["origen"] in ("estimada", "estimadora")) if activo else "")
 
 
 def columnas():

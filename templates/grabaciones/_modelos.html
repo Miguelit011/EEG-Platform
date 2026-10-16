@@ -1,0 +1,64 @@
+<section class="tarjeta" id="modelos" aria-labelledby="titulo-modelos">
+  <h2 id="titulo-modelos">Modelos</h2>
+  <p class="aviso aviso-alerta aviso-modelos" role="note"><strong>Importante.</strong> {{ aviso_fijo }}</p>
+
+  {% for mensaje in modelos.mensajes %}<p class="nota">{{ mensaje }}</p>{% endfor %}
+
+  {% for t in modelos.tarjetas %}
+  <article class="modelo modelo-{{ t.estado }}" aria-labelledby="modelo-{{ forloop.counter }}">
+    <h3 id="modelo-{{ forloop.counter }}">{{ t.titulo }}
+      {% if t.origen == "estimada" %}<span class="insignia">condición estimada</span>
+      {% elif t.origen == "estimadora" %}<span class="insignia">estima la condición</span>{% endif %}
+    </h3>
+    {% if t.que_predice %}<p class="nota">{{ t.que_predice }}</p>{% endif %}
+
+    {% if t.estado == "ok" %}
+      <p class="resultado-modelo">Predice: <strong>{{ t.clase }}</strong></p>
+      <ul class="probabilidades" aria-label="Probabilidad de cada clase">
+        {% for p in t.probabilidades %}
+        <li{% if p.ganadora %} class="ganadora"{% endif %}>
+          <span class="etiqueta">{{ p.nombre }}</span>
+          <span class="barra" aria-hidden="true"><span style="width: {{ p.ancho }}%"></span></span>
+          <span class="valor">{{ p.texto }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if t.comparacion %}
+        <p class="aviso {% if t.comparacion.alta_confianza %}aviso-alerta{% else %}aviso-info{% endif %}" role="status">
+          {% if t.comparacion.coincide %}✔{% else %}⚠{% endif %} {{ t.comparacion.texto }}
+        </p>
+      {% endif %}
+    {% else %}
+      <p class="aviso {% if t.estado == 'error' %}aviso-alerta{% else %}aviso-info{% endif %}" role="status">
+        {{ t.motivo }}
+        {% if t.requeridos %}<br>Este modelo solo es válido con: <strong>{{ t.requeridos }}</strong>.{% endif %}
+      </p>
+    {% endif %}
+
+    {% if t.ficha %}
+    <details>
+      <summary>Ficha del modelo y resultado en el test</summary>
+      {% if t.ficha.test %}
+      <p class="resultado-test">
+        En un test independiente ({{ t.ficha.test.n_personas }} personas, {{ t.ficha.test.n_grabaciones }} grabaciones):
+        <strong>{{ t.ficha.test.metrica }} {{ t.ficha.test.valor }}</strong>
+        (intervalo de confianza del 95 %: {{ t.ficha.test.ic }}).
+        Nivel de azar: {{ t.ficha.test.azar }}.
+      </p>
+      {% endif %}
+      <dl class="datos">
+        <dt>Clases</dt><dd>{{ t.ficha.clases }}</dd>
+        <dt>Condiciones a las que se aplica</dt><dd>{{ t.ficha.condiciones }}</dd>
+        <dt>Procesado válido</dt><dd>{{ t.ficha.parametros_validos }}</dd>
+        {% if t.ficha.entrenamiento.fecha %}<dt>Entrenado</dt><dd>{{ t.ficha.entrenamiento.fecha }}{% if t.ficha.entrenamiento.variante %} · {{ t.ficha.entrenamiento.variante }}{% endif %}</dd>{% endif %}
+        {% if t.ficha.test.fuente %}<dt>Fuente de las cifras</dt><dd>{{ t.ficha.test.fuente }}</dd>{% endif %}
+      </dl>
+      {% if t.ficha.avisos %}
+      <p><strong>Limitaciones</strong></p>
+      <ul>{% for aviso in t.ficha.avisos %}<li>{{ aviso }}</li>{% endfor %}</ul>
+      {% endif %}
+    </details>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>

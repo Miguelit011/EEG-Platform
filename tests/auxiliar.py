@@ -53,6 +53,14 @@ def grabacion_con(resultado, estado="procesada"):
         n_canales_buenos=(resultado or {}).get("metadatos", {}).get("n_canales_buenos"))
 
 
+def sin_bloque_de_modelos(html):
+    """
+    La página sin el bloque de modelos. La palabra «fatiga» solo puede aparecer ahí, en el
+    aviso fijo que dice que los modelos no la miden; en cualquier otro sitio está prohibida.
+    """
+    return re.sub(r'<section class="tarjeta" id="modelos".*?</section>', "", html, flags=re.S)
+
+
 def mapa(html):
     """El primer mapa SVG de la cabeza de la página."""
     return re.search(r'<svg class="mapa-cabeza".*?</svg>', html, re.S).group(0)

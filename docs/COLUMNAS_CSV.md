@@ -13,7 +13,7 @@ Generado con `manage.py documentar_csv`; no se edita a mano. Un test comprueba q
 - Los electrodos descartados no tienen valor de potencia: se calculó con señal que no pasó por CAR ni ICA y no es comparable.
 - Bandas: `delta` (1–4 Hz), `theta` (4–8 Hz), `alfa` (8–13 Hz), `beta` (13–30 Hz). Zonas: `frontal`, `frontocentral`, `temporal`, `posterior`.
 
-Total: 167 columnas.
+Total: 182 columnas.
 
 ## Identificación
 
@@ -211,3 +211,23 @@ Total: 167 columnas.
 |---|---|---|
 | `version_eeg_library` | Versión de EEG-Library que procesó la grabación | texto |
 | `fecha_analisis` | Fecha y hora del procesado | texto |
+
+## Modelos
+
+| Columna | Significado | Unidad |
+|---|---|---|
+| `c1_oa_oc_logistica_clase` | Ojos abiertos / ojos cerrados: clase predicha (vacía si el modelo no se aplica a la grabación) | texto |
+| `c1_oa_oc_logistica_p_OA` | Ojos abiertos / ojos cerrados: probabilidad de la clase OA | proporción 0–1 |
+| `c1_oa_oc_logistica_p_OC` | Ojos abiertos / ojos cerrados: probabilidad de la clase OC | proporción 0–1 |
+| `c1_oa_oc_logistica_condicion_estimada` | Ojos abiertos / ojos cerrados: 1 si se aplicó porque la condición de la grabación no se conocía y se estimó; 0 si se conocía (vacía si el modelo no se aplica) | 1/0 |
+| `c2_reposo_tarea_logistica_clase` | Reposo / tarea: clase predicha (vacía si el modelo no se aplica a la grabación) | texto |
+| `c2_reposo_tarea_logistica_p_reposo` | Reposo / tarea: probabilidad de la clase reposo | proporción 0–1 |
+| `c2_reposo_tarea_logistica_p_tarea` | Reposo / tarea: probabilidad de la clase tarea | proporción 0–1 |
+| `c2_reposo_tarea_logistica_condicion_estimada` | Reposo / tarea: 1 si se aplicó porque la condición de la grabación no se conocía y se estimó; 0 si se conocía (vacía si el modelo no se aplica) | 1/0 |
+| `c3_tareas_logistica_clase` | Cuál de las 5 tareas: clase predicha (vacía si el modelo no se aplica a la grabación) | texto |
+| `c3_tareas_logistica_p_STROOP` | Cuál de las 5 tareas: probabilidad de la clase STROOP | proporción 0–1 |
+| `c3_tareas_logistica_p_PASAT` | Cuál de las 5 tareas: probabilidad de la clase PASAT | proporción 0–1 |
+| `c3_tareas_logistica_p_PVTB` | Cuál de las 5 tareas: probabilidad de la clase PVTB | proporción 0–1 |
+| `c3_tareas_logistica_p_MSIT` | Cuál de las 5 tareas: probabilidad de la clase MSIT | proporción 0–1 |
+| `c3_tareas_logistica_p_PVSAT` | Cuál de las 5 tareas: probabilidad de la clase PVSAT | proporción 0–1 |
+| `c3_tareas_logistica_condicion_estimada` | Cuál de las 5 tareas: 1 si se aplicó porque la condición de la grabación no se conocía y se estimó; 0 si se conocía (vacía si el modelo no se aplica) | 1/0 |

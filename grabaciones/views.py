@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from grabaciones import modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
 from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
@@ -55,8 +56,11 @@ def analisis(request, pk):
     """Pantalla 3: análisis espectral de una grabación, a partir de su JSON guardado."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
     resumen = resumen_analisis(grabacion.resultado) if grabacion.estado == "procesada" else None
+    aplicados = (modelos.aplicar(grabacion.resultado, grabacion.condicion)
+                 if resumen and grabacion.resultado.get("caracteristicas") else None)
     return render(request, "grabaciones/analisis.html", {
         "pantalla": "analisis", "grabacion": grabacion, "resumen": resumen,
+        "modelos": aplicados, "aviso_fijo": modelos.AVISO_FIJO,
     })
 
 
