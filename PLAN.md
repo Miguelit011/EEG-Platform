@@ -6,8 +6,8 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 |---|---|---|---|
 | 0 | Contrato con la librería y modelos empaquetados | EEG-Library | [x] |
 | 1 | Esqueleto Django | EEG-Platform | [x] |
-| 2 | Subida y lista de grabaciones | EEG-Platform | [ ] |
-| 3 | Procesado en segundo plano | EEG-Platform | [ ] |
+| 2 | Subida y lista de grabaciones | EEG-Platform | [x] |
+| 3 | Procesado en segundo plano | EEG-Platform | [x] |
 | 4 | Pantalla de calidad | EEG-Platform | [ ] |
 | 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [ ] |
 | 6 | Exportación CSV | EEG-Platform | [ ] |
@@ -88,7 +88,7 @@ Aceptación:
 - Los tests pasan.
 - Ningún dato queda dentro del repo.
 
-## Fase 2 — Subida y lista de grabaciones
+## Fase 2 — Subida y lista de grabaciones — **hecha** (2026-10-16)
 **Objetivo:** subir uno o muchos EDF y verlos listados. Todavía no se procesan.
 
 Incluye:
@@ -103,7 +103,7 @@ Aceptación:
 - Un archivo corrupto en un lote solo marca ese archivo.
 - Hay tests de validación y del patrón de condición.
 
-## Fase 3 — Procesado en segundo plano
+## Fase 3 — Procesado en segundo plano — **hecha** (2026-10-16)
 **Objetivo:** procesar lotes grandes sin bloquear la web y sin infraestructura extra.
 
 Incluye:

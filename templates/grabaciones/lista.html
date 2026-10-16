@@ -34,50 +34,8 @@
 
 <section class="tarjeta" aria-labelledby="titulo-lista">
   <h2 id="titulo-lista">Lista</h2>
-  {% if hay_grabaciones %}
-    <datalist id="condiciones">
-      {% for c in condiciones_sugeridas %}<option value="{{ c }}">{% endfor %}
-    </datalist>
-    {% for lote in lotes %}
-      {% if lote.grabaciones.all %}
-      <h3 class="lote">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}
-        <span class="nota">{{ lote.resumen_parametros }}</span></h3>
-      <div class="tabla-ancha">
-      <table>
-        <thead>
-          <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Frecuencia de muestreo</th><th>Estado</th><th>Detalle</th></tr>
-        </thead>
-        <tbody>
-        {% for g in lote.grabaciones.all %}
-          <tr>
-            <td>{{ g.nombre_original }}</td>
-            <td>
-              <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
-                {% csrf_token %}
-                <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
-                       maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
-                       placeholder="sin condición">
-                <button type="submit">Guardar</button>
-              </form>
-              {% if g.condicion %}<span class="nota">{{ g.get_origen_condicion_display }}</span>{% endif %}
-            </td>
-            <td>{{ g.duracion_texto }}</td>
-            <td>{{ g.frecuencia_texto }}</td>
-            <td>
-              <span class="estado estado-{{ g.estado }}">{{ g.get_estado_display }}</span>
-              {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
-            </td>
-            <td><span class="desactivado" title="Disponible cuando la grabación se procese">—</span></td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      </div>
-      {% endif %}
-    {% endfor %}
-  {% else %}
-    <p class="vacio">Todavía no hay grabaciones.</p>
-  {% endif %}
+  {% include 'grabaciones/_lista.html' %}
 </section>
 <script src="{% static 'js/subida.js' %}"></script>
+<script src="{% static 'js/lista.js' %}"></script>
 {% endblock %}

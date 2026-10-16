@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
@@ -31,7 +31,7 @@ def test_subir_un_archivo(client, bytes_edf, settings):
     respuesta = _subir(client, [("sub-C1F081_ses-M2_task-OA_eeg.edf", bytes_edf)])
     assert respuesta.status_code == 200
     g = Grabacion.objects.get()
-    assert g.estado == Grabacion.Estado.SUBIDA
+    assert g.estado == Grabacion.Estado.EN_COLA
     assert g.condicion == "OA" and g.origen_condicion == "nombre"
     assert g.duracion_s == pytest.approx(25, abs=1)
     assert g.remuestreada is False
@@ -39,14 +39,14 @@ def test_subir_un_archivo(client, bytes_edf, settings):
     # El EDF se guarda en la carpeta de datos, no en el repo.
     assert settings.MEDIA_ROOT in __import__("pathlib").Path(g.archivo.path).parents
     html = respuesta.content.decode()
-    assert "sub-C1F081_ses-M2_task-OA_eeg.edf" in html and "Subida" in html
+    assert "sub-C1F081_ses-M2_task-OA_eeg.edf" in html and "En cola" in html
 
 
 def test_subir_veinte_de_golpe(client, bytes_edf):
     archivos = [(f"sub-C1F{i:03d}_ses-M2_task-OC_eeg.edf", bytes_edf) for i in range(20)]
     respuesta = _subir(client, archivos)
     assert Lote.objects.count() == 1
-    assert Grabacion.objects.filter(estado="subida").count() == 20
+    assert Grabacion.objects.filter(estado="en_cola").count() == 20
     assert respuesta.content.decode().count("sub-C1F0") >= 20
 
 
@@ -58,8 +58,8 @@ def test_un_corrupto_solo_marca_ese_archivo(client, bytes_edf):
     ]
     respuesta = _subir(client, archivos)
     estados = {g.nombre_original: g for g in Grabacion.objects.all()}
-    assert estados["bueno_1_task-OA.edf"].estado == "subida"
-    assert estados["bueno_2_task-STROOP.edf"].estado == "subida"
+    assert estados["bueno_1_task-OA.edf"].estado == "en_cola"
+    assert estados["bueno_2_task-STROOP.edf"].estado == "en_cola"
     roto = estados["roto_task-OC.edf"]
     assert roto.estado == "error" and "No se puede leer" in roto.mensaje_error
     assert not roto.archivo  # no se conserva un archivo inválido
@@ -76,7 +76,7 @@ def test_extension_que_no_es_edf(client, bytes_edf):
 def test_128_hz_se_indica_en_la_lista(client, bytes_edf_128):
     respuesta = _subir(client, [("a_task-OA.edf", bytes_edf_128)])
     g = Grabacion.objects.get()
-    assert g.estado == "subida" and g.remuestreada and g.sfreq_original_hz == 128
+    assert g.estado == "en_cola" and g.remuestreada and g.sfreq_original_hz == 128
     assert "128 Hz → 256 Hz (remuestreada)" in respuesta.content.decode()
 
 

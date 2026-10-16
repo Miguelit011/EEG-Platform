@@ -94,8 +94,16 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 table { border-collapse: collapse; width: 100%; }
 th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--borde); vertical-align: top; }
 .en-linea { display: flex; gap: 0.4rem; margin: 0; }
-.en-linea button { background: var(--superficie); color: var(--acento); }
 .estado { font-weight: 600; }
 .estado-error::before { content: "✖ "; }
 .estado-procesada::before { content: "✔ "; }
+button.secundario { background: var(--superficie); color: var(--acento); }
+.progreso-lote { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.progreso-lote progress { width: 12rem; }
+.aviso { padding: 0.6rem 0.9rem; border-radius: 6px; border: 1px solid var(--borde); }
+.aviso-info { background: #eef3fb; border-color: var(--acento); }
+.aviso-alerta { background: #fdf3e1; border-color: #b26a00; }
+.aviso code { background: rgba(0, 0, 0, 0.06); padding: 0.1rem 0.3rem; border-radius: 4px; }
+.estado-en_cola::before { content: "⏳ "; }
+.estado-procesando::before { content: "⚙ "; }
 .msg-error { color: #b3261e; font-size: 0.9rem; }

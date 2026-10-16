@@ -57,6 +57,6 @@ Desde la carpeta `EEG-Platform`, en PowerShell. Python 3.10 y EEG-Library clonad
   ```
 - Arrancar: `.venv\Scripts\python.exe manage.py runserver` y abrir http://127.0.0.1:8000/
 - Tests: `.venv\Scripts\python.exe -m pytest`
-- Worker: se añade en la Fase 3.
+- Procesador (en otra terminal, abierto mientras se usa la web): `.venv\Scripts\python.exe manage.py procesar`. Procesa la cola con N procesos. N se calcula en cada equipo (mitad de los hilos, máximo 4 y un proceso por GB libre; `grabaciones/recursos.py`) y se puede fijar con `--procesos N` o `EEG_PLATFORM_PROCESOS`, porque la plataforma se usará en portátiles distintos. `--una-vez` termina al vaciar la cola. Se para con Ctrl+C y, al relanzarlo, continúa donde iba. Si hay cola y no está en marcha, la lista lo avisa. El `iniciar.bat` de la Fase 8 lo lanzará junto a la web.
 
 Los datos (base SQLite, EDF y resultados) van a `EEG_PLATFORM_DATOS`; por defecto `..\EEG-Platform-datos`. Django no arranca si apunta dentro del repo.

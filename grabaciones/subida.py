@@ -41,6 +41,7 @@ def guardar_grabacion(lote, archivo):
         grabacion.duracion_s = info.duracion_s
         grabacion.sfreq_original_hz = info.sfreq_original_hz
         grabacion.remuestreada = info.remuestreada
+        grabacion.estado = Grabacion.Estado.EN_COLA
     except ErrorDeValidacion as error:
         grabacion.mensaje_error = str(error)
     except Exception as error:  # p. ej. disco lleno: que no tumbe al resto del lote

@@ -1,0 +1,78 @@
+<div id="lista-viva" data-url="{% url 'grabaciones:lista_parcial' %}" data-activo="{% if hay_cola %}1{% else %}0{% endif %}">
+  {% if hay_cola %}
+    {% if procesador %}
+      <p class="aviso aviso-info" role="status">Procesando en segundo plano con {{ procesador.procesos }} proceso(s). Esta lista se actualiza sola.</p>
+    {% else %}
+      <p class="aviso aviso-alerta" role="alert">
+        Hay grabaciones en cola pero el procesador no está en marcha, así que no avanzan.
+        Abre una terminal en la carpeta <code>EEG-Platform</code> y ejecuta:
+        <code>.venv\Scripts\python.exe manage.py procesar</code>
+      </p>
+    {% endif %}
+  {% endif %}
+
+  {% if hay_grabaciones %}
+    <datalist id="condiciones">
+      {% for c in condiciones_sugeridas %}<option value="{{ c }}">{% endfor %}
+    </datalist>
+    {% for lote in lotes %}
+      {% if lote.grabaciones.all %}
+      {% with p=lote.progreso %}
+      <h3 class="lote">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}
+        <span class="nota">{{ lote.resumen_parametros }}</span></h3>
+      <div class="progreso-lote">
+        <progress max="{{ p.total }}" value="{{ p.procesadas|add:p.con_error }}"
+                  aria-label="Progreso del lote {{ lote.pk }}"></progress>
+        <span>{{ p.procesadas }} de {{ p.total }} procesadas
+          {% if p.con_error %}· {{ p.con_error }} con error{% endif %}
+          {% if p.pendientes %}· {{ p.pendientes }} pendientes{% endif %}</span>
+        {% if lote.hay_fallidas_reintentables %}
+          <form method="post" action="{% url 'grabaciones:reintentar_lote' lote.pk %}" class="en-linea">
+            {% csrf_token %}<button type="submit" class="secundario">Reintentar las fallidas</button>
+          </form>
+        {% endif %}
+      </div>
+      {% endwith %}
+      <div class="tabla-ancha">
+      <table>
+        <thead>
+          <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Frecuencia de muestreo</th><th>Estado</th><th>Detalle</th></tr>
+        </thead>
+        <tbody>
+        {% for g in lote.grabaciones.all %}
+          <tr>
+            <td>{{ g.nombre_original }}</td>
+            <td>
+              <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
+                {% csrf_token %}
+                <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
+                       maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
+                       placeholder="sin condición">
+                <button type="submit" class="secundario">Guardar</button>
+              </form>
+              {% if g.condicion %}<span class="nota">{{ g.get_origen_condicion_display }}</span>{% endif %}
+            </td>
+            <td>{{ g.duracion_texto }}</td>
+            <td>{{ g.frecuencia_texto }}</td>
+            <td>
+              <span class="estado estado-{{ g.estado }}">{{ g.get_estado_display }}</span>
+              {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
+              {% if g.reintentable or g.reprocesable %}
+                <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
+                  {% csrf_token %}
+                  <button type="submit" class="secundario">{% if g.reintentable %}Reintentar{% else %}Reprocesar{% endif %}</button>
+                </form>
+              {% endif %}
+            </td>
+            <td><span class="desactivado" title="Disponible en la pantalla de calidad (Fase 4)">—</span></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <p class="vacio">Todavía no hay grabaciones.</p>
+  {% endif %}
+</div>

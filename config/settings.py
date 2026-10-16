@@ -100,6 +100,13 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": DATOS_DIR / "db.sqlite3",
+        # La web y el procesador escriben a la vez en la misma base: WAL deja
+        # leer mientras se escribe y el tiempo de espera evita «database is locked».
+        "OPTIONS": {
+            "timeout": 30,
+            "init_command": "PRAGMA journal_mode=WAL;",
+            "transaction_mode": "IMMEDIATE",
+        },
     }
 }
 
@@ -117,6 +124,18 @@ PATRON_CONDICION = os.environ.get(
     "EEG_PLATFORM_PATRON_CONDICION",
     r"task-(OA|OC|STROOP|PASAT|PVTB|MSIT|PVSAT)",
 )
+
+# Procesado en segundo plano (`manage.py procesar`): procesos en paralelo. Si no
+# se fija, el procesador lo calcula en cada equipo según sus hilos y su memoria
+# libre (ver grabaciones/recursos.py), porque la plataforma se usará en
+# portátiles distintos. Con resultados idénticos, medido con 12 EDF reales:
+# 1 proceso → 37 s, 2 → 21 s, 4 → 14,5 s, 6 → 12,7 s.
+PROCESOS = int(os.environ.get("EEG_PLATFORM_PROCESOS") or 0) or None
+if PROCESOS is not None and PROCESOS < 1:
+    raise ImproperlyConfigured("EEG_PLATFORM_PROCESOS debe ser al menos 1.")
+
+# Si el procesador no da señales en estos segundos, la lista avisa de que está parado.
+PROCESADOR_LATIDO_CADUCA_S = 15
 
 LANGUAGE_CODE = "es-es"
 TIME_ZONE = "Europe/Madrid"

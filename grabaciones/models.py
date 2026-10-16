@@ -53,6 +53,22 @@ class Lote(models.Model):
     def con_parametros_del_estudio(self):
         return self.parametros() == normalizar_parametros()
 
+    @property
+    def progreso(self):
+        """Recuento por estado, para mostrar «7 de 20 procesadas»."""
+        estados = [g.estado for g in self.grabaciones.all()]
+        pendientes = sum(e in Grabacion.ESTADOS_PENDIENTES for e in estados)
+        return {
+            "total": len(estados),
+            "procesadas": estados.count(Grabacion.Estado.PROCESADA),
+            "con_error": estados.count(Grabacion.Estado.ERROR),
+            "pendientes": pendientes,
+        }
+
+    @property
+    def hay_fallidas_reintentables(self):
+        return any(g.reintentable for g in self.grabaciones.all())
+
 
 def ruta_edf(grabacion, nombre):
     return f"edf/lote_{grabacion.lote_id}/{nombre}"
@@ -70,6 +86,8 @@ class Grabacion(models.Model):
         NOMBRE = "nombre", "Del nombre del archivo"
         MANUAL = "manual", "Escrita a mano"
         VACIA = "vacia", "Sin condición"
+
+    ESTADOS_PENDIENTES = (Estado.EN_COLA, Estado.PROCESANDO)
 
     lote = models.ForeignKey(Lote, on_delete=models.CASCADE, related_name="grabaciones")
     # Vacío si el archivo era inválido: solo se guardan los EDF que se pueden procesar.
@@ -92,6 +110,15 @@ class Grabacion(models.Model):
         return self.nombre_original
 
     @property
+    def reintentable(self):
+        """Falló al procesar (y su EDF se conserva). Los rechazados al subir no tienen archivo."""
+        return self.estado == self.Estado.ERROR and bool(self.archivo)
+
+    @property
+    def reprocesable(self):
+        return self.estado == self.Estado.PROCESADA
+
+    @property
     def duracion_texto(self):
         if self.duracion_s is None:
             return "—"
@@ -106,3 +133,25 @@ class Grabacion(models.Model):
             return (f"{self.sfreq_original_hz:g} Hz → {TARGET_SFREQ:g} Hz "
                     f"(remuestreada)")
         return f"{self.sfreq_original_hz:g} Hz"
+
+
+class Procesador(models.Model):
+    """
+    Señal de vida del procesador (una sola fila). Lo escribe `manage.py procesar`
+    cada pocos segundos; la web la lee para avisar si hay cola y nadie procesa.
+    """
+
+    pid = models.IntegerField()
+    procesos = models.IntegerField()
+    ultimo_latido = models.DateTimeField()
+
+    @classmethod
+    def activo(cls):
+        """La fila del procesador si dio señales hace poco; si no, None."""
+        from datetime import timedelta
+
+        from django.conf import settings
+        from django.utils import timezone
+
+        limite = timezone.now() - timedelta(seconds=settings.PROCESADOR_LATIDO_CADUCA_S)
+        return cls.objects.filter(ultimo_latido__gte=limite).first()

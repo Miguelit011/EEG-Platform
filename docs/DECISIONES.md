@@ -23,3 +23,35 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 - **Sin `admin` ni `auth`.** Login y usuarios están fuera de alcance; quitar las apps evita tablas y pantallas que nadie usaría.
 - **Calidad y Análisis desactivadas en la navegación** mientras no se elige una grabación: son pantallas por grabación.
 - **Django 5.2 (LTS)**, la última rama que admite Python 3.10.
+
+## Fase 2 — Subida y lista de grabaciones (2026-10-16)
+
+- **Los requisitos de un EDF son los de la librería, leídos de ella.** Frecuencia mínima `MIN_SFREQ` (128 Hz) y canales `CANALES_EPOC`. Un EDF de 128 Hz se acepta, la librería lo remuestrea a 256 Hz y la lista lo indica («128 Hz → 256 Hz (remuestreada)»). Copiar los números haría que la web y la librería pudieran discrepar.
+- **Duración mínima de 14 s, derivada de la librería.** Es el recorte inicial más el final más una ventana de epocado, leídos de los argumentos por defecto de `recortar_registro` y `crear_epocas` (la librería no los expone como constantes). Comprobado: 14 s da 1 época y 13 s falla en el epocado. Se rechaza al subir para que no falle luego en el procesado.
+- **La validación solo lee la cabecera del EDF** (`preload=False`): subir 20 archivos no carga 20 señales.
+- **Un archivo inválido no se guarda en disco.** Queda en la lista con estado `error` y su mensaje, y no afecta al resto del lote. Los EDF son datos de menores: no se conserva lo que no se va a procesar.
+- **Remuestreo y frecuencia original se guardan en la grabación al subir**, para que la lista los muestre antes de procesar. El JSON de la librería ya trae `metadatos.resampleado`.
+- **Parámetros del lote como opciones cerradas tomadas de la librería** (`OPCIONES`, `PARAMETROS_ESTUDIO`); `Lote.parametros()` pasa por `normalizar_parametros`, así que la web no puede enviar a la librería una combinación que esta rechace.
+- **Condición como metadato opcional con origen.** Se lee del nombre con un patrón configurable (`PATRON_CONDICION` o `EEG_PLATFORM_PATRON_CONDICION`), se edita a mano en la lista y se guarda si viene del nombre, de la edición o está vacía. El campo admite texto libre (con sugerencias), porque otros estudios tendrán otras condiciones.
+- **Sin deep learning en la plataforma.** El epocado de 4 s es el común del pipeline, del que salen las 70 características de c1, c2 y c3; la ruta CNN de la librería no se usa.
+- **`edfio` en `requirements.txt`** solo para que los tests escriban EDF sintéticos pequeños, sin datos de participantes en el repo. Los tests guardan los archivos en una carpeta temporal, nunca en `EEG-Platform-datos`.
+- **`DATA_UPLOAD_MAX_NUMBER_FILES = 1000`**: el valor por defecto de Django (100) cortaría lotes grandes.
+
+## Fase 3 — Procesado en segundo plano (2026-10-16)
+
+- **Un procesador que reparte entre N procesos.** `manage.py procesar` es el único que toca la base de datos; los hijos (`ProcessPoolExecutor`) solo reciben una ruta y unos parámetros y devuelven el resultado (`analisis.py`, que no importa Django). Así no hay escrituras concurrentes ni conexiones de Django en procesos hijos.
+- **N se calcula en cada equipo, no se fija.** La plataforma se ejecutará en el PC del autor, en el portátil de la defensa y en los de Ciencias del Deporte, así que `grabaciones/recursos.py` decide al arrancar el procesador: la mitad de los hilos, con tope en 4, y no más de un proceso por GB de memoria libre (mínimo 1). Se anula con `EEG_PLATFORM_PROCESOS` o `--procesos N`, y el comando dice qué eligió y por qué. Ejemplos: 12 hilos y 16 GB → 4; 4 hilos → 2; 2 hilos → 1; 12 hilos pero 1,2 GB libres → 1.
+  - Tope en 4: medido con 12 EDF reales en un Ryzen 5 5600G (6 núcleos físicos), 1 proceso, 37 s; 2, 21 s; 4, 14,5 s; 6, 12,7 s. Con 4 se gana casi todo (2,5×); pasar a 6 solo añade un 15 %.
+  - Memoria: un análisis llega a ~0,35–0,4 GB de pico (EDF de 380 s). Se reserva 1 GB por proceso para cubrir EDF de 71 canales y el propio procesador y la web.
+  - La memoria libre se lee con la API de Windows (`ctypes`, sin `psutil`). Si no se puede leer, solo cuentan los hilos.
+  - En un portátil con batería, o si se prefiere que no se caliente, conviene fijar 1 o 2: tarda más, pero es más suave.
+- **Mismo resultado con N=1 y N>1.** Comprobado con 12 EDF reales (JSON idéntico salvo `fecha_analisis`) y con un test automático. Con N=1 también se usa un hijo, para que haya un único camino de código.
+- **La cola es el campo `estado`.** Al subir, los EDF válidos pasan directamente a `en_cola`: no hay un paso intermedio que el investigador deba confirmar. `subida` queda en el modelo pero ya no se usa.
+- **Continuar donde iba.** Al arrancar, lo que estaba `procesando` vuelve a la cola (es seguro porque solo hay un procesador). Con Ctrl+C también se devuelve lo que estaba a medias. Comprobado matando el procesador a la fuerza en mitad de un lote de 20 EDF reales: al relanzarlo terminaron las 20, sin repetir las ya hechas.
+- **Señal de vida en la base de datos (`Procesador`, una fila).** Se actualiza cada 2 s, también cuando espera un archivo largo. Si hay cola y la señal tiene más de 15 s (o no existe), la lista avisa y da el comando. Con cola y procesador activo, indica cuántos procesos usa. Sin cola no avisa. Evita además lanzar dos procesadores a la vez.
+- **Reintentar y reprocesar.** Una grabación fallida al procesar vuelve a la cola con un botón, y también todas las fallidas de un lote. Reprocesar una procesada conserva el resultado anterior hasta que termine el nuevo. Los archivos rechazados al subir no se pueden reintentar: no se guardaron.
+- **Un error en un archivo solo marca ese archivo.** El mensaje incluye la fase de la librería donde falló. Si se muere un proceso hijo (p. ej. por memoria), las grabaciones afectadas quedan en `error` y se crea un grupo de procesos nuevo.
+- **SQLite con WAL, `timeout` de 30 s y transacciones `IMMEDIATE`.** La web y el procesador escriben a la vez en la misma base; así no hay errores de «database is locked».
+- **La lista se actualiza sola cada 3 s con un `fetch` a una vista parcial**, solo mientras haya cola. No pisa lo que se esté escribiendo en un campo de condición.
+- **El procesador se lanza a mano en esta fase.** Queda documentado en `CLAUDE.md`; el `iniciar.bat` de la Fase 8 lo arrancará con la web.
+- **Prueba con 20 EDF reales** (carpeta de datos temporal): 20 procesados con 4 procesos en 29 s, sin errores.
