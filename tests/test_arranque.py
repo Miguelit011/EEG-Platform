@@ -1,9 +1,13 @@
-"""La web arranca y muestra la pantalla Grabaciones vacía, sin recursos externos."""
+﻿"""La web arranca y muestra la pantalla Grabaciones vacía, sin recursos externos."""
 
 import re
 
 from django.conf import settings
 from django.urls import reverse
+
+from tests.conftest import USA_LA_WEB
+
+pytestmark = USA_LA_WEB
 
 
 def test_grabaciones_vacia(client):
@@ -40,3 +44,4 @@ def test_plantillas_sin_recursos_externos():
 
 def test_ningun_texto_menciona_fatiga(client):
     assert "fatiga" not in client.get("/").content.decode().lower()
+

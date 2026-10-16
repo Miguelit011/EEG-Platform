@@ -107,6 +107,17 @@ DATABASES = {
 MEDIA_ROOT = DATOS_DIR / "archivos"
 MEDIA_URL = "/archivos/"
 
+# Subida de grabaciones. Un lote puede traer cientos de EDF de una vez.
+DATA_UPLOAD_MAX_NUMBER_FILES = 1000
+
+# La condición (OA, OC, STROOP...) se lee del nombre del archivo con este patrón
+# (regex, sin distinguir mayúsculas; si tiene un grupo, la condición es el grupo).
+# Es un metadato opcional: si no coincide, la condición queda vacía.
+PATRON_CONDICION = os.environ.get(
+    "EEG_PLATFORM_PATRON_CONDICION",
+    r"task-(OA|OC|STROOP|PASAT|PVTB|MSIT|PVSAT)",
+)
+
 LANGUAGE_CODE = "es-es"
 TIME_ZONE = "Europe/Madrid"
 USE_I18N = True

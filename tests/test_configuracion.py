@@ -31,7 +31,13 @@ def test_carpeta_dentro_del_repo_no_arranca(dentro):
 
 
 def test_base_de_datos_y_archivos_fuera_del_repo():
-    for ruta in (Path(settings.DATABASES["default"]["NAME"]), Path(settings.MEDIA_ROOT)):
+    rutas = [Path(settings.MEDIA_ROOT)]
+    nombre_bd = str(settings.DATABASES["default"]["NAME"])
+    # Si ya corrió un test con base de datos, pytest-django la ha cambiado por
+    # una en memoria; en ese caso no queda nada en disco que comprobar.
+    if not nombre_bd.startswith("file:memorydb"):
+        rutas.append(Path(nombre_bd))
+    for ruta in rutas:
         assert settings.DATOS_DIR in ruta.parents
         assert BASE not in ruta.resolve().parents
 

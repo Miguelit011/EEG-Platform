@@ -11,6 +11,8 @@ Django>=5.2,<5.3
 # Tests
 pytest
 pytest-django
+# Escritura de EDF sintéticos en los tests (como en EEG-Library).
+edfio==0.4.18
 
 # Versiones con las que se validó EEG-Library (Fase 0: paridad exacta con
 # matriz_rf.parquet). Fijarlas garantiza que la web procesa igual.

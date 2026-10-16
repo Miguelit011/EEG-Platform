@@ -67,3 +67,35 @@ body {
 .nota, .vacio { color: var(--texto-suave); }
 
 .mensajes { list-style: none; padding: 0; }
+.mensajes li { padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; border: 1px solid var(--borde); background: var(--superficie); }
+.mensajes .success { border-color: #2e7d32; }
+.mensajes .error { border-color: #b3261e; }
+
+/* Subida */
+.solo-lectores { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.zona-soltar {
+  display: block;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border: 2px dashed var(--borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.zona-soltar span { display: block; }
+.zona-soltar.sobre, .solo-lectores:focus-visible + .zona-soltar, .zona-soltar:hover { border-color: var(--acento); background: #eef3fb; }
+.parametros { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; margin: 1rem 0 0.5rem; border: 1px solid var(--borde); border-radius: 8px; }
+.parametros label { display: flex; gap: 0.5rem; align-items: center; }
+button { font: inherit; padding: 0.3rem 0.8rem; border: 1px solid var(--acento); background: var(--acento); color: #fff; border-radius: 6px; cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #f2b705; outline-offset: 1px; }
+
+/* Lista */
+.lote { margin: 1rem 0 0.5rem; font-size: 1rem; }
+.tabla-ancha { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--borde); vertical-align: top; }
+.en-linea { display: flex; gap: 0.4rem; margin: 0; }
+.en-linea button { background: var(--superficie); color: var(--acento); }
+.estado { font-weight: 600; }
+.estado-error::before { content: "✖ "; }
+.estado-procesada::before { content: "✔ "; }
+.msg-error { color: #b3261e; font-size: 0.9rem; }

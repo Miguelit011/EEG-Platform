@@ -1,21 +1,83 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Grabaciones{% endblock %}
 
 {% block contenido %}
 <h1>Grabaciones</h1>
 
-<section class="tarjeta subida" aria-labelledby="titulo-subida">
+<section class="tarjeta" aria-labelledby="titulo-subida">
   <h2 id="titulo-subida">Subir archivos EDF</h2>
-  <p class="nota">La subida de archivos estará disponible próximamente.</p>
+  <form method="post" action="{% url 'grabaciones:subir' %}" enctype="multipart/form-data" id="form-subida">
+    {% csrf_token %}
+    <input type="file" name="archivos" id="archivos" accept=".edf" multiple class="solo-lectores">
+    <label class="zona-soltar" id="zona-soltar" for="archivos">
+      <strong>Arrastra aquí los EDF</strong> o pulsa para elegirlos
+      <span class="nota" id="resumen-archivos" aria-live="polite">Ningún archivo elegido.</span>
+    </label>
+
+    <fieldset class="parametros">
+      <legend>Parámetros de procesado (para todo el lote)</legend>
+      <label>{{ formulario.referencia.label }} {{ formulario.referencia }}</label>
+      <label>{{ formulario.banda.label }} {{ formulario.banda }}</label>
+      <label class="casilla">{{ formulario.notch }} {{ formulario.notch.label }}</label>
+      {{ formulario.non_field_errors }}
+    </fieldset>
+    <p class="nota">
+      Por defecto son los parámetros con los que se entrenaron los modelos. Con otros,
+      la plataforma procesa igual pero los modelos no darán predicciones.
+      Con el paso banda 3–30 Hz la potencia delta casi desaparece.
+    </p>
+    <button type="submit">Subir</button>
+  </form>
 </section>
 
 <section class="tarjeta" aria-labelledby="titulo-lista">
   <h2 id="titulo-lista">Lista</h2>
-  {% if grabaciones %}
-    {# La tabla de grabaciones llega en la Fase 2. #}
+  {% if hay_grabaciones %}
+    <datalist id="condiciones">
+      {% for c in condiciones_sugeridas %}<option value="{{ c }}">{% endfor %}
+    </datalist>
+    {% for lote in lotes %}
+      {% if lote.grabaciones.all %}
+      <h3 class="lote">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}
+        <span class="nota">{{ lote.resumen_parametros }}</span></h3>
+      <div class="tabla-ancha">
+      <table>
+        <thead>
+          <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Frecuencia de muestreo</th><th>Estado</th><th>Detalle</th></tr>
+        </thead>
+        <tbody>
+        {% for g in lote.grabaciones.all %}
+          <tr>
+            <td>{{ g.nombre_original }}</td>
+            <td>
+              <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
+                {% csrf_token %}
+                <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
+                       maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
+                       placeholder="sin condición">
+                <button type="submit">Guardar</button>
+              </form>
+              {% if g.condicion %}<span class="nota">{{ g.get_origen_condicion_display }}</span>{% endif %}
+            </td>
+            <td>{{ g.duracion_texto }}</td>
+            <td>{{ g.frecuencia_texto }}</td>
+            <td>
+              <span class="estado estado-{{ g.estado }}">{{ g.get_estado_display }}</span>
+              {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
+            </td>
+            <td><span class="desactivado" title="Disponible cuando la grabación se procese">—</span></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% endif %}
+    {% endfor %}
   {% else %}
     <p class="vacio">Todavía no hay grabaciones.</p>
   {% endif %}
 </section>
+<script src="{% static 'js/subida.js' %}"></script>
 {% endblock %}
