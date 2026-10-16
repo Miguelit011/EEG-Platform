@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" font-family="Segoe UI, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Casos de uso de EEG-Platform</title>
+  <desc id="d">El investigador sube grabaciones, consulta la lista, edita condiciones, reintenta, ve calidad, análisis, modelos y descarga CSV. El autor de modelos añade modelos. El procesador procesa en segundo plano.</desc>
+  <defs>
+    <style>
+      .sis { fill: #fafbfd; stroke: #5b6475; stroke-width: 2; }
+      .uc { fill: #eef3fb; stroke: #1f5fbf; stroke-width: 2; }
+      .uc2 { fill: #fdf3e1; stroke: #b26a00; stroke-width: 2; }
+      .t { font-size: 14px; fill: #1d2330; text-anchor: middle; }
+      .a { font-size: 15px; font-weight: 700; fill: #1d2330; text-anchor: middle; }
+      .s { font-size: 12.5px; fill: #5b6475; text-anchor: middle; }
+      .l { stroke: #333; stroke-width: 1.6; fill: none; }
+      .m { stroke: #333; stroke-width: 2.5; fill: #fff; }
+    </style>
+  </defs>
+  <rect width="1000" height="600" fill="#ffffff"/>
+  <rect class="sis" x="190" y="20" width="620" height="560" rx="12"/>
+  <text x="500" y="46" class="a">EEG-Platform</text>
+
+  <!-- Columna izquierda -->
+  <ellipse class="uc" cx="340" cy="105" rx="130" ry="36"/><text class="t" x="340" y="101">UC1 Subir grabaciones</text><text class="t" x="340" y="119">y elegir parámetros</text>
+  <ellipse class="uc" cx="340" cy="200" rx="130" ry="36"/><text class="t" x="340" y="196">UC2 Consultar la lista</text><text class="t" x="340" y="214">y el progreso del lote</text>
+  <ellipse class="uc" cx="340" cy="295" rx="130" ry="36"/><text class="t" x="340" y="291">UC3 Editar la condición</text><text class="t" x="340" y="309">de una grabación</text>
+  <ellipse class="uc" cx="340" cy="390" rx="130" ry="36"/><text class="t" x="340" y="386">UC4 Reintentar o</text><text class="t" x="340" y="404">reprocesar grabaciones</text>
+
+  <!-- Columna derecha -->
+  <ellipse class="uc" cx="660" cy="105" rx="130" ry="36"/><text class="t" x="660" y="101">UC5 Ver la calidad</text><text class="t" x="660" y="119">de la señal</text>
+  <ellipse class="uc" cx="660" cy="200" rx="130" ry="36"/><text class="t" x="660" y="196">UC6 Ver el análisis</text><text class="t" x="660" y="214">espectral y el mapa</text>
+  <ellipse class="uc" cx="660" cy="295" rx="130" ry="36"/><text class="t" x="660" y="291">UC7 Consultar las</text><text class="t" x="660" y="309">predicciones de los modelos</text>
+  <ellipse class="uc" cx="660" cy="390" rx="130" ry="36"/><text class="t" x="660" y="386">UC8 Descargar el CSV</text><text class="t" x="660" y="404">(grabación o lote)</text>
+
+  <!-- Fila inferior -->
+  <ellipse class="uc2" cx="340" cy="505" rx="130" ry="36"/><text class="t" x="340" y="501">UC10 Procesar en</text><text class="t" x="340" y="519">segundo plano</text>
+  <ellipse class="uc2" cx="660" cy="505" rx="130" ry="36"/><text class="t" x="660" y="501">UC9 Añadir un modelo</text><text class="t" x="660" y="519">(ficha + archivo + 1 línea)</text>
+
+  <!-- Investigador (izquierda) -->
+  <circle cx="85" cy="215" r="15" class="m"/>
+  <path d="M85 230 V268 M60 243 H110 M85 268 L68 300 M85 268 L102 300" class="m" style="fill:none"/>
+  <text x="85" y="324" class="a">Investigador</text><text x="85" y="342" class="s">Ciencias del Deporte</text>
+  <path d="M100 235 L212 112 M100 238 L212 200 M100 242 L212 295 M100 246 L215 380" class="l"/>
+
+  <!-- Investigador (derecha, el mismo actor) -->
+  <circle cx="915" cy="215" r="15" class="m"/>
+  <path d="M915 230 V268 M890 243 H940 M915 268 L898 300 M915 268 L932 300" class="m" style="fill:none"/>
+  <text x="915" y="324" class="a">Investigador</text><text x="915" y="342" class="s">(el mismo actor)</text>
+  <path d="M900 235 L788 112 M900 238 L788 200 M900 242 L788 295 M900 246 L785 380" class="l"/>
+
+  <!-- Autor de modelos -->
+  <circle cx="915" cy="470" r="15" class="m"/>
+  <path d="M915 485 V523 M890 498 H940 M915 523 L898 555 M915 523 L932 555" class="m" style="fill:none"/>
+  <text x="915" y="575" class="a">Autor de modelos</text>
+  <path d="M900 500 L788 505" class="l"/>
+
+  <!-- Procesador -->
+  <rect class="m" x="40" y="480" width="90" height="58" rx="6"/>
+  <text x="85" y="505" class="a" style="font-size:13px">Procesador</text><text x="85" y="523" class="s">(sistema)</text>
+  <path d="M130 508 L212 505" class="l"/>
+</svg>

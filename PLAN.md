@@ -12,7 +12,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 5 | Pantalla de análisis y mapa de la cabeza | EEG-Platform | [x] |
 | 6 | Exportación CSV | EEG-Platform | [x] |
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [x] |
-| 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [ ] |
+| 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [x] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -175,7 +175,7 @@ Aceptación:
 - Las cifras mostradas coinciden con `resultados.json` del análisis confirmatorio.
 - Con parámetros distintos a los del entrenamiento no se muestran predicciones.
 
-## Fase 8 — Cierre
+## Fase 8 — Cierre — **hecha** (2026-10-16)
 **Objetivo:** que alguien que no programa pueda usarla, y tener material para la memoria.
 
 Incluye:

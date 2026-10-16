@@ -219,8 +219,8 @@ def test_formato_configurable(settings):
 
 
 def test_nombre_de_archivo_seguro():
-    assert nombre_de_archivo_seguro("sub-C1F081_ses-M2_task-OA_eeg") == \
-        "sub-C1F081_ses-M2_task-OA_eeg"
+    assert nombre_de_archivo_seguro("sub-T1F081_ses-M2_task-OA_eeg") == \
+        "sub-T1F081_ses-M2_task-OA_eeg"
     assert nombre_de_archivo_seguro("sub C1/ñ 01") == "sub_C1___01"
     assert nombre_de_archivo_seguro("...") == "grabacion"
 
@@ -231,13 +231,13 @@ def test_nombre_de_archivo_seguro():
 
 def test_descarga_de_una_grabacion(client):
     g = grabacion_con(FIXTURE)
-    g.nombre_original = "sub-C1F081_ses-M2_task-OA_eeg.edf"
+    g.nombre_original = "sub-T1F081_ses-M2_task-OA_eeg.edf"
     g.save()
     r = client.get(reverse("grabaciones:csv_grabacion", args=[g.pk]))
     assert r.status_code == 200 and r["Content-Type"] == "text/csv; charset=utf-8"
-    assert r["Content-Disposition"] == 'attachment; filename="eeg_sub-C1F081_ses-M2_task-OA_eeg.csv"'
+    assert r["Content-Disposition"] == 'attachment; filename="eeg_sub-T1F081_ses-M2_task-OA_eeg.csv"'
     tabla = leer(r.content)
-    assert len(tabla) == 1 and tabla.loc[0, "archivo"] == "sub-C1F081_ses-M2_task-OA_eeg.edf"
+    assert len(tabla) == 1 and tabla.loc[0, "archivo"] == "sub-T1F081_ses-M2_task-OA_eeg.edf"
 
 
 def test_descarga_del_lote_solo_incluye_las_procesadas(client):
@@ -311,7 +311,7 @@ def test_csv_de_una_grabacion_procesada_de_verdad(client, tmp_path):
 
     datos = {"referencia": "car_condicional", "banda": "1-30", "notch": "on",
              "archivos": [SimpleUploadedFile(
-                 "sub-C1F001_task-OC.edf", escribir_edf(tmp_path / "a.edf", 30).read_bytes())]}
+                 "sub-T1F001_task-OC.edf", escribir_edf(tmp_path / "a.edf", 30).read_bytes())]}
     client.post(reverse("grabaciones:subir"), datos)
     procesador.trabajar(1, una_vez=True, fabrica_ejecutor=EjecutorSincrono())
 

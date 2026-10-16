@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" width="1000" height="620" font-family="Segoe UI, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Arquitectura de EEG-Platform</title>
+  <desc id="d">El navegador habla con la web Django. La web y el procesador comparten la carpeta de datos (base SQLite, EDF y modelos) y llaman a EEG-Library, que hace todo el cálculo.</desc>
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+    <style>
+      .caja { fill: #fff; stroke: #1f5fbf; stroke-width: 2.5; }
+      .datos { fill: #eef3fb; stroke: #1f5fbf; stroke-width: 2.5; }
+      .lib { fill: #fdf3e1; stroke: #b26a00; stroke-width: 2.5; }
+      .mini { fill: #fff; stroke: #1f5fbf; stroke-width: 1.5; }
+      .tit { font-size: 17px; font-weight: 700; fill: #1d2330; }
+      .txt { font-size: 14px; fill: #1d2330; }
+      .peq { font-size: 12.5px; fill: #5b6475; }
+      .flecha { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#f); }
+      .doble { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#f); marker-start: url(#f); }
+      .punteada { stroke: #777; stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+      .etq { font-size: 12.5px; fill: #333; }
+    </style>
+  </defs>
+  <rect width="1000" height="620" fill="#ffffff"/>
+
+  <!-- Investigador y navegador -->
+  <circle cx="85" cy="238" r="16" fill="#fff" stroke="#333" stroke-width="2.5"/>
+  <path d="M85 254 V292 M58 268 H112 M85 292 L66 326 M85 292 L104 326" stroke="#333" stroke-width="2.5" fill="none"/>
+  <text x="85" y="352" text-anchor="middle" class="tit">Investigador</text>
+  <text x="85" y="371" text-anchor="middle" class="peq">Ciencias del Deporte</text>
+  <rect class="caja" x="20" y="396" width="130" height="84" rx="8"/>
+  <text x="85" y="428" text-anchor="middle" class="tit">Navegador</text>
+  <text x="85" y="450" text-anchor="middle" class="peq">127.0.0.1:8000</text>
+  <text x="85" y="466" text-anchor="middle" class="peq">sin internet</text>
+  <path d="M85 376 V396" class="flecha" style="marker-start:none"/>
+
+  <!-- Web -->
+  <rect class="caja" x="240" y="40" width="290" height="190" rx="10"/>
+  <text x="385" y="68" text-anchor="middle" class="tit">Web · Django</text>
+  <text x="385" y="86" text-anchor="middle" class="peq">EEG-Platform · app «grabaciones»</text>
+  <text x="258" y="114" class="txt">• Subida y validación del EDF</text>
+  <text x="258" y="136" class="txt">• Lista de grabaciones y progreso</text>
+  <text x="258" y="158" class="txt">• Calidad y análisis (SVG, Chart.js local)</text>
+  <text x="258" y="180" class="txt">• Modelos: aplica sobre el JSON guardado</text>
+  <text x="258" y="202" class="txt">• Exportación a CSV</text>
+
+  <!-- Procesador -->
+  <rect class="caja" x="240" y="330" width="290" height="230" rx="10"/>
+  <text x="385" y="358" text-anchor="middle" class="tit">Procesador</text>
+  <text x="385" y="376" text-anchor="middle" class="peq">manage.py procesar · segundo plano</text>
+  <text x="258" y="404" class="txt">• La cola es la propia base de datos</text>
+  <text x="258" y="426" class="txt">• Reparte entre N procesos</text>
+  <text x="258" y="448" class="txt">• Guarda el resultado y la señal de vida</text>
+  <rect class="mini" x="258" y="468" width="76" height="34" rx="5"/><text x="296" y="490" text-anchor="middle" class="peq">proceso 1</text>
+  <rect class="mini" x="344" y="468" width="76" height="34" rx="5"/><text x="382" y="490" text-anchor="middle" class="peq">proceso 2</text>
+  <text x="438" y="490" class="txt">…</text>
+  <rect class="mini" x="458" y="468" width="56" height="34" rx="5"/><text x="486" y="490" text-anchor="middle" class="peq">N</text>
+  <text x="258" y="530" class="peq">N se calcula en cada equipo (hilos y memoria)</text>
+
+  <!-- Datos -->
+  <rect class="datos" x="650" y="40" width="330" height="190" rx="10"/>
+  <text x="815" y="68" text-anchor="middle" class="tit">Datos (fuera del repositorio)</text>
+  <text x="815" y="86" text-anchor="middle" class="peq">EEG-Platform-datos · participantes menores</text>
+  <text x="668" y="116" class="txt">• db.sqlite3 (WAL)</text>
+  <text x="686" y="134" class="peq">lotes, grabaciones, cola, resultados JSON</text>
+  <text x="668" y="160" class="txt">• archivos\ (EDF subidos)</text>
+  <text x="668" y="186" class="txt">• modelos\ (modelos externos)</text>
+  <text x="668" y="212" class="peq">Nunca a git ni a servicios externos</text>
+
+  <!-- Librería -->
+  <rect class="lib" x="650" y="330" width="330" height="230" rx="10"/>
+  <text x="815" y="358" text-anchor="middle" class="tit">EEG-Library</text>
+  <text x="815" y="376" text-anchor="middle" class="peq">todo el cálculo; instalada con pip install -e</text>
+  <text x="668" y="404" class="txt">• analizar_grabacion(EDF, parámetros)</text>
+  <text x="686" y="422" class="peq">calidad, ICA, potencia, 70 características → JSON</text>
+  <text x="668" y="448" class="txt">• predecir(modelo, características, …)</text>
+  <text x="686" y="466" class="peq">clase y probabilidades, o «no disponible»</text>
+  <text x="668" y="492" class="txt">• Modelos c1, c2, c3 y sus fichas</text>
+  <text x="668" y="518" class="txt">• Requisitos de un EDF (frecuencia, canales)</text>
+  <text x="668" y="544" class="peq">La web no reimplementa procesado de señal</text>
+
+  <!-- Flechas -->
+  <path d="M150 438 H195 V135 H240" class="doble"/>
+  <text x="183" y="300" class="etq" transform="rotate(-90 183 300)" text-anchor="middle">HTTP local</text>
+
+  <path d="M530 135 H650" class="doble"/>
+  <text x="590" y="126" text-anchor="middle" class="etq">lee y escribe</text>
+
+  <path d="M530 445 H600 V150 H650" class="doble" style="marker-end:url(#f);marker-start:url(#f)"/>
+  <text x="588" y="330" class="etq" transform="rotate(-90 588 330)" text-anchor="middle">cola y resultados</text>
+
+  <path d="M530 400 H650" class="flecha"/>
+  <text x="590" y="391" text-anchor="middle" class="etq">analiza</text>
+
+  <path d="M385 230 V270 H690 V330" class="flecha" style="stroke-dasharray:none"/>
+  <text x="500" y="262" class="etq" text-anchor="middle">valida y aplica modelos</text>
+
+  <path d="M385 230 V330" class="punteada" style="marker-end:none"/>
+  <text x="396" y="292" class="etq">solo se «hablan»</text>
+  <text x="396" y="308" class="etq">a través de la base de datos</text>
+</svg>

@@ -4,12 +4,12 @@ from grabaciones.condicion import condicion_desde_nombre
 
 
 @pytest.mark.parametrize("nombre, esperada", [
-    ("sub-C4F123_ses-M5_task-STROOP_eeg.edf", "STROOP"),
-    ("sub-C1F081_ses-M2_task-OA_eeg.edf", "OA"),
-    ("sub-C1F081_ses-M2_task-oc_eeg.edf", "OC"),          # sin distinguir mayúsculas
-    ("sub-C1F081_ses-M2_task-PVSAT_eeg.edf", "PVSAT"),
+    ("sub-T4F123_ses-M5_task-STROOP_eeg.edf", "STROOP"),
+    ("sub-T1F081_ses-M2_task-OA_eeg.edf", "OA"),
+    ("sub-T1F081_ses-M2_task-oc_eeg.edf", "OC"),          # sin distinguir mayúsculas
+    ("sub-T1F081_ses-M2_task-PVSAT_eeg.edf", "PVSAT"),
     ("grabacion_juan.edf", ""),                           # nombre sin condición
-    ("sub-C1F081_ses-M2_task-DESCONOCIDA_eeg.edf", ""),   # condición fuera del patrón
+    ("sub-T1F081_ses-M2_task-DESCONOCIDA_eeg.edf", ""),   # condición fuera del patrón
     ("", ""),
 ])
 def test_patron_por_defecto(nombre, esperada):

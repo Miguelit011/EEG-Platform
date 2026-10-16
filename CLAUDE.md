@@ -48,14 +48,16 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 ## Comandos
 Desde la carpeta `EEG-Platform`, en PowerShell. Python 3.10 y EEG-Library clonada al lado (`..\EEG-Library`).
 
-- Instalar (una vez):
+- Instalar (una vez): doble clic en `instalar.bat` (busca Python 3.10, crea `.venv`, instala `requirements.txt`, crea `.env` y migra). A mano:
   ```
   & "$env:LOCALAPPDATA\Programs\Python\Python310\python.exe" -m venv .venv
   .venv\Scripts\python.exe -m pip install -r requirements.txt
-  copy .env.example .env      # y ajustar EEG_PLATFORM_DATOS
+  copy .env.example .env      # EEG_PLATFORM_DATOS es opcional
   .venv\Scripts\python.exe manage.py migrate
   ```
-- Arrancar: `.venv\Scripts\python.exe manage.py runserver` y abrir http://127.0.0.1:8000/
+- Usar: doble clic en `iniciar.bat` (abre la web y el procesador en dos ventanas y el navegador). Solo la web: `.venv\Scripts\python.exe manage.py runserver` y abrir http://127.0.0.1:8000/
+- Capturas de la guía y la memoria (datos anónimos): `.venv\Scripts\python.exe docs\generar_capturas.py`
+- Los `.bat` llevan saltos de línea CRLF y UTF-8 sin BOM (`.gitattributes` lo fija).
 - Tests: `.venv\Scripts\python.exe -m pytest`
 - Modelos: `.venv\Scripts\python.exe manage.py comprobar_modelos` valida los de `settings.MODELOS` (ficha, SHA-256, columnas, predicción). Cómo añadir uno: `docs/AÑADIR_UN_MODELO.md`. Los externos van en `EEG-Platform-datos\modelos\`.
 - Documentación de las columnas del CSV: `.venv\Scripts\python.exe manage.py documentar_csv` regenera `docs/COLUMNAS_CSV.md` (un test falla si está desactualizado).

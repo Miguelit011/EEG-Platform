@@ -58,7 +58,7 @@ def bytes_edf_corto(tmp_path_factory):
 def subir(client, contenidos, **parametros):
     datos = {"referencia": "car_condicional", "banda": "1-30", "notch": "on", **parametros}
     datos = {k: v for k, v in datos.items() if v is not None}
-    datos["archivos"] = [SimpleUploadedFile(f"sub-C1F{i:03d}_task-OA.edf", c)
+    datos["archivos"] = [SimpleUploadedFile(f"sub-T1F{i:03d}_task-OA.edf", c)
                          for i, c in enumerate(contenidos)]
     client.post(reverse("grabaciones:subir"), datos)
 
@@ -221,9 +221,9 @@ def test_reintentar_las_fallidas_del_lote(client, bytes_edf):
     lote = Lote.objects.get()
     client.post(reverse("grabaciones:reintentar_lote", args=[lote.pk]))
     estados = {g.nombre_original: g.estado for g in Grabacion.objects.all()}
-    assert estados["sub-C1F000_task-OA.edf"] == "en_cola"
-    assert estados["sub-C1F001_task-OA.edf"] == "procesada"
-    assert estados["sub-C1F002_task-OA.edf"] == "error"  # rechazada al subir: sin archivo
+    assert estados["sub-T1F000_task-OA.edf"] == "en_cola"
+    assert estados["sub-T1F001_task-OA.edf"] == "procesada"
+    assert estados["sub-T1F002_task-OA.edf"] == "error"  # rechazada al subir: sin archivo
 
 
 # ---------------------------------------------------------------------------
@@ -275,4 +275,4 @@ def test_lista_parcial_para_actualizar_sola(client, bytes_edf):
     html = respuesta.content.decode()
     assert respuesta.status_code == 200
     assert html.lstrip().startswith('<div id="lista-viva"') and "<html" not in html
-    assert 'data-activo="1"' in html and "sub-C1F000_task-OA.edf" in html
+    assert 'data-activo="1"' in html and "sub-T1F000_task-OA.edf" in html

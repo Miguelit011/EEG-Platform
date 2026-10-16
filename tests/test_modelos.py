@@ -469,7 +469,7 @@ def test_modelos_sobre_una_grabacion_procesada_de_verdad(client, tmp_path):
 
     datos = {"referencia": "car_condicional", "banda": "1-30", "notch": "on",
              "archivos": [SimpleUploadedFile(
-                 "sub-C1F001_task-OC.edf", escribir_edf(tmp_path / "a.edf", 30).read_bytes())]}
+                 "sub-T1F001_task-OC.edf", escribir_edf(tmp_path / "a.edf", 30).read_bytes())]}
     client.post(reverse("grabaciones:subir"), datos)
     procesador.trabajar(1, una_vez=True, fabrica_ejecutor=EjecutorSincrono())
     g = Grabacion.objects.get()

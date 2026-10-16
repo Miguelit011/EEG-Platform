@@ -28,7 +28,7 @@ def _subir(client, archivos, **parametros):
 
 
 def test_subir_un_archivo(client, bytes_edf, settings):
-    respuesta = _subir(client, [("sub-C1F081_ses-M2_task-OA_eeg.edf", bytes_edf)])
+    respuesta = _subir(client, [("sub-T1F081_ses-M2_task-OA_eeg.edf", bytes_edf)])
     assert respuesta.status_code == 200
     g = Grabacion.objects.get()
     assert g.estado == Grabacion.Estado.EN_COLA
@@ -39,15 +39,15 @@ def test_subir_un_archivo(client, bytes_edf, settings):
     # El EDF se guarda en la carpeta de datos, no en el repo.
     assert settings.MEDIA_ROOT in __import__("pathlib").Path(g.archivo.path).parents
     html = respuesta.content.decode()
-    assert "sub-C1F081_ses-M2_task-OA_eeg.edf" in html and "En cola" in html
+    assert "sub-T1F081_ses-M2_task-OA_eeg.edf" in html and "En cola" in html
 
 
 def test_subir_veinte_de_golpe(client, bytes_edf):
-    archivos = [(f"sub-C1F{i:03d}_ses-M2_task-OC_eeg.edf", bytes_edf) for i in range(20)]
+    archivos = [(f"sub-T1F{i:03d}_ses-M2_task-OC_eeg.edf", bytes_edf) for i in range(20)]
     respuesta = _subir(client, archivos)
     assert Lote.objects.count() == 1
     assert Grabacion.objects.filter(estado="en_cola").count() == 20
-    assert respuesta.content.decode().count("sub-C1F0") >= 20
+    assert respuesta.content.decode().count("sub-T1F0") >= 20
 
 
 def test_un_corrupto_solo_marca_ese_archivo(client, bytes_edf):
