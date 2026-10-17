@@ -1,6 +1,6 @@
 {% comment %}
 Mapa de la cabeza (vista desde arriba, nariz hacia arriba), reutilizable.
-Recibe `puntos`: una lista de dicts con canal, cx, cy, forma ("circulo" o "rombo"),
+Recibe `puntos`: una lista de dicts con canal, cx, cy, forma ("circulo" o "cruz": círculo con una cruz dentro),
 clase (estilo CSS), simbolo (texto bajo el nombre) y titulo; opcionalmente
 relleno y texto_color (colores de un círculo con valor). El estado no depende solo
 del color: lo distinguen también la forma, el texto y el título.
@@ -20,12 +20,14 @@ del color: lo distinguen también la forma, el texto y el título.
   {% for p in puntos %}
   <g class="punto punto-{{ p.clase }}">
     <title>{{ p.titulo }}</title>
-    {% if p.forma == "rombo" %}
-    <polygon points="{{ p.cx }},{{ p.cy|add:'-25' }} {{ p.cx|add:'25' }},{{ p.cy }} {{ p.cx }},{{ p.cy|add:'25' }} {{ p.cx|add:'-25' }},{{ p.cy }}"/>
+    {% if p.forma == "cruz" %}
+    <circle class="cruz-aro" cx="{{ p.cx }}" cy="{{ p.cy }}" r="21"/>
+    <line class="cruz-raya" x1="{{ p.cx|add:'-7' }}" y1="{{ p.cy|add:'-13' }}" x2="{{ p.cx|add:'7' }}" y2="{{ p.cy|add:'1' }}"/>
+    <line class="cruz-raya" x1="{{ p.cx|add:'-7' }}" y1="{{ p.cy|add:'1' }}" x2="{{ p.cx|add:'7' }}" y2="{{ p.cy|add:'-13' }}"/>
     {% else %}
     <circle cx="{{ p.cx }}" cy="{{ p.cy }}" r="21"{% if p.relleno %} style="fill: {{ p.relleno }}"{% endif %}/>
     {% endif %}
-    <text class="punto-canal" x="{{ p.cx }}" y="{{ p.cy|add:'-2' }}" text-anchor="middle"{% if p.texto_color %} style="fill: {{ p.texto_color }}"{% endif %}>{{ p.canal }}</text>
+    <text class="punto-canal" x="{{ p.cx }}" y="{% if p.forma == 'cruz' %}{{ p.cy|add:'15' }}{% else %}{{ p.cy|add:'-2' }}{% endif %}" text-anchor="middle"{% if p.texto_color %} style="fill: {{ p.texto_color }}"{% endif %}>{{ p.canal }}</text>
     <text class="punto-simbolo" x="{{ p.cx }}" y="{{ p.cy|add:'12' }}" text-anchor="middle"{% if p.texto_color %} style="fill: {{ p.texto_color }}"{% endif %}>{{ p.simbolo }}</text>
   </g>
   {% endfor %}

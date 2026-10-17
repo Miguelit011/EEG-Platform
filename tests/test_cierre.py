@@ -140,3 +140,14 @@ def test_ningun_codigo_de_participante_real_en_el_repositorio():
         revisados += 1
         assert not patron.search(ruta.read_text(encoding="utf-8", errors="ignore")), ruta
     assert revisados > 40
+
+
+def test_actualizar_la_plataforma_esta_cubierto():
+    """Tras actualizar hay que cerrar la versión antigua, y los binarios no se tocan en git."""
+    assert "sigue mostrando la versión anterior" in texto("iniciar.bat")
+    assert "choice /c SN" in texto("iniciar.bat") and "Stop-Process" in texto("iniciar.bat")
+    instalar = texto("instalar.bat")
+    assert r"static\models\cabeza.bin" in instalar and ":faltan_mallas" in instalar
+    assert "ábrela" in instalar
+    for regla in ("*.bin binary", "*.woff2 binary", "*.png binary"):
+        assert regla in texto(".gitattributes")

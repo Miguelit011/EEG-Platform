@@ -89,6 +89,8 @@ if errorlevel 1 goto :fallo
 
 echo.
 echo Comprobando la instalación...
+if not exist "static\models\cabeza.bin" goto :faltan_mallas
+if not exist "static\models\cerebro.bin" goto :faltan_mallas
 ".venv\Scripts\python.exe" manage.py check
 if errorlevel 1 goto :fallo
 ".venv\Scripts\python.exe" manage.py comprobar_modelos
@@ -98,10 +100,21 @@ echo.
 echo ============================================================
 echo   Instalación terminada. Para usar la plataforma, abre
 echo   iniciar.bat.
+echo.
+echo   Si ya tenías la plataforma abierta, ciérrala ^(las ventanas
+echo   "EEG-Platform - web" y "EEG-Platform - procesador"^) y ábrela
+echo   otra vez para usar la versión nueva.
 echo ============================================================
 echo.
 pause
 exit /b 0
+
+:faltan_mallas
+echo.
+echo [ERROR] Faltan los archivos de la cabeza y el cerebro 3D ^(carpeta static\models^).
+echo         Vuelve a descargar o clonar EEG-Platform completa: no se han copiado todos
+echo         los archivos.
+goto :fallo
 
 :fallo
 echo.

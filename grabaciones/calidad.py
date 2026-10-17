@@ -136,10 +136,10 @@ def resumen_calidad(resultado):
             "motivo": _coma(datos.get("motivo")),
             "ayuda": "" if bueno else _ayuda(datos.get("motivo")),
             "cx": cx, "cy": cy,
-            # Para el mapa (plantilla reutilizable): forma y símbolo, además del color.
-            "forma": "circulo" if bueno else "rombo",
+            # Para el mapa (plantilla reutilizable): forma (círculo, o círculo con una cruz si se descartó) y símbolo.
+            "forma": "circulo" if bueno else "cruz",
             "clase": "bueno" if bueno else "descartado",
-            "simbolo": "✔" if bueno else "✖",
+            "simbolo": "✔" if bueno else "",
             "titulo": (f"{canal}: bueno" if bueno else
                        f"{canal}: descartado. {_coma(datos.get('motivo'))}".strip()),
         })

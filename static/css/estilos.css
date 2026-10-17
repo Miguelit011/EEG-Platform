@@ -264,11 +264,12 @@ th { font-weight: 600; color: var(--texto-suave); font-size: 0.9rem; }
 .mapa-nariz { fill: none; stroke: var(--texto-suave); stroke-width: 3; stroke-linejoin: round; }
 .mapa-rotulo { fill: var(--texto-suave); font-size: 14px; }
 .punto-bueno circle { fill: var(--acento); stroke: var(--acento-fuerte); stroke-width: 2; }
-.punto-descartado polygon { fill: var(--superficie); stroke: var(--descartado); stroke-width: 3; stroke-dasharray: 5 3; }
+.cruz-aro { fill: var(--superficie); stroke: var(--descartado); stroke-width: 2.5; }
+.cruz-raya { stroke: var(--descartado); stroke-width: 3; stroke-linecap: round; }
 .punto-canal { font-size: 13px; font-weight: 700; }
 .punto-simbolo { font-size: 13px; font-weight: 700; }
 .punto-bueno text { fill: var(--sobre-acento); }
-.punto-descartado text { fill: var(--descartado); }
+.punto-descartado text { fill: var(--descartado); paint-order: stroke; stroke: var(--superficie); stroke-width: 3px; }
 .mapa-cabeza .punto { cursor: help; }
 
 a.boton, summary.boton, .boton-desactivado { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 40px; padding: 0.4rem 0.9rem; border: 1px solid var(--borde-fuerte); background: var(--superficie-2); color: var(--texto); border-radius: 8px; text-decoration: none; font-weight: 500; }
@@ -398,13 +399,6 @@ details h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
 .tabla-zonas td, .tabla-zonas th:not(:first-child) { text-align: right; }
 .tabla-zonas td { font-family: var(--fuente-datos); font-variant-numeric: tabular-nums; font-size: 0.92rem; }
 
-/* Conmutador cabeza/cerebro: mismos segmentos que los radios de arriba, pero con botones. */
-.segmentado button { min-height: 40px; padding: 0.35rem 0.9rem; border: 0; border-radius: 0; background: transparent; color: var(--texto-suave); font-size: 0.95rem; font-weight: 500; }
-.segmentado button + button { border-left: 1px solid var(--borde-fuerte); }
-.segmentado button:hover { background: transparent; color: var(--texto); border-color: var(--borde-fuerte); }
-.segmentado button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 650; }
-.segmentado button:focus-visible { outline-offset: -3px; }
-.modo-3d { margin-bottom: 0.6rem; }
 .etq.orient { transform: translate(-50%, -50%); background: transparent; border: 0; color: var(--texto-suave); font-family: var(--fuente); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; text-shadow: 0 0 6px var(--fondo), 0 0 2px var(--fondo); }
 
 /* ---- Lista de grabaciones ---------------------------------------------- */
@@ -465,7 +459,7 @@ select { max-width: 100%; }
 
 /* Pantallas táctiles: objetivos de al menos 44 px. */
 @media (pointer: coarse) {
-  button, a.boton, summary.boton, input[type="text"], select, .segmentado label, .segmentado button,
+  button, a.boton, summary.boton, input[type="text"], select, .segmentado label,
   .herramientas-3d button, details.condicion summary, .menu-lista a, .menu-lista button { min-height: 44px; }
   .tema-boton { width: 44px; height: 44px; }
   .migas a, .marca { display: inline-flex; align-items: center; min-height: 44px; }

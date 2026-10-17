@@ -24,16 +24,23 @@ if errorlevel 1 (
     exit /b 1
 )
 
-rem --- ¿Ya está en marcha? --------------------------------------------------------
+rem --- ¿Ya está en marcha? ----------------------------------------------------------
 powershell -NoProfile -Command "if (Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
 if not errorlevel 1 (
     echo.
-    echo Ya hay algo funcionando en el puerto 8000. Si es EEG-Platform, no hace falta
-    echo arrancarla otra vez: abro el navegador.
+    echo Ya hay algo funcionando en el puerto 8000. Si es una copia de EEG-Platform arrancada
+    echo antes de actualizar, sigue mostrando la versión anterior.
     echo.
-    start "" "http://127.0.0.1:8000/"
-    timeout /t 5 >nul
-    exit /b 0
+    choice /c SN /n /m "¿Reiniciarla con la versión actual? [S = sí, N = solo abrir el navegador] "
+    if errorlevel 2 (
+        start "" "http://127.0.0.1:8000/"
+        timeout /t 5 >nul
+        exit /b 0
+    )
+    echo.
+    echo Cerrando la copia anterior...
+    powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'manage\.py (procesar|runserver 127\.0\.0\.1:8000)' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
+    timeout /t 3 >nul
 )
 
 echo.

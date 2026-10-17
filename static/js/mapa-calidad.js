@@ -80,10 +80,10 @@ async function iniciar() {
         ctx.strokeStyle = css("--sobre-acento"); ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.lineJoin = "round";
         ctx.beginPath(); ctx.moveTo(x - 3.5, y); ctx.lineTo(x - 1, y + 3); ctx.lineTo(x + 4, y - 3); ctx.stroke();
       } else {
-        ctx.fillStyle = fondo; ctx.strokeStyle = descartado; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
-        ctx.beginPath(); ctx.moveTo(x, y - 11); ctx.lineTo(x + 11, y); ctx.lineTo(x, y + 11); ctx.lineTo(x - 11, y); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.beginPath(); ctx.moveTo(x - 4, y - 4); ctx.lineTo(x + 4, y + 4); ctx.moveTo(x + 4, y - 4); ctx.lineTo(x - 4, y + 4); ctx.stroke();
+        // Descartado: una cruz dentro de un círculo.
+        ctx.fillStyle = fondo; ctx.strokeStyle = descartado; ctx.lineWidth = 2; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.arc(x, y, 9.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x - 3.8, y - 3.8); ctx.lineTo(x + 3.8, y + 3.8); ctx.moveTo(x + 3.8, y - 3.8); ctx.lineTo(x - 3.8, y + 3.8); ctx.stroke();
       }
       const dx = x - lado / 2, dy = y - lado / 2, n = Math.hypot(dx, dy) || 1;
       const lx = x + (dx / n) * 17, ly = y + (dy / n) * 17 + 4;

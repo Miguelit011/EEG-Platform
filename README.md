@@ -11,8 +11,8 @@ Qué hace:
 
 1. Subir uno o muchos EDF a la vez, con los parámetros de procesado (referencia, paso banda y notch).
 2. Lista de grabaciones con su estado y el progreso del lote.
-3. Calidad de la señal por grabación: mapa de electrodos y motivo de cada descarte.
-4. Análisis espectral por grabación: potencia por banda, por zona y mapa de la cabeza.
+3. Calidad de la señal por grabación: mapa de electrodos sobre el cerebro y motivo de cada descarte.
+4. Análisis espectral por grabación: potencia por banda y por zona, con una cabeza y un cerebro en 3D y cuatro mapas por banda (el color entre sensores es una interpolación orientativa, no localiza fuentes).
 5. Resultados de modelos de IA enchufables (hoy, c1, c2 y c3 del estudio).
 6. Descargar los resultados en CSV (una grabación o el lote completo).
 
@@ -65,6 +65,24 @@ cerró: vuelve a abrir `iniciar.bat`.
 
 La guía paso a paso, con capturas, está en [`docs/GUIA_DE_USO.md`](docs/GUIA_DE_USO.md).
 
+Si ya hay algo funcionando en el puerto 8000 (por ejemplo, la versión anterior sin cerrar),
+`iniciar.bat` te pregunta si quieres **reiniciarla con la versión actual** (pulsa `S`) o solo abrir
+el navegador (`N`). Reiniciar es seguro: lo que estaba en cola continúa donde iba.
+
+## Actualizar a una versión nueva
+
+1. **Cierra** las dos ventanas negras de la versión anterior («EEG-Platform - web» y
+   «EEG-Platform - procesador»), o pulsa `S` cuando `iniciar.bat` te pregunte por ellas. Si no,
+   sigues viendo la versión vieja.
+2. Actualiza las carpetas (`EEG-Platform` y, si cambió, `EEG-Library`) con la versión nueva.
+   Tus datos viven aparte, en `EEG-Platform-datos`, y no se tocan.
+3. Abre **`instalar.bat`** otra vez (es seguro repetirlo: reutiliza el entorno y la configuración,
+   instala lo que falte y aplica las migraciones de la base de datos).
+4. Abre **`iniciar.bat`**.
+
+La web no guarda en el navegador copias antiguas del CSS ni del JS, así que no hace falta limpiar
+la caché ni pulsar Ctrl+F5.
+
 ## Dónde se guardan los datos
 
 Los EDF y los resultados son de **participantes menores de edad**. Se guardan **fuera del
@@ -81,6 +99,7 @@ Nunca se suben a git ni a servicios externos, y la web no usa recursos de intern
 .venv\Scripts\python.exe manage.py comprobar_modelos     # valida los modelos registrados
 .venv\Scripts\python.exe manage.py documentar_csv        # regenera docs/COLUMNAS_CSV.md
 .venv\Scripts\python.exe docs\generar_capturas.py        # regenera las capturas de docs/capturas (datos anónimos)
+.venv\Scripts\python.exe docs\generar_mallas.py --pial-izq <pial_left.gii.gz> --pial-der <pial_right.gii.gz>   # regenera static/models (ver su docstring)
 ```
 
 ## Documentación

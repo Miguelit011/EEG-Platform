@@ -159,39 +159,39 @@ def test_pantalla_con_el_fixture(client):
     assert "Amplitud excesiva (z=8,27 &gt; 3,00)" in html      # coma decimal, como el resto
     assert "ejemplo_OA.edf" in html and 'Condición <span class="dato">OA</span>' in html
     svg = mapa(html)
-    assert svg.count("<circle cx=") == 12 and svg.count("<polygon") == 2
+    assert svg.count("<circle cx=") == 12 and svg.count("cruz-raya") == 4   # 2 descartados, 2 rayas cada uno
     # Cada electrodo lleva su nombre y su símbolo.
     for canal in CANALES_EPOC:
         assert f">{canal}</text>" in svg
-    assert svg.count("✔") == 12 and svg.count("✖") == 2
+    assert svg.count("✔") == 12
 
 
 def test_el_estado_no_depende_solo_del_color(client):
     html = client.get(reverse("grabaciones:calidad",
                               args=[grabacion_con(variante(["F7"])).pk])).content.decode()
     svg = mapa(html)
-    # Forma distinta (rombo / círculo), símbolo, título con el motivo y texto en la tabla.
-    assert "<polygon" in svg and "<title>F7: descartado. Amplitud excesiva" in svg
+    # Forma distinta (círculo / círculo con una cruz), título con el motivo y texto en la tabla.
+    assert "cruz-raya" in svg and "<title>F7: descartado. Amplitud excesiva" in svg
     assert "<title>AF3: bueno</title>" in svg
     assert '<use href="#i-x"/></svg>Descartado' in html and '<use href="#i-ok"/></svg>Bueno' in html
     # Y la leyenda explica las dos formas.
     assert "Leyenda" in html
 
 
-@pytest.mark.parametrize("descartados, n_rombos", [
+@pytest.mark.parametrize("descartados, n_tachados", [
     ([], 0),
     (["O2"], 1),
     (["F7", "F3", "T7", "O1", "O2"], 5),
     (list(CANALES_EPOC[:11]), 11),
 ])
-def test_pantalla_con_0_1_o_varios_descartados(client, descartados, n_rombos):
+def test_pantalla_con_0_1_o_varios_descartados(client, descartados, n_tachados):
     g = grabacion_con(variante(descartados))
     html = client.get(reverse("grabaciones:calidad", args=[g.pk])).content.decode()
     svg = mapa(html)
-    assert svg.count("<polygon") == n_rombos
-    assert svg.count("<circle cx=") == 14 - n_rombos
-    assert f"{14 - n_rombos} de 14 electrodos buenos" in html
-    assert ("aprovechables" in html) == (n_rombos == 0)
+    assert svg.count("cruz-raya") == 2 * n_tachados
+    assert svg.count("<circle cx=") == 14 - n_tachados
+    assert f"{14 - n_tachados} de 14 electrodos buenos" in html
+    assert ("aprovechables" in html) == (n_tachados == 0)
 
 
 def test_aviso_con_pocos_electrodos_buenos(client):
@@ -211,10 +211,7 @@ def test_svg_sin_decimales_con_coma(client):
     html = client.get(reverse("grabaciones:calidad",
                               args=[grabacion_con(FIXTURE).pk])).content.decode()
     svg = mapa(html)
-    assert not re.search(r'\b(cx|cy|x|y)="[^"]*,', svg)
-    # Los rombos son cuatro pares «x,y»; un decimal con coma rompería el recuento.
-    for puntos in re.findall(r'points="([^"]*)"', svg):
-        assert re.fullmatch(r"(-?\d+,-?\d+ ?){4}", puntos), puntos
+    assert not re.search(r'\b(cx|cy|x|y|x1|y1|x2|y2)="[^"]*,', svg)
 
 
 @pytest.mark.parametrize("estado, texto", [

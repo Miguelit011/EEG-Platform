@@ -45,3 +45,18 @@ def test_plantillas_sin_recursos_externos():
 def test_ningun_texto_menciona_fatiga(client):
     assert "fatiga" not in client.get("/").content.decode().lower()
 
+
+
+def test_runserver_propio_y_estaticos_sin_cache():
+    """Al actualizar, el navegador no debe mezclar una página nueva con CSS o JS antiguos."""
+    from django.core.management import get_commands
+    from django.test import RequestFactory
+
+    from grabaciones.management.commands.runserver import Command, StaticFilesSinCache
+
+    assert get_commands()["runserver"] == "grabaciones"     # el nuestro sustituye al de Django
+    manejador = Command().get_handler(use_static_handler=True, insecure_serving=True)
+    assert isinstance(manejador, StaticFilesSinCache)
+    respuesta = manejador.get_response(RequestFactory().get("/static/css/estilos.css"))
+    assert respuesta.status_code == 200 and respuesta["Cache-Control"] == "no-cache"
+    respuesta.close()

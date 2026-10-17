@@ -61,10 +61,6 @@
           <label><input type="radio" name="escala" value="comun">Común a las 4</label>
         </div>
       </fieldset>
-      <fieldset class="control">
-        <legend>Resaltar zona</legend>
-        <div class="segmentado" id="zonas-visor"></div>
-      </fieldset>
     </div>
   </div>
   <p class="orientativo" role="note">
@@ -74,22 +70,21 @@
 
   <div class="visor-cuerpo" id="visor-cuerpo">
     <div class="visor-3d">
-      <h3>Cabeza y cerebro en 3D</h3>
-      <div class="segmentado modo-3d" id="modo-3d" role="group" aria-label="Qué se muestra en 3D"></div>
-      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se proyecta en la cabeza 3D"></div>
+      <h3>Cerebro en 3D</h3>
+      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se proyecta en el cerebro 3D"></div>
       <div class="escena-3d" id="escena-3d">
         <div class="etiquetas-3d" id="etiquetas-3d" aria-hidden="true"></div>
       </div>
-      <div class="herramientas-3d" id="herramientas-3d" role="toolbar" aria-label="Vista de la cabeza 3D"></div>
+      <div class="herramientas-3d" id="herramientas-3d" role="toolbar" aria-label="Opciones del cerebro 3D"></div>
       <div class="escala-mapa" id="escala-3d"></div>
-      <p class="ayuda-3d">Arrastra para girar y usa la rueda o el pellizco para acercar. Con el teclado: flechas para girar y + / − para acercar.</p>
+      <p class="ayuda-3d">El cerebro gira solo; arrástralo para girarlo tú, y usa la rueda o el pellizco para acercar. Con el teclado: flechas para girar y + / − para acercar.</p>
     </div>
     <div class="visor-2d">
       <h3>Las cuatro bandas sobre el cerebro, vista desde arriba</h3>
       <div class="mapas-2d" id="mapas-2d"></div>
       <ul class="sensores-leyenda" aria-label="Leyenda de sensores">
         <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="var(--acento)" stroke="var(--texto)" stroke-width="1.5"/></svg>Sensor válido, con su valor medido</li>
-        <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2 16 9 9 16 2 9Z" fill="none" stroke="var(--descartado)" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M6.5 6.5l5 5M11.5 6.5l-5 5" stroke="var(--descartado)" stroke-width="1.5"/></svg>Sensor descartado, sin dato</li>
+        <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.5" fill="none" stroke="var(--descartado)" stroke-width="1.5"/><path d="M6.4 6.4l5.2 5.2M11.6 6.4l-5.2 5.2" stroke="var(--descartado)" stroke-width="1.5" stroke-linecap="round"/></svg>Sensor descartado, sin dato</li>
       </ul>
       <p class="escala-leyenda" id="leyenda-escala"></p>
     </div>

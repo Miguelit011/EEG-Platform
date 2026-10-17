@@ -1,7 +1,7 @@
 // Visor de potencia por banda: cuatro mapas 2D (vista desde arriba) y cabeza 3D.
 import {
   bandas, electrodos, estado, cambiar, suscribir, geo, rango, valor, puntosBanda, estimar, opacidad,
-  colorDeValor, fmt, decimales, textoValor, degradadoCss, css, hexARgb, zonas, enZona,
+  colorDeValor, fmt, decimales, textoValor, degradadoCss, css, hexARgb,
 } from "./visor-comun.js";
 
 const controles = document.getElementById("controles-visor");
@@ -25,17 +25,6 @@ bandas.forEach(function (b) {
   boton.innerHTML = b.nombre + " <small>" + b.rango + "</small>";
   boton.addEventListener("click", function () { cambiar({ banda: b.clave }); });
   pestanas.appendChild(boton);
-});
-
-// ---- Resaltar una zona (frontal, frontocentral, temporal, posterior) -------------
-const selectorZona = document.getElementById("zonas-visor");
-[null].concat(zonas).forEach(function (z) {
-  const b = document.createElement("button");
-  b.type = "button";
-  b.dataset.zona = z || "";
-  b.textContent = z ? z.charAt(0).toUpperCase() + z.slice(1) : "Todas";
-  b.addEventListener("click", function () { cambiar({ zona: z }); });
-  selectorZona.appendChild(b);
 });
 
 // ---- Tooltip -------------------------------------------------------------
@@ -160,12 +149,11 @@ function dibujarMapa(mapa) {
     const pxy = proyectar(e), x = pxy[0], y = pxy[1];
     const v = valor(e, b);
     mapa.marcadores.push({ canal: e.canal, x: x, y: y, v: v });
-    ctx.globalAlpha = enZona(e) ? 1 : 0.22;
     if (v === null) {
-      ctx.strokeStyle = descartado; ctx.lineWidth = 1.6; ctx.setLineDash([3, 2]);
-      ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.lineTo(x + 7, y); ctx.lineTo(x, y + 7); ctx.lineTo(x - 7, y); ctx.closePath(); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.beginPath(); ctx.moveTo(x - 3.5, y - 3.5); ctx.lineTo(x + 3.5, y + 3.5); ctx.moveTo(x + 3.5, y - 3.5); ctx.lineTo(x - 3.5, y + 3.5); ctx.stroke();
+      // Descartado: una cruz dentro de un círculo.
+      ctx.strokeStyle = descartado; ctx.lineWidth = 1.6; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.arc(x, y, 6.5, 0, 2 * Math.PI); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x - 2.8, y - 2.8); ctx.lineTo(x + 2.8, y + 2.8); ctx.moveTo(x + 2.8, y - 2.8); ctx.lineTo(x - 2.8, y + 2.8); ctx.stroke();
     } else {
       const c = colorDeValor(v, min, max);
       ctx.fillStyle = "rgb(" + c.map(Math.round).join(",") + ")";
@@ -180,7 +168,6 @@ function dibujarMapa(mapa) {
     ctx.strokeText(e.canal, lx, ly);
     ctx.fillStyle = v === null ? descartado : texto;
     ctx.fillText(e.canal, lx, ly);
-    ctx.globalAlpha = 1;
   });
 
   // Escala y descripción accesible.
@@ -199,9 +186,6 @@ function actualizarTextos() {
   document.querySelectorAll('input[name="escala"]').forEach(function (r) { r.checked = r.value === estado.escala; });
   pestanas.querySelectorAll("button").forEach(function (bt) {
     bt.setAttribute("aria-pressed", bt.dataset.banda === estado.banda ? "true" : "false");
-  });
-  selectorZona.querySelectorAll("button").forEach(function (bt) {
-    bt.setAttribute("aria-pressed", (bt.dataset.zona || null) === estado.zona ? "true" : "false");
   });
   mapas.forEach(function (m) {
     const activa = m.banda.clave === estado.banda;
@@ -231,6 +215,4 @@ import("./visor3d.js").then(function (m) { return m.iniciar3D({ mostrarTip, ocul
   console.warn("Visor 3D no disponible:", error);
   const escena = document.getElementById("escena-3d");
   if (escena) escena.innerHTML = '<p class="sin-webgl">La vista 3D no está disponible en este navegador. Los mapas 2D muestran los mismos valores.</p>';
-  const modo = document.getElementById("modo-3d");
-  if (modo) modo.hidden = true;
 });

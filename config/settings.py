@@ -65,8 +65,10 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
+    # `grabaciones` va antes de `staticfiles` para que su `runserver` (que desactiva la caché
+    # de los archivos estáticos) sustituya al de Django.
     "grabaciones",
+    "django.contrib.staticfiles",
 ]
 
 MIDDLEWARE = [

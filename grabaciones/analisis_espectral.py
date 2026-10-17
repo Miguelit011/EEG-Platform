@@ -151,7 +151,7 @@ def resumen_analisis(resultado):
             punto = {"canal": e["canal"], "cx": cx, "cy": cy}
             valor = e["relativa"][b]
             if valor is None:
-                punto.update(forma="rombo", clase="descartado", simbolo="✖",
+                punto.update(forma="cruz", clase="descartado", simbolo="",
                              titulo=f"{e['canal']}: descartado, sin dato")
             else:
                 t = 0.5 if maximo == minimo else (valor - minimo) / (maximo - minimo)

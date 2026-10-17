@@ -15,7 +15,7 @@ const ESCALA_RGB = ESCALA.map(hexARgb);
 // superficie se muestra apagada (ver `opacidad`), no inventada.
 const SIGMA = 0.8;
 
-export const estado = { metrica: "rel", escala: "banda", banda: datos.banda_inicial, zona: null };
+export const estado = { metrica: "rel", escala: "banda", banda: datos.banda_inicial };
 const oyentes = new Set();
 export function suscribir(fn) { oyentes.add(fn); }
 export function cambiar(parcial) {
@@ -105,12 +105,3 @@ export function puntosBanda(banda) {
 }
 
 export function degradadoCss() { return "linear-gradient(to right, " + ESCALA.join(", ") + ")"; }
-
-// Zonas de la librería (frontal, frontocentral, temporal, posterior), en el orden en que salen.
-export const zonas = electrodos.reduce(function (lista, e) {
-  if (e.zona && lista.indexOf(e.zona) < 0) lista.push(e.zona);
-  return lista;
-}, []);
-
-// ¿Debe destacarse este electrodo? Sí si no hay zona elegida o es de la zona elegida.
-export function enZona(e) { return !estado.zona || e.zona === estado.zona; }

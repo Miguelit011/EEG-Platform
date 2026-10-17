@@ -95,8 +95,8 @@ Desde la lista, pulsa **Calidad** en una grabación procesada.
 - **Resumen:** cuántos de los 14 electrodos son buenos y cuáles se han descartado.
 - **Mapa de electrodos** (el cerebro de una plantilla vista desde arriba, nariz hacia arriba, con
   los electrodos sobre la cabeza). El estado **no depende solo del color**: un círculo azul con
-  una marca de verificación es un electrodo bueno; un rombo discontinuo con una cruz es un
-  electrodo descartado.
+  una marca de verificación es un electrodo bueno; un círculo con una cruz dentro
+  es un electrodo descartado.
 - **Tabla** con la zona de cada electrodo y, si se descartó, el **motivo**: mal contacto
   (calidad de contacto baja del casco), señal plana (sin señal) o amplitud excesiva (ruido o
   artefactos).
@@ -123,13 +123,14 @@ Pulsa **Análisis** en una grabación procesada.
 
   ![Mapas de potencia por banda](capturas/analisis_mapa.png)
 
-  A la izquierda, una **cabeza en 3D** que se gira con el ratón (o con las flechas del teclado)
-  y que se puede cambiar a **cerebro real**; a la derecha, **los cuatro mapas** (delta, theta,
-  alfa y beta) con el cerebro visto desde arriba. Pulsa una banda para verla en el 3D. Puedes
-  elegir potencia **relativa** (porcentaje) o **absoluta** (log<sub>10</sub> de V²), escala **por
-  banda** o **común a las cuatro**, y **resaltar una zona** (frontal, frontocentral, temporal o
-  posterior). Al pasar el ratón por un electrodo aparece su **valor medido**; los rombos son
-  electrodos descartados, sin dato. «Guardar imagen» descarga la vista 3D con el aviso incluido.
+  A la izquierda, un **cerebro en 3D** dentro de la silueta de la cabeza, que **gira solo** (se
+  detiene al arrastrarlo; también se gira con el ratón o las flechas del teclado, y «Girar solo»
+  lo reactiva); a la derecha, **los cuatro mapas** (delta, theta, alfa y beta) con el cerebro
+  visto desde arriba. Pulsa una banda para verla en el 3D. Puedes elegir potencia **relativa**
+  (porcentaje) o **absoluta** (log<sub>10</sub> de V²), y escala **por banda** o **común a las
+  cuatro**. Al pasar el ratón por un electrodo aparece su **valor medido**; los círculos
+  con una cruz son electrodos descartados, sin dato. «Guardar imagen» descarga la vista 3D con el
+  aviso incluido.
 
   **Importante:** el color entre electrodos es una **interpolación orientativa**. Con 14 sensores
   no se puede saber dónde se origina la actividad dentro del cerebro, y la cabeza y el cerebro

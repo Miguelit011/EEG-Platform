@@ -133,7 +133,7 @@ def test_electrodo_descartado_en_el_mapa():
     for m in resumen_analisis(FIXTURE)["mapas"]:
         for p in m["puntos"]:
             if p["canal"] in DESCARTADOS_FIXTURE:
-                assert (p["forma"], p["clase"], p["simbolo"]) == ("rombo", "descartado", "✖")
+                assert (p["forma"], p["clase"], p["simbolo"]) == ("cruz", "descartado", "")
                 assert "relleno" not in p and p["titulo"] == f"{p['canal']}: descartado, sin dato"
 
 
@@ -256,9 +256,8 @@ def test_el_visor_avisa_de_que_es_orientativo(client):
 def test_mapas_con_valores_y_descartados(client):
     html = client.get(url(grabacion_con(FIXTURE))).content.decode()
     for svg in mapas(html):
-        assert svg.count("<circle cx=") == 12 and svg.count("<polygon") == 2
+        assert svg.count("<circle cx=") == 12 and svg.count("cruz-raya") == 4   # 2 descartados, 2 rayas cada uno
         assert svg.count('style="fill: #') >= 12            # círculos coloreados por potencia
-        assert svg.count("✖") == 2
         for canal in DESCARTADOS_FIXTURE:
             assert f"<title>{canal}: descartado, sin dato</title>" in svg
     assert "<title>AF3: 28,7 % de la potencia (alfa)</title>" in html
@@ -275,9 +274,9 @@ def test_los_descartados_no_aparecen_en_las_tablas_con_valor(client):
     assert "Potencia absoluta por zona" in html and "Potencia absoluta por electrodo" in html
 
 
-def test_sin_descartados_no_hay_rombos(client):
+def test_sin_descartados_no_hay_cruces(client):
     html = client.get(url(grabacion_con(variante()))).content.decode()
-    assert all("<polygon" not in svg for svg in mapas(html))
+    assert all("cruz-raya" not in svg for svg in mapas(html))
     assert "14 de 14" in html
 
 
