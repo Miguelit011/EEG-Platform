@@ -145,7 +145,7 @@ def tarjetas(imagen):
         if en_tarjeta and y0 is None:
             y0 = y
         elif not en_tarjeta and y0 is not None:
-            if y - y0 > 40:
+            if y - y0 > 80:   # las franjas finas (la barra de la grabación, un aviso) no son tarjetas
                 rangos.append((y0 - 1, y))
             y0 = None
     if y0 is not None:
@@ -213,10 +213,14 @@ def main():
         imagen, t = pagina(f"/grabaciones/{ids['oa']}/analisis/", "pantalla_3_analisis.png")
         guardar_recorte(imagen, t, 1, 1, "analisis_grafica_y_tabla.png")
         guardar_recorte(imagen, t, 0, 0, "analisis_mapa.png")
-        guardar_recorte(imagen, t, 2, 2, "analisis_modelos.png")
-        imagen, t = pagina(f"/grabaciones/{ids['sin']}/analisis/", "analisis_sin_condicion.png")
-        guardar_recorte(imagen, t, 2, 2, "analisis_modelos_condicion_estimada.png")
-        os.remove(SALIDA / "analisis_sin_condicion.png")
+
+        # Pantalla 4: modelos de una grabación (con la condición conocida y con la estimada) y resumen
+        imagen, t = pagina(f"/grabaciones/{ids['oa']}/modelos/", "pantalla_4_modelos.png")
+        guardar_recorte(imagen, t, len(t) - 1, len(t) - 1, "modelos_condicion_conocida.png")
+        imagen, t = pagina(f"/grabaciones/{ids['sin']}/modelos/", "modelos_sin_condicion.png")
+        guardar_recorte(imagen, t, len(t) - 1, len(t) - 1, "modelos_condicion_estimada.png")
+        os.remove(SALIDA / "modelos_sin_condicion.png")
+        imagen, t = pagina("/modelos/resumen/", "modelos_resumen.png")
     finally:
         if servidor:
             servidor.terminate()

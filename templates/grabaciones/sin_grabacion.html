@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block titulo %}Sin grabaciones procesadas{% endblock %}
+
+{% block contenido %}
+<div class="cabecera-pagina">
+  <div>
+    <h1>{% if seccion == "calidad" %}Calidad de la señal{% elif seccion == "modelos" %}Modelos{% else %}Análisis espectral{% endif %}</h1>
+  </div>
+</div>
+
+<section class="tarjeta">
+  <p class="vacio">Todavía no hay ninguna grabación para ver. Esta pantalla muestra {% if seccion == "calidad" %}la calidad de la señal{% elif seccion == "modelos" %}lo que predicen los modelos{% else %}el análisis espectral{% endif %} de una grabación procesada.</p>
+  <p><a class="boton primario" href="{% url 'grabaciones:lista' %}">Subir grabaciones</a></p>
+</section>
+{% endblock %}

@@ -280,8 +280,9 @@ def test_botones_en_la_lista(client):
     g = grabacion_con(FIXTURE)
     Grabacion.objects.create(lote=g.lote, nombre_original="x.edf", estado="en_cola")
     html = client.get("/").content.decode()
-    assert f'href="{reverse("grabaciones:csv_lote", args=[g.lote_id])}">' \
-           f'Descargar CSV del lote (1 procesadas)</a>' in html
+    # Botón compacto del lote: lleva el recuento de procesadas en su título.
+    assert re.search(rf'href="{reverse("grabaciones:csv_lote", args=[g.lote_id])}" '
+                     r'title="Descargar el CSV del lote \(1 procesadas\)">.*?CSV del lote</a>', html, re.S)
     assert html.count(">CSV</a>") == 1                    # solo la grabación procesada
     assert f'href="{reverse("grabaciones:csv_grabacion", args=[g.pk])}">CSV</a>' in html
 

@@ -112,6 +112,10 @@ def _ficha_para_pantalla(ficha):
             "valor": _numero(test["valor"]), "ic": f"{_numero(lo)}–{_numero(hi)}",
             "azar": _numero(test["azar"], 2), "n_personas": test.get("n_personas"),
             "n_grabaciones": test.get("n_grabaciones"), "fuente": test.get("fuente", ""),
+            # Posiciones en la escala de 0 a 1 como porcentajes enteros: en un atributo style
+            # un decimal saldría con coma. Solo sirven para dibujar la escala.
+            "pos_valor": round(test["valor"] * 100), "pos_azar": round(test["azar"] * 100),
+            "pos_ic_desde": round(lo * 100), "pos_ic_ancho": max(1, round(hi * 100) - round(lo * 100)),
         }
     entrenamiento = ficha.get("entrenamiento") or {}
     return {
@@ -249,3 +253,62 @@ def aplicar(resultado, condicion):
                 mensajes.append(f"Condición estimada por «{tarjeta['titulo']}»: "
                                 f"{prediccion['clase']}.")
     return {"tarjetas": tarjetas + errores, "mensajes": mensajes}
+
+
+# ---------------------------------------------------------------------------
+# Pantalla «Modelos»: los modelos y sus resultados, sin elegir una grabación
+# ---------------------------------------------------------------------------
+
+LIMITE_FILAS = 100   # grabaciones más recientes que se muestran en la tabla de predicciones
+
+
+def resumen_modelos():
+    """
+    Un elemento por modelo registrado, con su ficha lista para mostrar. Un modelo que no se
+    puede cargar sale con su error y no tumba la pantalla.
+    """
+    salida = []
+    for nombre in settings.MODELOS:
+        try:
+            modelo = cargar(nombre)
+        except ErrorDeModelo as error:
+            salida.append({"nombre": nombre, "id": nombre, "titulo": nombre, "estado": "error",
+                           "motivo": f"No se pudo cargar el modelo: {error}",
+                           "que_predice": "", "ficha": None})
+            continue
+        ficha = modelo.ficha
+        salida.append({"nombre": nombre, "id": ficha["id"], "titulo": ficha.get("titulo", ficha["id"]),
+                       "estado": "ok", "motivo": "", "que_predice": ficha["que_predice"],
+                       "ficha": _ficha_para_pantalla(ficha)})
+    return salida
+
+
+def _celda(tarjeta):
+    """Lo que se muestra de un modelo en la fila de una grabación."""
+    if tarjeta is None:
+        return {"estado": "no_aplica"}
+    if tarjeta["estado"] != "ok":
+        return {"estado": tarjeta["estado"], "motivo": tarjeta["motivo"]}
+    ganadora = next(p for p in tarjeta["probabilidades"] if p["ganadora"])
+    comparacion = tarjeta["comparacion"]
+    return {"estado": "ok", "clase": tarjeta["clase"], "probabilidad": ganadora["texto"],
+            "origen": tarjeta["origen"],
+            "coincide": None if comparacion is None else comparacion["coincide"],
+            "alta_confianza": bool(comparacion and comparacion["alta_confianza"])}
+
+
+def tabla_predicciones(grabaciones, columnas):
+    """
+    Predicción de cada modelo para cada grabación procesada (las mismas que en su pantalla de
+    análisis: se aplican `aplicar` sobre las características guardadas, sin reprocesar).
+    `columnas` son los modelos que se pudieron cargar (`resumen_modelos`).
+    """
+    ids = [c["id"] for c in columnas]
+    filas = []
+    for grabacion in grabaciones:
+        if not (grabacion.resultado or {}).get("caracteristicas"):
+            continue
+        por_id = {t["id"]: t for t in aplicar(grabacion.resultado, grabacion.condicion)["tarjetas"]}
+        filas.append({"grabacion": grabacion, "celdas": [_celda(por_id.get(i)) for i in ids]})
+    return filas
+

@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from grabaciones import modelos
+from grabaciones import contexto, modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
 from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
@@ -47,21 +47,50 @@ def calidad(request, pk):
     """Pantalla 2: calidad de la señal de una grabación, a partir de su JSON guardado."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
     resumen = resumen_calidad(grabacion.resultado) if grabacion.estado == "procesada" else None
-    return render(request, "grabaciones/calidad.html", {
+    return contexto.recordar(render(request, "grabaciones/calidad.html", {
         "pantalla": "calidad", "grabacion": grabacion, "resumen": resumen,
-    })
+    }), grabacion)
 
 
 def analisis(request, pk):
     """Pantalla 3: análisis espectral de una grabación, a partir de su JSON guardado."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
     resumen = resumen_analisis(grabacion.resultado) if grabacion.estado == "procesada" else None
-    aplicados = (modelos.aplicar(grabacion.resultado, grabacion.condicion)
-                 if resumen and grabacion.resultado.get("caracteristicas") else None)
-    return render(request, "grabaciones/analisis.html", {
+    return contexto.recordar(render(request, "grabaciones/analisis.html", {
         "pantalla": "analisis", "grabacion": grabacion, "resumen": resumen,
+    }), grabacion)
+
+
+def modelos_grabacion(request, pk):
+    """Pantalla 4: lo que predice cada modelo para una grabación, con su resultado en el test."""
+    grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
+    procesada = grabacion.estado == "procesada"
+    aplicados = (modelos.aplicar(grabacion.resultado, grabacion.condicion)
+                 if procesada and (grabacion.resultado or {}).get("caracteristicas") else None)
+    return contexto.recordar(render(request, "grabaciones/modelos_grabacion.html", {
+        "pantalla": "modelos", "grabacion": grabacion, "procesada": procesada,
         "modelos": aplicados, "aviso_fijo": modelos.AVISO_FIJO,
+    }), grabacion)
+
+
+def modelos_resumen(request):
+    """Resumen de los modelos: qué predice cada uno para todas las grabaciones procesadas."""
+    columnas = [m for m in modelos.resumen_modelos() if m["estado"] == "ok"]
+    procesadas = Grabacion.objects.filter(estado=Grabacion.Estado.PROCESADA)
+    recientes = procesadas.select_related("lote").order_by("-pk")[:modelos.LIMITE_FILAS]
+    return render(request, "grabaciones/modelos_resumen.html", {
+        "pantalla": "modelos", "aviso_fijo": modelos.AVISO_FIJO, "columnas": columnas,
+        "filas": modelos.tabla_predicciones(recientes, columnas) if columnas else [],
+        "n_procesadas": procesadas.count(), "limite": modelos.LIMITE_FILAS,
     })
+
+
+def atajo(request, seccion):
+    """`/calidad/`, `/analisis/` y `/modelos/`: llevan a esa pantalla de la grabación activa."""
+    pk = contexto.activa(request, contexto.procesadas())
+    if pk is None:
+        return render(request, "grabaciones/sin_grabacion.html", {"pantalla": seccion, "seccion": seccion})
+    return redirect(contexto.url_de(seccion, pk))
 
 
 def _descarga(grabaciones, nombre):

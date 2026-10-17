@@ -78,7 +78,7 @@ Decisiones de arquitectura que conviene explicar:
 | UC9 Añadir un modelo | Autor de modelos | Añade un modelo con su ficha, su archivo y una línea de configuración | (configuración) |
 | UC10 Procesar en segundo plano | Procesador (sistema) | Procesa la cola sin bloquear la web, en paralelo y reanudable | — |
 
-## 4. Las tres pantallas
+## 4. Las pantallas
 
 ### Pantalla 1. Grabaciones
 
@@ -102,6 +102,24 @@ Gráfica de barras, tabla zona × banda, mapa de la cabeza por banda y bloque de
 ficha y su advertencia. Las capturas se han generado con **datos anónimos de ejemplo**, no con
 grabaciones reales.
 
+### Pantalla 4. Modelos (por grabación)
+
+![Pantalla Modelos](capturas/pantalla_4_modelos.png)
+
+Lo que predice cada modelo para la grabación activa (clase, probabilidades y comparación con la
+condición del archivo o «condición estimada»), con su resultado en el test independiente
+(resultado, intervalo de confianza del 95 % y nivel de azar sobre una escala de 0 a 1), sus
+clases, condiciones, parámetros válidos y limitaciones. Honestidad por diseño: el azar y el
+intervalo se ven siempre junto al resultado, y el aviso de que los modelos no miden fatiga
+encabeza el bloque. Un resumen aparte tabula las predicciones de todas las grabaciones.
+
+### Navegación
+
+Calidad, Análisis y Modelos son vistas de una grabación. Para que la barra de navegación baste,
+las tres pestañas llevan a la **grabación activa** (la que se está viendo, la última abierta o la
+última procesada) y una barra con un selector y flechas de anterior y siguiente cambia de grabación
+sin salir de la pestaña.
+
 ## 5. Pruebas
 
 | Grupo | Qué comprueba | Tests |
@@ -111,12 +129,13 @@ grabaciones reales.
 | Recursos del equipo | Cuántos procesos usar según hilos y memoria | 13 |
 | Pantalla de calidad | Datos y mapa (0, 1 o varios descartados), avisos como en la librería | 35 |
 | Pantalla de análisis | Valores de la librería, escalas y contraste del mapa, avisos, gráfica, visor (datos, aviso de orientativo, sin CDN) y respaldo sin JavaScript | 32 |
+| Modelos y navegación | Grabación activa (cookie, valor por defecto, atajos), selector con buscador, anterior y siguiente, pestaña Modelos con resultado, intervalo y azar de la ficha, resumen, parámetros distintos, modelo roto, límite de filas | 23 |
 | Geometría del visor | Posición de los electrodos sobre la cabeza y el cerebro reales, coherente con el montaje de la librería; mallas y licencias | 4 |
 | Modelos enchufables | Qué modelos se muestran (condición conocida o estimada), parámetros distintos, cifras iguales a `resultados.json`, modelo de prueba que se añade con una línea, modelo roto | 34 |
 | Exportación a CSV | Columnas estables y documentadas, coincidencia valor a valor con el JSON, formato de Excel, protección contra fórmulas | 27 |
 | Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 15 |
 | Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 11 |
-| **Total EEG-Platform** | | **221** |
+| **Total EEG-Platform** | | **246** |
 
 EEG-Library, la librería que usa, tiene **557 tests** automáticos (más 5 que necesitan el
 dataset real) y mantiene la paridad exacta de las 70 características con la matriz del estudio.

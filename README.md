@@ -13,7 +13,9 @@ Qué hace:
 2. Lista de grabaciones con su estado y el progreso del lote.
 3. Calidad de la señal por grabación: mapa de electrodos sobre el cerebro y motivo de cada descarte.
 4. Análisis espectral por grabación: potencia por banda y por zona, con una cabeza y un cerebro en 3D y cuatro mapas por banda (el color entre sensores es una interpolación orientativa, no localiza fuentes).
-5. Resultados de modelos de IA enchufables (hoy, c1, c2 y c3 del estudio).
+5. Una pestaña **Modelos** con lo que predicen los modelos de IA enchufables (hoy, c1, c2 y c3 del estudio) para cada grabación, junto a su resultado en el test independiente, con el intervalo y el nivel de azar, y un resumen de todas las grabaciones.
+
+Calidad, Análisis y Modelos son vistas de una misma grabación: la barra de navegación recuerda la última que abriste y un selector con flechas permite cambiar de grabación sin salir de la pestaña.
 6. Descargar los resultados en CSV (una grabación o el lote completo).
 
 > **No detecta ni mide fatiga.** Los modelos clasifican la condición de la grabación (por

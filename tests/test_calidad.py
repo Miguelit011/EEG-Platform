@@ -257,7 +257,8 @@ def test_la_lista_enlaza_a_calidad_y_avisa(client):
         Grabacion.objects.create(lote=lote, nombre_original=nombre, estado=estado,
                                  n_canales_buenos=n)
     html = client.get("/").content.decode()
-    assert html.count(">Calidad</a>") == 3          # solo las procesadas
+    tabla = html[html.index("<table"):html.index("</table>")]
+    assert tabla.count(">Calidad</a>") == 3         # solo las procesadas, en el menú de cada fila
     assert "7 electrodos buenos (se recomiendan al menos 8)." in html
     assert "Solo 5 electrodos buenos: resultados no fiables" in html
     assert html.count("electrodos buenos") == 2     # la de 12 no avisa

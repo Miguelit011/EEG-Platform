@@ -23,9 +23,12 @@ def test_grabaciones_vacia(client):
 def test_navegacion_a_las_tres_pantallas(client):
     html = client.get("/").content.decode()
     assert 'aria-current="page">Grabaciones' in html
-    # Calidad y Análisis son de una grabación: sin elegir una, desactivadas.
-    assert re.search(r'class="desactivado"[^>]*>Calidad<', html)
-    assert re.search(r'class="desactivado"[^>]*>Análisis<', html)
+    # Calidad, Análisis y Modelos son de una grabación, pero la barra siempre funciona: sin
+    # ninguna procesada llevan a una pantalla que lo explica.
+    for ruta, texto in (("/calidad/", "Calidad"), ("/analisis/", "Análisis"), ("/modelos/", "Modelos")):
+        assert re.search(rf'<a href="{ruta}"\s*>{texto}</a>', html), texto
+        assert "Todavía no hay ninguna grabación para ver" in client.get(ruta).content.decode()
+    assert "desactivado" not in html.split("<main")[0]
 
 
 def test_css_servido_desde_static(client):

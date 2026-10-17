@@ -1,33 +1,77 @@
-<section class="tarjeta" id="modelos" aria-labelledby="titulo-modelos">
-  <h2 id="titulo-modelos">Modelos</h2>
-  <p class="aviso aviso-alerta aviso-modelos" role="note"><strong>Importante.</strong> {{ aviso_fijo }}</p>
+<section class="bloque-modelos" id="modelos" aria-labelledby="titulo-modelos">
+  <h2 id="titulo-modelos" class="solo-lectores">Lo que predice cada modelo para esta grabación</h2>
 
-  {% for mensaje in modelos.mensajes %}<p class="nota">{{ mensaje }}</p>{% endfor %}
+  <p class="aviso aviso-alerta aviso-modelos" role="note"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg><span><strong>Importante.</strong> {{ aviso_fijo }}</span></p>
+
+  <div class="guia-modelos">
+    <p><strong>Cada modelo se lee en dos partes.</strong>
+      A la izquierda, <em>lo que predice para esta grabación</em> y con qué seguridad.
+      A la derecha, <em>lo fiable que es ese modelo en general</em>, medido con personas que no usó para aprender:
+      lo que importa es cuánto se separa el punto de la raya del azar.</p>
+    <ul class="leyenda-escala" aria-label="Cómo leer las escalas de fiabilidad">
+      <li><span class="muestra muestra-punto"></span>Resultado del modelo</li>
+      <li><span class="muestra muestra-tramo"></span>Intervalo de confianza del 95 %</li>
+      <li><span class="muestra muestra-azar"></span>Nivel de azar</li>
+    </ul>
+  </div>
+
+  {% for mensaje in modelos.mensajes %}<p class="nota mensaje-modelos">{{ mensaje }}</p>{% endfor %}
 
   {% for t in modelos.tarjetas %}
-  <article class="modelo modelo-{{ t.estado }}" aria-labelledby="modelo-{{ forloop.counter }}">
-    <h3 id="modelo-{{ forloop.counter }}">{{ t.titulo }}
+  <article class="tarjeta modelo-ficha modelo-{{ t.estado }}" aria-labelledby="modelo-{{ forloop.counter }}">
+    <header class="modelo-cab">
+      <h3 id="modelo-{{ forloop.counter }}">{{ t.titulo }}</h3>
       {% if t.origen == "estimada" %}<span class="insignia">condición estimada</span>
       {% elif t.origen == "estimadora" %}<span class="insignia">estima la condición</span>{% endif %}
-    </h3>
-    {% if t.que_predice %}<p class="nota">{{ t.que_predice }}</p>{% endif %}
+    </header>
+    {% if t.que_predice %}<p class="nota que-predice">{{ t.que_predice }}</p>{% endif %}
 
     {% if t.estado == "ok" %}
-      <p class="resultado-modelo">Predice: <strong>{{ t.clase }}</strong></p>
-      <ul class="probabilidades" aria-label="Probabilidad de cada clase">
-        {% for p in t.probabilidades %}
-        <li{% if p.ganadora %} class="ganadora"{% endif %}>
-          <span class="etiqueta">{{ p.nombre }}</span>
-          <span class="barra" aria-hidden="true"><span style="width: {{ p.ancho }}%"></span></span>
-          <span class="valor">{{ p.texto }}</span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% if t.comparacion %}
-        <p class="aviso {% if t.comparacion.alta_confianza %}aviso-alerta{% else %}aviso-info{% endif %}" role="status">
-          <svg class="ico" aria-hidden="true"><use href="#{% if t.comparacion.coincide %}i-ok{% else %}i-aviso{% endif %}"/></svg> {{ t.comparacion.texto }}
+    <div class="modelo-cuerpo">
+      <div class="parte parte-grabacion">
+        <h4>En esta grabación</h4>
+        <p class="prediccion">Predice: <strong>{{ t.clase }}</strong></p>
+        <ul class="probabilidades" aria-label="Probabilidad de cada clase">
+          {% for p in t.probabilidades %}
+          <li{% if p.ganadora %} class="ganadora"{% endif %}>
+            <span class="etiqueta">{{ p.nombre }}</span>
+            <span class="barra" aria-hidden="true"><span style="width: {{ p.ancho }}%"></span></span>
+            <span class="valor">{{ p.texto }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% if t.comparacion %}
+        <p class="comparacion {% if t.comparacion.coincide %}comparacion-ok{% elif t.comparacion.alta_confianza %}comparacion-alerta{% else %}comparacion-info{% endif %}" role="status">
+          <svg class="ico" aria-hidden="true"><use href="#{% if t.comparacion.coincide %}i-ok{% else %}i-aviso{% endif %}"/></svg>
+          <span>{{ t.comparacion.texto }}</span>
         </p>
+        {% endif %}
+      </div>
+
+      {% if t.ficha.test %}
+      {% with test=t.ficha.test %}
+      <div class="parte parte-fiabilidad">
+        <h4>Fiabilidad del modelo</h4>
+        <p class="cifra"><span class="dato">{{ test.valor }}</span> <span class="nota">{{ test.metrica }}</span></p>
+        <div class="acierto" role="img"
+             aria-label="{{ test.metrica|capfirst }} {{ test.valor }}, con un intervalo de confianza del 95 % de {{ test.ic }}. Nivel de azar: {{ test.azar }}. Escala de 0 a 1.">
+          <div class="acierto-pista">
+            <span class="acierto-ic" style="left: {{ test.pos_ic_desde }}%; width: {{ test.pos_ic_ancho }}%"></span>
+            <span class="acierto-azar" style="left: {{ test.pos_azar }}%"></span>
+            <span class="acierto-punto" style="left: {{ test.pos_valor }}%"></span>
+            <span class="acierto-etiqueta" style="left: {{ test.pos_azar }}%">azar {{ test.azar }}</span>
+          </div>
+          <div class="acierto-ejes" aria-hidden="true"><span>0</span><span>1</span></div>
+        </div>
+        <dl class="mini-datos">
+          <div><dt>Intervalo 95 %</dt><dd class="dato">{{ test.ic }}</dd></div>
+          <div><dt>Azar</dt><dd class="dato">{{ test.azar }}</dd></div>
+          <div><dt>Test</dt><dd>{{ test.n_personas }} personas · {{ test.n_grabaciones }} grabaciones</dd></div>
+        </dl>
+      </div>
+      {% endwith %}
       {% endif %}
+    </div>
     {% else %}
       <p class="aviso {% if t.estado == 'error' %}aviso-alerta{% else %}aviso-info{% endif %}" role="status">
         {{ t.motivo }}
@@ -36,8 +80,8 @@
     {% endif %}
 
     {% if t.ficha %}
-    <details>
-      <summary>Ficha del modelo y resultado en el test</summary>
+    <details class="ficha-modelo">
+      <summary>Ficha del modelo y limitaciones</summary>
       {% if t.ficha.test %}
       <p class="resultado-test">
         En un test independiente ({{ t.ficha.test.n_personas }} personas, {{ t.ficha.test.n_grabaciones }} grabaciones):
@@ -48,13 +92,13 @@
       {% endif %}
       <dl class="datos">
         <dt>Clases</dt><dd>{{ t.ficha.clases }}</dd>
-        <dt>Condiciones a las que se aplica</dt><dd>{{ t.ficha.condiciones }}</dd>
+        <dt>Se aplica a</dt><dd>{{ t.ficha.condiciones }}</dd>
         <dt>Procesado válido</dt><dd>{{ t.ficha.parametros_validos }}</dd>
         {% if t.ficha.entrenamiento.fecha %}<dt>Entrenado</dt><dd>{{ t.ficha.entrenamiento.fecha }}{% if t.ficha.entrenamiento.variante %} · {{ t.ficha.entrenamiento.variante }}{% endif %}</dd>{% endif %}
         {% if t.ficha.test.fuente %}<dt>Fuente de las cifras</dt><dd>{{ t.ficha.test.fuente }}</dd>{% endif %}
       </dl>
       {% if t.ficha.avisos %}
-      <p><strong>Limitaciones</strong></p>
+      <p class="limitaciones"><strong>Limitaciones</strong></p>
       <ul>{% for aviso in t.ficha.avisos %}<li>{{ aviso }}</li>{% endfor %}</ul>
       {% endif %}
     </details>

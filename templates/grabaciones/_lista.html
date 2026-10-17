@@ -17,94 +17,98 @@
     </datalist>
     {% for lote in lotes %}
       {% if lote.grabaciones.all %}
-      {% with p=lote.progreso %}
-      <h3 class="lote">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}
-        <span class="nota">{{ lote.resumen_parametros }}</span></h3>
-      <div class="progreso-lote">
-        <progress max="{{ p.total }}" value="{{ p.procesadas|add:p.con_error }}"
-                  aria-label="Progreso del lote {{ lote.pk }}"></progress>
-        <span class="dato">{{ p.procesadas }} de {{ p.total }} procesadas
-          {% if p.con_error %}· {{ p.con_error }} con error{% endif %}
-          {% if p.pendientes %}· {{ p.pendientes }} pendientes{% endif %}</span>
-        {% if p.procesadas %}
-          <a class="boton" href="{% url 'grabaciones:csv_lote' lote.pk %}">Descargar CSV del lote ({{ p.procesadas }} procesadas)</a>
-        {% else %}
-          <span class="boton boton-desactivado" title="Aún no hay grabaciones procesadas">Descargar CSV del lote</span>
-        {% endif %}
-        {% if lote.hay_fallidas_reintentables %}
-          <form method="post" action="{% url 'grabaciones:reintentar_lote' lote.pk %}" class="en-linea">
-            {% csrf_token %}<button type="submit" class="secundario">Reintentar las fallidas</button>
-          </form>
-        {% endif %}
-      </div>
-      {% endwith %}
-      <div class="tabla-ancha">
-      <table class="tabla-lista">
-        <thead>
-          <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Estado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-        {% for g in lote.grabaciones.all %}
-          <tr>
-            <td data-etiqueta="Archivo" class="archivo"><div class="celda"><span class="dato">{{ g.nombre_original }}</span></div></td>
-            <td data-etiqueta="Condición"><div class="celda">
-              <details class="condicion">
-                <summary aria-label="Cambiar la condición de {{ g.nombre_original }}">
-                  <span class="chip{% if not g.condicion %} chip-vacio{% endif %}">{% if g.condicion %}{{ g.condicion }}{% else %}sin condición{% endif %}</span>
-                  <svg class="ico" aria-hidden="true"><use href="#i-lapiz"/></svg>
-                </summary>
-                <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
-                  {% csrf_token %}
-                  <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
-                         maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
-                         placeholder="sin condición">
-                  <button type="submit" class="secundario">Guardar</button>
-                </form>
-              </details>
-              {% if g.condicion %}<span class="nota origen">{{ g.get_origen_condicion_display }}</span>{% endif %}
-            </div></td>
-            <td data-etiqueta="Duración"><div class="celda">
-              <span class="dato">{{ g.duracion_texto }}</span>
-              {% if g.remuestreada %}<br><span class="nota">{{ g.frecuencia_texto }}</span>{% endif %}
-            </div></td>
-            <td data-etiqueta="Estado"><div class="celda">
-              <span class="estado estado-{{ g.estado }}"><svg class="ico{% if g.estado == 'procesando' %} gira{% endif %}" aria-hidden="true"><use href="#{% if g.estado == 'procesada' %}i-ok{% elif g.estado == 'error' %}i-x{% elif g.estado == 'procesando' %}i-proc{% else %}i-cola{% endif %}"/></svg>{{ g.get_estado_display }}</span>
-              {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
-              {% with aviso=g.aviso_canales %}
-                {% if aviso.1 %}<br><span class="aviso-canales aviso-canales-{{ aviso.0 }}"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{{ aviso.1 }}</span>{% endif %}
-              {% endwith %}
-              {% if g.reintentable %}
-                <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
-                  {% csrf_token %}
-                  <button type="submit" class="secundario">Reintentar</button>
-                </form>
-              {% endif %}
-            </div></td>
-            <td data-etiqueta="Acciones" class="acciones-fila"><div class="celda">
-              {% if g.estado == "procesada" %}
-                <a class="boton primario" href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
-                <details class="menu">
-                  <summary class="boton" aria-label="Más acciones de {{ g.nombre_original }}"><svg class="ico" aria-hidden="true"><use href="#i-mas"/></svg></summary>
-                  <div class="menu-lista">
-                    <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
-                    <a href="{% url 'grabaciones:csv_grabacion' g.pk %}">CSV</a>
-                    {% if g.reprocesable %}
-                    <form method="post" action="{% url 'grabaciones:encolar' g.pk %}">
-                      {% csrf_token %}
-                      <button type="submit" class="secundario">Reprocesar</button>
-                    </form>
-                    {% endif %}
-                  </div>
+      <section class="lote-bloque" aria-label="Lote {{ lote.pk }}">
+        {% with p=lote.progreso %}
+        <div class="lote-cab">
+          <h3 class="lote">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}
+            <span class="nota">{{ lote.resumen_parametros }}</span></h3>
+          <div class="lote-estado">
+            <progress max="{{ p.total }}" value="{{ p.procesadas|add:p.con_error }}"
+                      aria-label="Progreso del lote {{ lote.pk }}"></progress>
+            <span class="dato">{{ p.procesadas }} de {{ p.total }} procesadas
+              {% if p.con_error %}· {{ p.con_error }} con error{% endif %}
+              {% if p.pendientes %}· {{ p.pendientes }} pendientes{% endif %}</span>
+            {% if lote.hay_fallidas_reintentables %}
+              <form method="post" action="{% url 'grabaciones:reintentar_lote' lote.pk %}" class="en-linea">
+                {% csrf_token %}<button type="submit" class="secundario">Reintentar las fallidas</button>
+              </form>
+            {% endif %}
+            {% if p.procesadas %}
+              <a class="boton boton-csv" href="{% url 'grabaciones:csv_lote' lote.pk %}" title="Descargar el CSV del lote ({{ p.procesadas }} procesadas)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>CSV del lote</a>
+            {% else %}
+              <span class="boton boton-csv boton-desactivado" title="Aún no hay grabaciones procesadas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>CSV del lote</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endwith %}
+        <div class="tabla-ancha">
+        <table class="tabla-lista">
+          <thead>
+            <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Estado</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+          {% for g in lote.grabaciones.all %}
+            <tr>
+              <td data-etiqueta="Archivo" class="archivo"><div class="celda"><span class="dato">{{ g.nombre_original }}</span></div></td>
+              <td data-etiqueta="Condición"><div class="celda">
+                <details class="condicion">
+                  <summary aria-label="Cambiar la condición de {{ g.nombre_original }}">
+                    <span class="chip{% if not g.condicion %} chip-vacio{% endif %}">{% if g.condicion %}{{ g.condicion }}{% else %}sin condición{% endif %}</span>
+                    <svg class="ico" aria-hidden="true"><use href="#i-lapiz"/></svg>
+                  </summary>
+                  <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
+                    {% csrf_token %}
+                    <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
+                           maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
+                           placeholder="sin condición">
+                    <button type="submit" class="secundario">Guardar</button>
+                  </form>
                 </details>
-              {% else %}
-                <span class="desactivado" aria-disabled="true" title="Disponible cuando la grabación se procese">—</span>
-              {% endif %}
-            </div></td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      </div>
+                {% if g.condicion %}<span class="nota origen">{{ g.get_origen_condicion_display }}</span>{% endif %}
+              </div></td>
+              <td data-etiqueta="Duración"><div class="celda">
+                <span class="dato">{{ g.duracion_texto }}</span>
+                {% if g.remuestreada %}<br><span class="nota">{{ g.frecuencia_texto }}</span>{% endif %}
+              </div></td>
+              <td data-etiqueta="Estado"><div class="celda">
+                <span class="estado estado-{{ g.estado }}"><svg class="ico{% if g.estado == 'procesando' %} gira{% endif %}" aria-hidden="true"><use href="#{% if g.estado == 'procesada' %}i-ok{% elif g.estado == 'error' %}i-x{% elif g.estado == 'procesando' %}i-proc{% else %}i-cola{% endif %}"/></svg>{{ g.get_estado_display }}</span>
+                {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
+                {% with aviso=g.aviso_canales %}
+                  {% if aviso.1 %}<br><span class="aviso-canales aviso-canales-{{ aviso.0 }}"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{{ aviso.1 }}</span>{% endif %}
+                {% endwith %}
+                {% if g.reintentable %}
+                  <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
+                    {% csrf_token %}
+                    <button type="submit" class="secundario">Reintentar</button>
+                  </form>
+                {% endif %}
+              </div></td>
+              <td data-etiqueta="Acciones" class="acciones-fila"><div class="celda">
+                {% if g.estado == "procesada" %}
+                  <a class="boton primario" href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
+                  <details class="menu">
+                    <summary class="boton" aria-label="Más acciones de {{ g.nombre_original }}"><svg class="ico" aria-hidden="true"><use href="#i-mas"/></svg></summary>
+                    <div class="menu-lista">
+                      <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
+                      <a href="{% url 'grabaciones:csv_grabacion' g.pk %}">CSV</a>
+                      {% if g.reprocesable %}
+                      <form method="post" action="{% url 'grabaciones:encolar' g.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="secundario">Reprocesar</button>
+                      </form>
+                      {% endif %}
+                    </div>
+                  </details>
+                {% else %}
+                  <span class="desactivado" aria-disabled="true" title="Disponible cuando la grabación se procese">—</span>
+                {% endif %}
+              </div></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </section>
       {% endif %}
     {% endfor %}
   {% else %}

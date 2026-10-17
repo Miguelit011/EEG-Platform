@@ -50,6 +50,22 @@ resto del lote. Se rechaza un archivo si no se puede leer como EDF, si tiene men
 frecuencia de muestreo, si le faltan alguno de los 14 electrodos del Emotiv o si dura menos de
 14 segundos. Un archivo de 128 Hz se acepta y se remuestrea a 256 Hz (la lista lo indica).
 
+## Moverse por la plataforma
+
+La barra de arriba tiene cuatro pestañas: **Grabaciones** (la lista), y **Calidad**, **Análisis** y
+**Modelos**, que son tres vistas de **una misma grabación**. Para que la barra baste para
+navegar:
+
+- Las tres pestañas están **siempre activas** y llevan a la **grabación activa**: la que estabas
+  viendo o, si no has abierto ninguna, la última procesada.
+- Dentro de una de esas pestañas, una barra bajo el menú muestra la grabación activa. Pulsa su
+  nombre para abrir un **selector** con todas las grabaciones procesadas, agrupadas por lote y con
+  su condición, y un **buscador** para encontrar una escribiendo parte del nombre o de la
+  condición (por ejemplo, «OA»). También puedes usar las **flechas** de anterior y siguiente.
+  Cambias de grabación **sin salir de la pestaña**: por ejemplo, para revisar la calidad de todo
+  un lote.
+- Si todavía no hay ninguna grabación procesada, las pestañas lo explican y te llevan a subirlas.
+
 ## 3. La lista de grabaciones
 
 ![Lista de grabaciones de un lote](capturas/lista_lotes.png)
@@ -141,9 +157,19 @@ Pulsa **Análisis** en una grabación procesada.
 
 ## 6. Modelos de IA
 
-Debajo del mapa, el bloque **Modelos** muestra qué predicen los modelos para esa grabación.
+La pestaña **Modelos** muestra lo que cada modelo ha predicho para **la grabación activa**:
 
-![Bloque de modelos con la condición conocida](capturas/analisis_modelos.png)
+![Pestaña Modelos de una grabación](capturas/modelos_condicion_conocida.png)
+
+Cada modelo es una tarjeta con **dos partes**: a la izquierda, **lo que predice para esta
+grabación** (la clase y la probabilidad de cada clase) y, a la derecha, **lo fiable que es ese
+modelo en general**, medido en un test independiente. La fiabilidad se ve sobre una escala de 0 a 1:
+el **resultado** (el punto), su **intervalo de confianza del 95 %** (el tramo coloreado) y el **nivel
+de azar** (la raya vertical); lo que importa es cuánto se separa el punto de la raya. Con el botón **Todas las grabaciones** se
+abre un **resumen** con una tabla que reúne la predicción de cada modelo para todas las grabaciones
+procesadas (las 100 más recientes), con un enlace a la pestaña Modelos de cada una:
+
+![Resumen de modelos](capturas/modelos_resumen.png)
 
 Hoy hay tres, entrenados con las grabaciones del estudio y evaluados **una sola vez** en un test
 independiente de 28 personas:
@@ -158,18 +184,19 @@ independiente de 28 personas:
 
 Cómo leer cada tarjeta:
 
-- **Predice:** la clase más probable, y debajo **la probabilidad de todas las clases**.
-- **Con la condición del archivo conocida**, se compara con ella: ✔ si coincide o ⚠ si no. Si el
-  modelo discrepa con mucha seguridad (80 % o más), el aviso lo destaca: conviene revisar la
-  etiqueta o la grabación.
+- **Predice** (parte izquierda): la clase más probable, y debajo **la probabilidad de todas las
+  clases**.
+- **Con la condición del archivo conocida**, se compara con ella: «coincide» (en verde) o «no
+  coincide». Si el modelo discrepa con mucha seguridad (80 % o más), el aviso se destaca en un
+  recuadro: conviene revisar la etiqueta o la grabación.
 - **Con la condición desconocida**, el modelo reposo/tarea (c2) decide y se muestra, según el
   caso, c1 o c3, marcado como **«condición estimada»**:
 
-  ![Modelos con la condición estimada](capturas/analisis_modelos_condicion_estimada.png)
+  ![Modelos con la condición estimada](capturas/modelos_condicion_estimada.png)
 - **«No disponible con estos parámetros»:** la grabación se procesó con otros parámetros que los
   del entrenamiento, y no se muestra ninguna predicción.
-- **Ficha del modelo** (desplegable): el resultado en el test, a qué condiciones se aplica y sus
-  limitaciones.
+- **Ficha del modelo y limitaciones** (desplegable): las clases, a qué condiciones se aplica, con
+  qué procesado es válido, cuándo se entrenó, de dónde salen las cifras y sus limitaciones.
 
 **Cómo no interpretarlos.** Estos modelos **no miden fatiga ni ningún estado del participante**.
 c3, con un acierto de 0,49 sobre un azar de 0,20, acierta la tarea a menudo pero se equivoca en
@@ -178,9 +205,9 @@ grabación o al **orden** de las tareas en el protocolo, no solo a la actividad 
 
 ## 7. Descargar los resultados en CSV
 
-- **De un lote:** botón **Descargar CSV del lote** en su cabecera (solo incluye las grabaciones
+- **De un lote:** botón **CSV del lote** (con la flecha de descarga) en su cabecera (solo incluye las grabaciones
   ya procesadas).
-- **De una grabación:** enlace **CSV** en la lista, o el botón de la pantalla de análisis.
+- **De una grabación:** opción **CSV** del menú ··· de la lista, o el botón **CSV** (con la flecha de descarga) de la pantalla de análisis.
 
 El archivo tiene **una fila por grabación** y está preparado para **Excel en español**: columnas
 separadas por `;`, decimales con coma y tildes correctas. Ábrelo con doble clic. Qué significa cada

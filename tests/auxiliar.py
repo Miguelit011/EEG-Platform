@@ -58,7 +58,7 @@ def sin_bloque_de_modelos(html):
     La página sin el bloque de modelos. La palabra «fatiga» solo puede aparecer ahí, en el
     aviso fijo que dice que los modelos no la miden; en cualquier otro sitio está prohibida.
     """
-    return re.sub(r'<section class="tarjeta" id="modelos".*?</section>', "", html, flags=re.S)
+    return re.sub(r'<section class="bloque-modelos" id="modelos".*?</section>', "", html, flags=re.S)
 
 
 def mapa(html):

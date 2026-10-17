@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block titulo %}Resumen de modelos{% endblock %}
+
+{% block contenido %}
+<div class="cabecera-pagina">
+  <div>
+    <p class="migas"><a href="{% url 'grabaciones:atajo_modelos' %}">← Modelos de una grabación</a></p>
+    <h1>Resumen de modelos</h1>
+    <p class="intro">Lo que predice cada modelo para las grabaciones procesadas, todas en una tabla. El detalle de cada una, con las probabilidades y el resultado de cada modelo en el test, está en la pestaña Modelos de esa grabación.</p>
+  </div>
+</div>
+
+<p class="aviso aviso-alerta" role="note"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg><span><strong>Importante.</strong> {{ aviso_fijo }}</span></p>
+
+<section class="tarjeta" aria-labelledby="titulo-predicciones">
+  <h2 id="titulo-predicciones">Predicciones en tus grabaciones</h2>
+  <p class="nota">Son las mismas predicciones que se ven en la pantalla de modelos de cada grabación. «Coincide» compara la predicción con la condición del archivo. Si la condición no se conoce, los modelos la estiman y se marcan como «estimada».</p>
+
+  {% if filas %}
+  <div class="tabla-ancha">
+  <table class="tabla-predicciones">
+    <thead>
+      <tr><th>Grabación</th><th>Condición</th>{% for c in columnas %}<th>{{ c.titulo }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+    {% for fila in filas %}
+      <tr>
+        <th scope="row"><a href="{% url 'grabaciones:modelos_grabacion' fila.grabacion.pk %}"><span class="dato">{{ fila.grabacion.nombre_original }}</span></a></th>
+        <td>{% if fila.grabacion.condicion %}<span class="chip">{{ fila.grabacion.condicion }}</span>{% else %}<span class="nota">sin condición</span>{% endif %}</td>
+        {% for c in fila.celdas %}
+        <td>
+          {% if c.estado == "ok" %}
+            <span class="dato">{{ c.clase }}</span> <span class="nota">{{ c.probabilidad }}</span>
+            {% if c.origen == "estimada" or c.origen == "estimadora" %}<span class="insignia">estimada</span>{% endif %}
+            {% if c.coincide is True %}<br><span class="coincide"><svg class="ico" aria-hidden="true"><use href="#i-ok"/></svg>coincide</span>
+            {% elif c.coincide is False %}<br><span class="no-coincide"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{% if c.alta_confianza %}no coincide, confianza alta{% else %}no coincide, confianza baja{% endif %}</span>{% endif %}
+          {% elif c.estado == "no_disponible" %}<span class="nota">no disponible con estos parámetros</span>
+          {% elif c.estado == "error" %}<span class="msg-error">error al aplicarlo</span>
+          {% else %}<span class="nota">—</span>{% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if n_procesadas > limite %}<p class="nota">Se muestran las {{ limite }} grabaciones procesadas más recientes de {{ n_procesadas }}. El CSV del lote incluye las predicciones de todas.</p>{% endif %}
+  {% else %}
+  <p class="vacio">Todavía no hay grabaciones procesadas. <a href="{% url 'grabaciones:lista' %}">Sube alguna</a> para ver aquí lo que predicen los modelos.</p>
+  {% endif %}
+</section>
+{% endblock %}

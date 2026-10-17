@@ -185,7 +185,7 @@ def test_con_otros_parametros_y_condicion_desconocida_no_se_estima_nada():
 
 def test_pantalla_con_otros_parametros(client):
     g = grabacion_con(variante(banda_hz=[3.0, 30.0]))
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert html.count("No disponible con estos parámetros de procesado.") == 2
     assert "Predice:" not in html and "Este modelo solo es válido con" in html
 
@@ -196,8 +196,8 @@ def test_pantalla_con_otros_parametros(client):
 
 def test_bloque_de_modelos_en_la_pantalla(client):
     g = grabacion_con(FIXTURE)
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
-    assert '<section class="tarjeta" id="modelos"' in html
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
+    assert '<section class="bloque-modelos" id="modelos"' in html
     assert modelos.AVISO_FIJO in html.replace("&quot;", '"')
     assert "Predice: <strong>OA</strong>" in html and "Predice: <strong>reposo</strong>" in html
     assert 'class="probabilidades"' in html and html.count('<span class="barra"') == 4
@@ -212,7 +212,7 @@ def test_la_palabra_fatiga_solo_aparece_en_el_bloque_de_modelos(client):
         g = grabacion_con(FIXTURE)
         g.condicion = condicion
         g.save()
-        html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+        html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
         assert "fatiga" in html.lower()                      # el aviso fijo, dentro del bloque
         assert "fatiga" not in sin_bloque_de_modelos(html).lower()
     for url in ("/", reverse("grabaciones:calidad", args=[g.pk])):
@@ -223,13 +223,13 @@ def test_insignias_de_condicion_estimada(client):
     g = grabacion_con(FIXTURE)
     g.condicion = ""
     g.save()
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert "condición estimada</span>" in html and "estima la condición</span>" in html
     assert "Condición estimada por «Reposo / tarea»: reposo." in html
     # Con la condición conocida no hay insignias.
     g.condicion = "OA"
     g.save()
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert "insignia" not in re.search(r'id="modelos".*?</section>', html, re.S).group(0)
 
 
@@ -237,13 +237,13 @@ def test_aviso_de_discrepancia_en_pantalla(client):
     g = grabacion_con(FIXTURE)
     g.condicion = "PVTB"
     g.save()
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert "No coincide con la condición del archivo (PVTB)" in html
 
 
 def test_sin_bloque_si_no_esta_procesada(client):
     g = grabacion_con(None, estado="en_cola")
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert 'id="modelos"' not in html
 
 
@@ -259,7 +259,7 @@ def test_cifras_de_la_pantalla_coinciden_con_resultados_json(client):
         g = grabacion_con(FIXTURE)
         g.condicion = condicion
         g.save()
-        html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+        html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
         for t in modelos.aplicar(FIXTURE, condicion)["tarjetas"]:
             esperado = resultados[claves[t["id"]]]
             logistica = esperado["modelos"]["logistica"]
@@ -283,10 +283,10 @@ def test_un_modelo_nuevo_aparece_en_la_pantalla_y_en_el_csv(client, settings):
 
     # Sin la línea en settings, no existe para la web.
     assert "Modelo de prueba" not in client.get(
-        reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+        reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
 
     settings.MODELOS = settings.MODELOS + ["prueba_externo.json"]          # la única línea
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert "Modelo de prueba" in html and "Aviso de prueba del modelo." in html
     assert "exactitud balanceada 0,700" in html and "0,600–0,800" in html
 
@@ -323,7 +323,7 @@ def test_el_modelo_nuevo_se_usa_sin_reprocesar(client, settings):
     crear_modelo_externo(settings.MODELOS_DIR)
     settings.MODELOS = settings.MODELOS + ["prueba_externo.json"]
     assert "Modelo de prueba" in client.get(
-        reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+        reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert Grabacion.objects.get(pk=g.pk).resultado == guardado
 
 
@@ -331,7 +331,7 @@ def test_modelo_con_sha_incorrecto_no_tumba_la_pantalla(client, settings):
     crear_modelo_externo(settings.MODELOS_DIR, sha="0" * 64)
     settings.MODELOS = settings.MODELOS + ["prueba_externo.json"]
     g = grabacion_con(FIXTURE)
-    respuesta = client.get(reverse("grabaciones:analisis", args=[g.pk]))
+    respuesta = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk]))
     html = respuesta.content.decode()
     assert respuesta.status_code == 200
     assert "No se pudo cargar el modelo" in html and "SHA-256" in html
@@ -343,7 +343,7 @@ def test_modelo_con_sha_incorrecto_no_tumba_la_pantalla(client, settings):
 def test_modelo_que_no_existe(client, settings):
     settings.MODELOS = settings.MODELOS + ["no_existe.json"]
     g = grabacion_con(FIXTURE)
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert "No se pudo cargar el modelo" in html and "no_existe.json" in html
 
 
@@ -353,7 +353,7 @@ def test_modelo_que_necesita_caracteristicas_que_no_hay(client, settings):
     t = por_id(modelos.aplicar(FIXTURE, "OA"))["prueba_externo"]
     assert t["estado"] == "error" and "otra_cosa" in t["motivo"]
     g = grabacion_con(FIXTURE)
-    assert client.get(reverse("grabaciones:analisis", args=[g.pk])).status_code == 200
+    assert client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).status_code == 200
 
 
 def test_los_modelos_se_cargan_una_vez(settings, monkeypatch):
@@ -473,7 +473,7 @@ def test_modelos_sobre_una_grabacion_procesada_de_verdad(client, tmp_path):
     client.post(reverse("grabaciones:subir"), datos)
     procesador.trabajar(1, una_vez=True, fabrica_ejecutor=EjecutorSincrono())
     g = Grabacion.objects.get()
-    html = client.get(reverse("grabaciones:analisis", args=[g.pk])).content.decode()
+    html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
     assert g.condicion == "OC" and "No se pudo" not in html
     assert html.count("Predice:") == 2                       # c1 y c2 para OC
     fila = leer_csv(client.get(reverse("grabaciones:csv_grabacion", args=[g.pk])).content).iloc[0]

@@ -6,7 +6,6 @@
 {% block contenido %}
 <div class="cabecera-pagina">
   <div>
-    <p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
     <h1>Análisis espectral</h1>
     <ul class="fichas" aria-label="Datos de la grabación">
       <li>Archivo <span class="dato">{{ grabacion.nombre_original }}</span></li>
@@ -17,9 +16,10 @@
   </div>
   <div class="acciones">
     <a class="boton" href="{% url 'grabaciones:calidad' grabacion.pk %}">Ver calidad de la señal</a>
-    {% if resumen %}<a class="boton" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}">
+    {% if resumen %}<a class="boton boton-csv" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}" title="Descargar el CSV de esta grabación" aria-label="Descargar el CSV de esta grabación">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>
-      Descargar CSV de esta grabación</a>{% endif %}
+      CSV</a>
+    <a class="boton primario" href="{% url 'grabaciones:modelos_grabacion' grabacion.pk %}">Ver modelos</a>{% endif %}
   </div>
 </div>
 
@@ -143,22 +143,23 @@
   </section>
 </div>
 
-{% if modelos %}{% include "grabaciones/_modelos.html" %}{% endif %}
-
 <section class="tarjeta" aria-labelledby="titulo-detalle">
   <h2 id="titulo-detalle">Valores por electrodo y potencia absoluta</h2>
   <details>
     <summary>Mostrar tablas</summary>
+    <p class="nota">Las tres tablas comparten columnas: la primera es el electrodo o la zona, la segunda su zona o cuántos electrodos válidos tiene, y después una columna por banda.</p>
+
     <h3>Potencia relativa por electrodo (%)</h3>
     <div class="tabla-ancha">
-    <table>
+    <table class="tabla-valores">
+      {% include "grabaciones/_colgrupo_valores.html" %}
       <thead><tr><th>Electrodo</th><th>Zona</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
       <tbody>
       {% for e in resumen.electrodos %}
         <tr class="{% if not e.valido %}fila-descartado{% endif %}">
           <th scope="row">{{ e.canal }}</th><td>{{ e.zona|default:"—"|capfirst }}</td>
           {% if e.valido %}{% for texto in e.rel_texto %}<td class="num">{{ texto }}</td>{% endfor %}
-          {% else %}<td colspan="{{ resumen.bandas|length }}"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Descartado: sin dato</td>{% endif %}
+          {% else %}<td class="sin-dato" colspan="{{ resumen.bandas|length }}"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Descartado: sin dato</td>{% endif %}
         </tr>
       {% endfor %}
       </tbody>
@@ -167,11 +168,12 @@
 
     <h3>Potencia absoluta por zona (log<sub>10</sub> de V²)</h3>
     <div class="tabla-ancha">
-    <table>
-      <thead><tr><th>Zona</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
+    <table class="tabla-valores">
+      {% include "grabaciones/_colgrupo_valores.html" %}
+      <thead><tr><th>Zona</th><th>Electrodos válidos</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
       <tbody>
       {% for z in resumen.zonas %}
-        <tr><th scope="row">{{ z.nombre }}</th>{% for texto in z.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}</tr>
+        <tr><th scope="row">{{ z.nombre }}</th><td>{{ z.n_validos }} de {{ z.n_total }}</td>{% for texto in z.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}</tr>
       {% endfor %}
       </tbody>
     </table>
@@ -179,25 +181,21 @@
 
     <h3>Potencia absoluta por electrodo (log<sub>10</sub> de V²)</h3>
     <div class="tabla-ancha">
-    <table>
-      <thead><tr><th>Electrodo</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
+    <table class="tabla-valores">
+      {% include "grabaciones/_colgrupo_valores.html" %}
+      <thead><tr><th>Electrodo</th><th>Zona</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
       <tbody>
       {% for e in resumen.electrodos %}
         <tr class="{% if not e.valido %}fila-descartado{% endif %}">
-          <th scope="row">{{ e.canal }}</th>
+          <th scope="row">{{ e.canal }}</th><td>{{ e.zona|default:"—"|capfirst }}</td>
           {% if e.valido %}{% for texto in e.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}
-          {% else %}<td colspan="{{ resumen.bandas|length }}"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Descartado: sin dato</td>{% endif %}
+          {% else %}<td class="sin-dato" colspan="{{ resumen.bandas|length }}"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Descartado: sin dato</td>{% endif %}
         </tr>
       {% endfor %}
       </tbody>
     </table>
     </div>
   </details>
-</section>
-
-<section class="cierre" aria-label="Siguiente paso">
-  <a class="boton" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}">Descargar CSV de esta grabación</a>
-  <a href="{% url 'grabaciones:lista' %}">Volver a la lista de grabaciones</a>
 </section>
 
 <script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>
