@@ -112,9 +112,9 @@ def test_referencia_original_sin_car():
 
 def test_componentes_de_ica_eliminadas():
     pipeline = dict(resumen_calidad(variante(eliminadas=[0, 3]))["pipeline"])
-    assert "2 componentes eliminadas (nº 0, 3)" in pipeline["ICA"]
-    assert "Ninguna componente eliminada" in dict(resumen_calidad(FIXTURE)["pipeline"])["ICA"]
-    assert "1 componente eliminada (nº 2)" in dict(
+    assert "2 eliminadas (nº 0, 3)" in pipeline["ICA"]
+    assert "ninguna eliminada" in dict(resumen_calidad(FIXTURE)["pipeline"])["ICA"]
+    assert "1 eliminada (nº 2)" in dict(
         resumen_calidad(variante(eliminadas=[2]))["pipeline"])["ICA"]
 
 
@@ -156,8 +156,8 @@ def test_pantalla_con_el_fixture(client):
     html = respuesta.content.decode()
     assert "12 de 14 electrodos buenos" in html
     assert "Se han descartado 2 electrodos: F7, F3." in html
-    assert "Amplitud excesiva (z=8.27 &gt; 3.00)" in html
-    assert "ejemplo_OA.edf" in html and "Condición: OA" in html
+    assert "Amplitud excesiva (z=8,27 &gt; 3,00)" in html      # coma decimal, como el resto
+    assert "ejemplo_OA.edf" in html and 'Condición <span class="dato">OA</span>' in html
     svg = mapa(html)
     assert svg.count("<circle cx=") == 12 and svg.count("<polygon") == 2
     # Cada electrodo lleva su nombre y su símbolo.
@@ -173,7 +173,7 @@ def test_el_estado_no_depende_solo_del_color(client):
     # Forma distinta (rombo / círculo), símbolo, título con el motivo y texto en la tabla.
     assert "<polygon" in svg and "<title>F7: descartado. Amplitud excesiva" in svg
     assert "<title>AF3: bueno</title>" in svg
-    assert "✖ Descartado" in html and "✔ Bueno" in html
+    assert '<use href="#i-x"/></svg>Descartado' in html and '<use href="#i-ok"/></svg>Bueno' in html
     # Y la leyenda explica las dos formas.
     assert "Leyenda" in html
 

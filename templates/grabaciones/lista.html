@@ -5,6 +5,7 @@
 
 {% block contenido %}
 <h1>Grabaciones</h1>
+<p class="intro">Sube grabaciones del casco Emotiv EPOC X (EDF). Se procesan solas y después puedes revisar su calidad, ver el análisis y descargar los resultados.</p>
 
 <section class="tarjeta" aria-labelledby="titulo-subida">
   <h2 id="titulo-subida">Subir archivos EDF</h2>
@@ -12,6 +13,7 @@
     {% csrf_token %}
     <input type="file" name="archivos" id="archivos" accept=".edf" multiple class="solo-lectores">
     <label class="zona-soltar" id="zona-soltar" for="archivos">
+      <svg class="ico-grande" aria-hidden="true"><use href="#i-subir"/></svg>
       <strong>Arrastra aquí los EDF</strong> o pulsa para elegirlos
       <span class="nota" id="resumen-archivos" aria-live="polite">Ningún archivo elegido.</span>
     </label>

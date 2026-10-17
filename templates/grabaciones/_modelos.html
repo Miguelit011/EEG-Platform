@@ -25,7 +25,7 @@
       </ul>
       {% if t.comparacion %}
         <p class="aviso {% if t.comparacion.alta_confianza %}aviso-alerta{% else %}aviso-info{% endif %}" role="status">
-          {% if t.comparacion.coincide %}✔{% else %}⚠{% endif %} {{ t.comparacion.texto }}
+          <svg class="ico" aria-hidden="true"><use href="#{% if t.comparacion.coincide %}i-ok{% else %}i-aviso{% endif %}"/></svg> {{ t.comparacion.texto }}
         </p>
       {% endif %}
     {% else %}

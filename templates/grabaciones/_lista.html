@@ -1,10 +1,10 @@
 <div id="lista-viva" data-url="{% url 'grabaciones:lista_parcial' %}" data-activo="{% if hay_cola %}1{% else %}0{% endif %}">
   {% if hay_cola %}
     {% if procesador %}
-      <p class="aviso aviso-info" role="status">Procesando en segundo plano con {{ procesador.procesos }} proceso(s). Esta lista se actualiza sola.</p>
+      <p class="aviso aviso-info" role="status"><svg class="ico" aria-hidden="true"><use href="#i-proc"/></svg>Procesando en segundo plano con {{ procesador.procesos }} proceso(s). Esta lista se actualiza sola.</p>
     {% else %}
       <p class="aviso aviso-alerta" role="alert">
-        Hay grabaciones en cola pero el procesador no está en marcha, así que no avanzan.
+        <svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>Hay grabaciones en cola pero el procesador no está en marcha, así que no avanzan.
         Abre una terminal en la carpeta <code>EEG-Platform</code> y ejecuta:
         <code>.venv\Scripts\python.exe manage.py procesar</code>
       </p>
@@ -23,7 +23,7 @@
       <div class="progreso-lote">
         <progress max="{{ p.total }}" value="{{ p.procesadas|add:p.con_error }}"
                   aria-label="Progreso del lote {{ lote.pk }}"></progress>
-        <span>{{ p.procesadas }} de {{ p.total }} procesadas
+        <span class="dato">{{ p.procesadas }} de {{ p.total }} procesadas
           {% if p.con_error %}· {{ p.con_error }} con error{% endif %}
           {% if p.pendientes %}· {{ p.pendientes }} pendientes{% endif %}</span>
         {% if p.procesadas %}
@@ -39,48 +39,67 @@
       </div>
       {% endwith %}
       <div class="tabla-ancha">
-      <table>
+      <table class="tabla-lista">
         <thead>
-          <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Frecuencia de muestreo</th><th>Estado</th><th>Detalle</th></tr>
+          <tr><th>Archivo</th><th>Condición</th><th>Duración</th><th>Estado</th><th>Acciones</th></tr>
         </thead>
         <tbody>
         {% for g in lote.grabaciones.all %}
           <tr>
-            <td>{{ g.nombre_original }}</td>
-            <td>
-              <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
-                {% csrf_token %}
-                <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
-                       maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
-                       placeholder="sin condición">
-                <button type="submit" class="secundario">Guardar</button>
-              </form>
-              {% if g.condicion %}<span class="nota">{{ g.get_origen_condicion_display }}</span>{% endif %}
-            </td>
-            <td>{{ g.duracion_texto }}</td>
-            <td>{{ g.frecuencia_texto }}</td>
-            <td>
-              <span class="estado estado-{{ g.estado }}">{{ g.get_estado_display }}</span>
+            <td data-etiqueta="Archivo" class="archivo"><div class="celda"><span class="dato">{{ g.nombre_original }}</span></div></td>
+            <td data-etiqueta="Condición"><div class="celda">
+              <details class="condicion">
+                <summary aria-label="Cambiar la condición de {{ g.nombre_original }}">
+                  <span class="chip{% if not g.condicion %} chip-vacio{% endif %}">{% if g.condicion %}{{ g.condicion }}{% else %}sin condición{% endif %}</span>
+                  <svg class="ico" aria-hidden="true"><use href="#i-lapiz"/></svg>
+                </summary>
+                <form method="post" action="{% url 'grabaciones:condicion' g.pk %}" class="en-linea">
+                  {% csrf_token %}
+                  <input type="text" name="condicion" value="{{ g.condicion }}" list="condiciones"
+                         maxlength="40" size="9" aria-label="Condición de {{ g.nombre_original }}"
+                         placeholder="sin condición">
+                  <button type="submit" class="secundario">Guardar</button>
+                </form>
+              </details>
+              {% if g.condicion %}<span class="nota origen">{{ g.get_origen_condicion_display }}</span>{% endif %}
+            </div></td>
+            <td data-etiqueta="Duración"><div class="celda">
+              <span class="dato">{{ g.duracion_texto }}</span>
+              {% if g.remuestreada %}<br><span class="nota">{{ g.frecuencia_texto }}</span>{% endif %}
+            </div></td>
+            <td data-etiqueta="Estado"><div class="celda">
+              <span class="estado estado-{{ g.estado }}"><svg class="ico{% if g.estado == 'procesando' %} gira{% endif %}" aria-hidden="true"><use href="#{% if g.estado == 'procesada' %}i-ok{% elif g.estado == 'error' %}i-x{% elif g.estado == 'procesando' %}i-proc{% else %}i-cola{% endif %}"/></svg>{{ g.get_estado_display }}</span>
               {% if g.mensaje_error %}<br><span class="msg-error">{{ g.mensaje_error }}</span>{% endif %}
               {% with aviso=g.aviso_canales %}
-                {% if aviso.1 %}<br><span class="aviso-canales aviso-canales-{{ aviso.0 }}">⚠ {{ aviso.1 }}</span>{% endif %}
+                {% if aviso.1 %}<br><span class="aviso-canales aviso-canales-{{ aviso.0 }}"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{{ aviso.1 }}</span>{% endif %}
               {% endwith %}
-              {% if g.reintentable or g.reprocesable %}
+              {% if g.reintentable %}
                 <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
                   {% csrf_token %}
-                  <button type="submit" class="secundario">{% if g.reintentable %}Reintentar{% else %}Reprocesar{% endif %}</button>
+                  <button type="submit" class="secundario">Reintentar</button>
                 </form>
               {% endif %}
-            </td>
-            <td>
+            </div></td>
+            <td data-etiqueta="Acciones" class="acciones-fila"><div class="celda">
               {% if g.estado == "procesada" %}
-                <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
-                · <a href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
-                · <a href="{% url 'grabaciones:csv_grabacion' g.pk %}">CSV</a>
+                <a class="boton primario" href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
+                <details class="menu">
+                  <summary class="boton" aria-label="Más acciones de {{ g.nombre_original }}"><svg class="ico" aria-hidden="true"><use href="#i-mas"/></svg></summary>
+                  <div class="menu-lista">
+                    <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
+                    <a href="{% url 'grabaciones:csv_grabacion' g.pk %}">CSV</a>
+                    {% if g.reprocesable %}
+                    <form method="post" action="{% url 'grabaciones:encolar' g.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="secundario">Reprocesar</button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </details>
               {% else %}
-                <span class="desactivado" title="Disponible cuando la grabación se procese">—</span>
+                <span class="desactivado" aria-disabled="true" title="Disponible cuando la grabación se procese">—</span>
               {% endif %}
-            </td>
+            </div></td>
           </tr>
         {% endfor %}
         </tbody>
@@ -89,6 +108,6 @@
       {% endif %}
     {% endfor %}
   {% else %}
-    <p class="vacio">Todavía no hay grabaciones.</p>
+    <p class="vacio">Todavía no hay grabaciones. Suelta uno o varios archivos EDF arriba para empezar: se procesan solos y aquí verás su estado.</p>
   {% endif %}
 </div>

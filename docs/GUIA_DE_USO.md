@@ -67,8 +67,10 @@ descargar su CSV. En cada grabación ves:
 La lista **se actualiza sola** cada pocos segundos mientras haya algo pendiente.
 
 - **La condición** (OA, OC, STROOP, PASAT…) se lee del nombre del archivo. Es opcional: si no se
-  reconoce queda vacía y la plataforma funciona igual. Puedes escribirla o corregirla en la
-  casilla y pulsar **Guardar**.
+  reconoce queda vacía y la plataforma funciona igual. Para escribirla o corregirla, pulsa el
+  lápiz que hay junto a la condición y **Guardar**.
+- **Acciones de cada fila.** **Análisis** abre el análisis de la grabación. El botón **···**
+  lleva a la **Calidad**, al **CSV** de esa grabación y a **Reprocesar**.
 - **Reintentar / Reprocesar.** *Reintentar* vuelve a poner en cola una grabación que falló, y
   *Reintentar las fallidas* lo hace con todas las del lote. *Reprocesar* repite una ya procesada
   (el resultado anterior se conserva hasta que termine el nuevo). Un archivo rechazado al subir
@@ -91,9 +93,10 @@ Desde la lista, pulsa **Calidad** en una grabación procesada.
 ![Pantalla de calidad](capturas/pantalla_2_calidad.png)
 
 - **Resumen:** cuántos de los 14 electrodos son buenos y cuáles se han descartado.
-- **Mapa de electrodos** (cabeza vista desde arriba, nariz hacia arriba). El estado **no depende
-  solo del color**: un círculo azul con ✔ es un electrodo bueno; un rombo discontinuo con ✖ es
-  un electrodo descartado.
+- **Mapa de electrodos** (el cerebro de una plantilla vista desde arriba, nariz hacia arriba, con
+  los electrodos sobre la cabeza). El estado **no depende solo del color**: un círculo azul con
+  una marca de verificación es un electrodo bueno; un rombo discontinuo con una cruz es un
+  electrodo descartado.
 - **Tabla** con la zona de cada electrodo y, si se descartó, el **motivo**: mal contacto
   (calidad de contacto baja del casco), señal plana (sin señal) o amplitud excesiva (ruido o
   artefactos).
@@ -116,15 +119,22 @@ Pulsa **Análisis** en una grabación procesada.
   para **toda la cabeza** (media de los electrodos válidos) y para cada **zona** (frontal,
   frontocentral, temporal y posterior). «—» significa que esa zona no tiene ningún electrodo
   válido.
-- **Mapa de la cabeza por banda:**
+- **Mapas de potencia por banda:**
 
-  ![Mapa de la cabeza por banda](capturas/analisis_mapa.png)
+  ![Mapas de potencia por banda](capturas/analisis_mapa.png)
 
-  Elige la banda con los botones. Cada círculo es un electrodo y lleva escrito **su porcentaje**.
-  El color va del valor mínimo al máximo **de esa banda en esa grabación**, así que **no se puede
-  comparar el color entre bandas**; la leyenda da los valores de los extremos. No hay
-  interpolación: no se inventan valores entre electrodos. Los rombos son electrodos descartados,
-  sin dato.
+  A la izquierda, una **cabeza en 3D** que se gira con el ratón (o con las flechas del teclado)
+  y que se puede cambiar a **cerebro real**; a la derecha, **los cuatro mapas** (delta, theta,
+  alfa y beta) con el cerebro visto desde arriba. Pulsa una banda para verla en el 3D. Puedes
+  elegir potencia **relativa** (porcentaje) o **absoluta** (log<sub>10</sub> de V²), escala **por
+  banda** o **común a las cuatro**, y **resaltar una zona** (frontal, frontocentral, temporal o
+  posterior). Al pasar el ratón por un electrodo aparece su **valor medido**; los rombos son
+  electrodos descartados, sin dato. «Guardar imagen» descarga la vista 3D con el aviso incluido.
+
+  **Importante:** el color entre electrodos es una **interpolación orientativa**. Con 14 sensores
+  no se puede saber dónde se origina la actividad dentro del cerebro, y la cabeza y el cerebro
+  son plantillas promedio, no los de la persona grabada. Por eso las zonas alejadas de un sensor
+  se muestran apagadas. Con la escala por banda, el color no se puede comparar entre bandas.
 - **Tablas desplegables** con la potencia relativa y absoluta (log<sub>10</sub> de V²) por
   electrodo y por zona.
 

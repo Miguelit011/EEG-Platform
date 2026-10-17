@@ -4,16 +4,24 @@
 {% block titulo %}Análisis · {{ grabacion.nombre_original }}{% endblock %}
 
 {% block contenido %}
-<p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
-<h1>Análisis espectral</h1>
-<p class="subtitulo">
-  <strong>{{ grabacion.nombre_original }}</strong>
-  · Condición: {% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}
-  · {{ grabacion.duracion_texto }}
-  · Lote {{ grabacion.lote_id }}
-  · <a href="{% url 'grabaciones:calidad' grabacion.pk %}">Ver calidad de la señal</a>
-  {% if resumen %}· <a class="boton" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}">Descargar CSV de esta grabación</a>{% endif %}
-</p>
+<div class="cabecera-pagina">
+  <div>
+    <p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
+    <h1>Análisis espectral</h1>
+    <ul class="fichas" aria-label="Datos de la grabación">
+      <li>Archivo <span class="dato">{{ grabacion.nombre_original }}</span></li>
+      <li>Condición <span class="dato">{% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}</span></li>
+      <li>Duración <span class="dato">{{ grabacion.duracion_texto }}</span></li>
+      <li>Lote <span class="dato">{{ grabacion.lote_id }}</span></li>
+    </ul>
+  </div>
+  <div class="acciones">
+    <a class="boton" href="{% url 'grabaciones:calidad' grabacion.pk %}">Ver calidad de la señal</a>
+    {% if resumen %}<a class="boton" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>
+      Descargar CSV de esta grabación</a>{% endif %}
+  </div>
+</div>
 
 {% if not resumen %}
   <section class="tarjeta">
@@ -28,82 +36,117 @@
   </section>
 {% else %}
 
+{% if resumen.titular %}<p class="frase-resumen">{{ resumen.titular }}</p>{% endif %}
+
 {% for aviso in resumen.avisos %}
-  <p class="aviso {% if aviso.nivel == 'critico' %}aviso-alerta{% else %}aviso-info{% endif %}" role="alert">⚠ {{ aviso.texto }}</p>
+  <p class="aviso {% if aviso.nivel == 'critico' %}aviso-alerta{% else %}aviso-info{% endif %}" role="alert"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{{ aviso.texto }}</p>
 {% endfor %}
 
-<section class="tarjeta" aria-labelledby="titulo-barras">
-  <h2 id="titulo-barras">Potencia relativa por banda</h2>
-  <p class="nota">Porcentaje de la potencia total de 1 a 30 Hz que cae en cada banda. «Toda la cabeza» es la media de los {{ resumen.n_validos }} electrodos válidos.</p>
-  <div class="grafica">
-    <canvas id="grafica-bandas" role="img"
-            aria-label="Gráfica de barras de la potencia relativa por banda, para toda la cabeza y para cada zona. Los mismos datos están en la tabla siguiente."></canvas>
-  </div>
-  {{ resumen.grafica|json_script:"datos-grafica" }}
-</section>
-
-<section class="tarjeta" aria-labelledby="titulo-tabla-zonas">
-  <h2 id="titulo-tabla-zonas">Zonas × bandas (potencia relativa, %)</h2>
-  <div class="tabla-ancha">
-  <table>
-    <thead>
-      <tr><th>Zona</th><th>Electrodos válidos</th>{% for b in resumen.bandas %}<th>{{ b.nombre }} <span class="nota">{{ b.rango }}</span></th>{% endfor %}</tr>
-    </thead>
-    <tbody>
-      <tr class="fila-total">
-        <th scope="row">Toda la cabeza</th><td>{{ resumen.n_validos }} de {{ resumen.n_total }}</td>
-        {% for texto in resumen.cabeza_texto %}<td class="num">{{ texto }}</td>{% endfor %}
-      </tr>
-      {% for z in resumen.zonas %}
-      <tr>
-        <th scope="row">{{ z.nombre }}</th><td>{{ z.n_validos }} de {{ z.n_total }}</td>
-        {% for texto in z.rel_texto %}<td class="num">{{ texto }}</td>{% endfor %}
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  </div>
-  <p class="nota">«—»: ningún electrodo válido en esa zona.</p>
-</section>
-
-<section class="tarjeta" aria-labelledby="titulo-mapa-bandas">
-  <h2 id="titulo-mapa-bandas">Mapa de la cabeza por banda</h2>
-  <div class="selector-banda">
-    {% for m in resumen.mapas %}
-      <input type="radio" name="banda-mapa" id="banda-{{ m.banda.clave }}" class="solo-lectores"
-             {% if m.banda.clave == resumen.banda_inicial %}checked{% endif %}>
-    {% endfor %}
-    <div class="botones-banda" role="group" aria-label="Banda">
-      {% for m in resumen.mapas %}
-        <label for="banda-{{ m.banda.clave }}">{{ m.banda.nombre }} <span class="nota">{{ m.banda.rango }}</span></label>
-      {% endfor %}
-    </div>
-    <div class="paneles">
-      {% for m in resumen.mapas %}
-      <div class="panel-banda" id="panel-{{ m.banda.clave }}">
-        {% include "grabaciones/_mapa_cabeza.html" with puntos=m.puntos mapa_id=m.banda.clave mapa_titulo="Potencia relativa de la banda "|add:m.banda.nombre mapa_descripcion="Cada círculo es un electrodo y lleva escrito su porcentaje; los rombos son electrodos descartados, sin dato." %}
-        <div class="escala">
-          <span>{% if m.minimo %}{{ m.minimo }} %{% else %}—{% endif %}</span>
-          <div class="escala-barra" style="background: {{ m.degradado }}" role="img"
-               aria-label="Escala de color: de {{ m.minimo }} % a {{ m.maximo }} %"></div>
-          <span>{% if m.maximo %}{{ m.maximo }} %{% else %}—{% endif %}</span>
+<section class="visor" id="visor" aria-labelledby="titulo-visor"
+         data-malla-cabeza="{% static 'models/cabeza.bin' %}" data-malla-cerebro="{% static 'models/cerebro.bin' %}">
+  <div class="visor-cab">
+    <h2 id="titulo-visor">Mapas de potencia por banda</h2>
+    <div class="controles" id="controles-visor">
+      <fieldset class="control">
+        <legend>Potencia</legend>
+        <div class="segmentado">
+          <label><input type="radio" name="metrica" value="rel" checked>Relativa (%)</label>
+          <label><input type="radio" name="metrica" value="abs">Absoluta (log<sub>10</sub> V²)</label>
         </div>
-        <p class="nota">Valor de cada electrodo: % de la potencia total en {{ m.banda.nombre|lower }}.
-          La escala va del mínimo al máximo de <strong>esta</strong> banda en esta grabación, así que
-          el color no se puede comparar entre bandas. Cada círculo es un electrodo: no hay interpolación.</p>
-      </div>
-      {% endfor %}
+      </fieldset>
+      <fieldset class="control">
+        <legend>Escala de color</legend>
+        <div class="segmentado">
+          <label><input type="radio" name="escala" value="banda" checked>Por banda</label>
+          <label><input type="radio" name="escala" value="comun">Común a las 4</label>
+        </div>
+      </fieldset>
+      <fieldset class="control">
+        <legend>Resaltar zona</legend>
+        <div class="segmentado" id="zonas-visor"></div>
+      </fieldset>
     </div>
   </div>
-  <style>
-    .panel-banda { display: none; }
-    {% for m in resumen.mapas %}
-    #banda-{{ m.banda.clave }}:checked ~ .paneles #panel-{{ m.banda.clave }} { display: block; }
-    #banda-{{ m.banda.clave }}:checked ~ .botones-banda label[for="banda-{{ m.banda.clave }}"] { background: var(--acento); color: #fff; border-color: var(--acento); }
-    #banda-{{ m.banda.clave }}:focus-visible ~ .botones-banda label[for="banda-{{ m.banda.clave }}"] { outline: 3px solid #f2b705; outline-offset: 2px; }
-    {% endfor %}
-  </style>
+  <p class="orientativo" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>
+    <span><strong>Interpolación orientativa.</strong> Con 14 sensores no se puede localizar la actividad dentro del cerebro: los colores entre sensores son una estimación suave sobre la superficie y las zonas alejadas de un sensor se muestran atenuadas. La cabeza y el cerebro son plantillas promedio (fsaverage), no los de esta persona. El valor medido es el de cada sensor, que está sobre el cuero cabelludo.</span>
+  </p>
+
+  <div class="visor-cuerpo" id="visor-cuerpo">
+    <div class="visor-3d">
+      <h3>Cabeza y cerebro en 3D</h3>
+      <div class="segmentado modo-3d" id="modo-3d" role="group" aria-label="Qué se muestra en 3D"></div>
+      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se proyecta en la cabeza 3D"></div>
+      <div class="escena-3d" id="escena-3d">
+        <div class="etiquetas-3d" id="etiquetas-3d" aria-hidden="true"></div>
+      </div>
+      <div class="herramientas-3d" id="herramientas-3d" role="toolbar" aria-label="Vista de la cabeza 3D"></div>
+      <div class="escala-mapa" id="escala-3d"></div>
+      <p class="ayuda-3d">Arrastra para girar y usa la rueda o el pellizco para acercar. Con el teclado: flechas para girar y + / − para acercar.</p>
+    </div>
+    <div class="visor-2d">
+      <h3>Las cuatro bandas sobre el cerebro, vista desde arriba</h3>
+      <div class="mapas-2d" id="mapas-2d"></div>
+      <ul class="sensores-leyenda" aria-label="Leyenda de sensores">
+        <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="var(--acento)" stroke="var(--texto)" stroke-width="1.5"/></svg>Sensor válido, con su valor medido</li>
+        <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2 16 9 9 16 2 9Z" fill="none" stroke="var(--descartado)" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M6.5 6.5l5 5M11.5 6.5l-5 5" stroke="var(--descartado)" stroke-width="1.5"/></svg>Sensor descartado, sin dato</li>
+      </ul>
+      <p class="escala-leyenda" id="leyenda-escala"></p>
+    </div>
+  </div>
+
+  <noscript>
+    <style>.controles, .visor-cuerpo { display: none; }</style>
+    <div class="fallback-visor">
+      <p class="nota">Sin JavaScript no hay visor interactivo. Cada círculo es un sensor con su valor medido (% de la potencia total en esa banda), sin interpolar.</p>
+      <div class="rejilla-svg">
+      {% for m in resumen.mapas %}
+        <div>
+          <h3>{{ m.banda.nombre }} <span class="nota">{{ m.banda.rango }}</span></h3>
+          {% include "grabaciones/_mapa_cabeza.html" with puntos=m.puntos mapa_id=m.banda.clave mapa_titulo="Potencia relativa de la banda "|add:m.banda.nombre mapa_descripcion="Cada círculo es un electrodo y lleva escrito su porcentaje; los rombos son electrodos descartados, sin dato." %}
+          <div class="escala-mapa"><span>{{ m.minimo }} %</span><div class="barra-escala" style="background: {{ m.degradado }}" role="img" aria-label="Escala de color: de {{ m.minimo }} % a {{ m.maximo }} %"></div><span>{{ m.maximo }} %</span></div>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+  </noscript>
+  {{ resumen.visor|json_script:"datos-visor" }}
 </section>
+
+<div class="par-datos">
+  <section class="tarjeta" aria-labelledby="titulo-tabla-zonas">
+    <h2 id="titulo-tabla-zonas">Zonas × bandas (potencia relativa, %)</h2>
+    <div class="tabla-ancha">
+    <table class="tabla-zonas">
+      <thead>
+        <tr><th>Zona</th><th>Electrodos válidos</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}<span class="nota rango-banda">{{ b.rango }}</span></th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        <tr class="fila-total">
+          <th scope="row">Toda la cabeza</th><td>{{ resumen.n_validos }} de {{ resumen.n_total }}</td>
+          {% for texto in resumen.cabeza_texto %}<td class="num">{{ texto }}</td>{% endfor %}
+        </tr>
+        {% for z in resumen.zonas %}
+        <tr>
+          <th scope="row">{{ z.nombre }}</th><td>{{ z.n_validos }} de {{ z.n_total }}</td>
+          {% for texto in z.rel_texto %}<td class="num">{{ texto }}</td>{% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p class="nota">«Toda la cabeza» es la media de los {{ resumen.n_validos }} electrodos válidos. «—»: ningún electrodo válido en esa zona.</p>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="titulo-barras">
+    <h2 id="titulo-barras">Potencia relativa por banda y zona</h2>
+    <div class="grafica">
+      <canvas id="grafica-bandas" role="img"
+              aria-label="Gráfica de barras de la potencia relativa por banda, para toda la cabeza y para cada zona. Los mismos datos están en la tabla."></canvas>
+    </div>
+    {{ resumen.grafica|json_script:"datos-grafica" }}
+  </section>
+</div>
 
 {% if modelos %}{% include "grabaciones/_modelos.html" %}{% endif %}
 
@@ -114,13 +157,13 @@
     <h3>Potencia relativa por electrodo (%)</h3>
     <div class="tabla-ancha">
     <table>
-      <thead><tr><th>Electrodo</th><th>Zona</th>{% for b in resumen.bandas %}<th>{{ b.nombre }}</th>{% endfor %}</tr></thead>
+      <thead><tr><th>Electrodo</th><th>Zona</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
       <tbody>
       {% for e in resumen.electrodos %}
         <tr class="{% if not e.valido %}fila-descartado{% endif %}">
           <th scope="row">{{ e.canal }}</th><td>{{ e.zona|default:"—"|capfirst }}</td>
           {% if e.valido %}{% for texto in e.rel_texto %}<td class="num">{{ texto }}</td>{% endfor %}
-          {% else %}<td colspan="{{ resumen.bandas|length }}">✖ Descartado: sin dato</td>{% endif %}
+          {% else %}<td colspan="{{ resumen.bandas|length }}"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Descartado: sin dato</td>{% endif %}
         </tr>
       {% endfor %}
       </tbody>
@@ -130,7 +173,7 @@
     <h3>Potencia absoluta por zona (log<sub>10</sub> de V²)</h3>
     <div class="tabla-ancha">
     <table>
-      <thead><tr><th>Zona</th>{% for b in resumen.bandas %}<th>{{ b.nombre }}</th>{% endfor %}</tr></thead>
+      <thead><tr><th>Zona</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
       <tbody>
       {% for z in resumen.zonas %}
         <tr><th scope="row">{{ z.nombre }}</th>{% for texto in z.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}</tr>
@@ -142,13 +185,13 @@
     <h3>Potencia absoluta por electrodo (log<sub>10</sub> de V²)</h3>
     <div class="tabla-ancha">
     <table>
-      <thead><tr><th>Electrodo</th>{% for b in resumen.bandas %}<th>{{ b.nombre }}</th>{% endfor %}</tr></thead>
+      <thead><tr><th>Electrodo</th>{% for b in resumen.bandas %}<th class="num">{{ b.nombre }}</th>{% endfor %}</tr></thead>
       <tbody>
       {% for e in resumen.electrodos %}
         <tr class="{% if not e.valido %}fila-descartado{% endif %}">
           <th scope="row">{{ e.canal }}</th>
           {% if e.valido %}{% for texto in e.abs_texto %}<td class="num">{{ texto }}</td>{% endfor %}
-          {% else %}<td colspan="{{ resumen.bandas|length }}">✖ Descartado: sin dato</td>{% endif %}
+          {% else %}<td colspan="{{ resumen.bandas|length }}"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Descartado: sin dato</td>{% endif %}
         </tr>
       {% endfor %}
       </tbody>
@@ -157,7 +200,14 @@
   </details>
 </section>
 
+<section class="cierre" aria-label="Siguiente paso">
+  <a class="boton" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}">Descargar CSV de esta grabación</a>
+  <a href="{% url 'grabaciones:lista' %}">Volver a la lista de grabaciones</a>
+</section>
+
+<script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>
 <script src="{% static 'vendor/chart.umd.js' %}"></script>
 <script src="{% static 'js/analisis.js' %}"></script>
+<script type="module" src="{% static 'js/visor.js' %}"></script>
 {% endif %}
 {% endblock %}

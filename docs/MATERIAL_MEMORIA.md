@@ -109,13 +109,14 @@ grabaciones reales.
 | Subida y validación | Requisitos del EDF (leídos de la librería), patrón de condición, lotes con archivos malos | 31 |
 | Procesado en segundo plano | Cola, reanudación, errores aislados, reintentos, paralelismo con procesos reales (mismo resultado con 1 y con varios), señal de vida y avisos | 19 |
 | Recursos del equipo | Cuántos procesos usar según hilos y memoria | 13 |
-| Pantalla de calidad | Datos y mapa SVG (0, 1 o varios descartados), avisos como en la librería | 35 |
-| Pantalla de análisis | Valores de la librería, escalas y contraste del mapa, avisos, gráfica y selector | 30 |
+| Pantalla de calidad | Datos y mapa (0, 1 o varios descartados), avisos como en la librería | 35 |
+| Pantalla de análisis | Valores de la librería, escalas y contraste del mapa, avisos, gráfica, visor (datos, aviso de orientativo, sin CDN) y respaldo sin JavaScript | 32 |
+| Geometría del visor | Posición de los electrodos sobre la cabeza y el cerebro reales, coherente con el montaje de la librería; mallas y licencias | 4 |
 | Modelos enchufables | Qué modelos se muestran (condición conocida o estimada), parámetros distintos, cifras iguales a `resultados.json`, modelo de prueba que se añade con una línea, modelo roto | 34 |
 | Exportación a CSV | Columnas estables y documentadas, coincidencia valor a valor con el JSON, formato de Excel, protección contra fórmulas | 27 |
 | Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 15 |
 | Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 11 |
-| **Total EEG-Platform** | | **215** |
+| **Total EEG-Platform** | | **221** |
 
 EEG-Library, la librería que usa, tiene **557 tests** automáticos (más 5 que necesitan el
 dataset real) y mantiene la paridad exacta de las 70 características con la matriz del estudio.
@@ -147,8 +148,11 @@ la defensa:
 3. **Nunca se predice con un procesado distinto al del entrenamiento.**
 4. **Los electrodos descartados no se colorean ni cuentan** en medias, mapas ni CSV, y el estado se
    distingue sin depender del color.
-5. **Sin interpolación en el mapa de la cabeza:** con 14 electrodos, una superficie suavizada
-   inventaría valores entre ellos.
+5. **Interpolación honesta en los mapas:** con 14 electrodos el color entre sensores es solo una
+   estimación suave. Siempre se ve el valor medido de cada sensor, la interpolación no se sale
+   del mínimo y el máximo medidos, las zonas lejanas a un sensor se apagan y un aviso fijo dice que
+   no localiza fuentes (Fase 9: cabeza y cerebro reales de la plantilla fsaverage, licencias en
+   `static/models/`).
 6. **Privacidad por diseño:** datos fuera del repositorio, sin recursos externos (Chart.js y el
    CSS van en local), y un test que impide que códigos de participantes lleguen a git.
 7. **Los requisitos de un EDF se leen de la librería, no se copian**, de modo que la web y la

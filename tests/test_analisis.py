@@ -215,14 +215,42 @@ def test_grafica_con_chart_js_local(client):
     assert finders.find("js/analisis.js")
 
 
-def test_selector_de_banda_sin_js(client):
+def test_visor_recibe_los_datos_de_la_libreria(client):
     html = client.get(url(grabacion_con(FIXTURE))).content.decode()
-    for b in BANDAS:
-        assert f'id="banda-{b}"' in html and f'id="panel-{b}"' in html
-        assert f'#banda-{b}:checked ~ .paneles #panel-{b} {{ display: block; }}' in html
-    assert re.search(r'id="banda-alfa"[^>]*checked', html)
-    assert not re.search(r'id="banda-(delta|theta|beta)"[^>]*checked', html)
-    assert len(mapas(html)) == 4
+    datos = json.loads(re.search(
+        r'<script id="datos-visor" type="application/json">(.*?)</script>', html, re.S).group(1))
+    assert [b["clave"] for b in datos["bandas"]] == BANDAS and datos["banda_inicial"] == "alfa"
+    assert len(datos["electrodos"]) == 14 and len(datos["geometria"]["canales"]) == 14
+    por_canal = {e["canal"]: e for e in datos["electrodos"]}
+    for canal in DESCARTADOS_FIXTURE:       # un descartado no lleva valor en ninguna banda
+        assert not por_canal[canal]["valido"]
+        assert all(v is None for v in por_canal[canal]["rel"].values())
+        assert all(v is None for v in por_canal[canal]["log_abs"].values())
+    assert por_canal["AF3"]["valido"] and abs(por_canal["AF3"]["rel"]["alfa"] - 0.287) < 0.0005
+
+
+def test_visor_sin_cdn_y_con_respaldo_sin_js(client):
+    html = client.get(url(grabacion_con(FIXTURE))).content.decode()
+    assert '<script type="importmap">' in html and "/static/vendor/three/three.module.min.js" in html
+    assert 'type="module" src="/static/js/visor.js"' in html
+    assert "http://" not in html and "https://" not in html.replace("https://claude.com", "")
+    for ruta in ("models/cabeza.bin", "models/cerebro.bin", "models/electrodos.json", "models/LEEME.txt",
+                 "models/LICENCIA-FreeSurfer.txt", "models/LICENCIA-MNE-BSD3.txt", "models/LICENCIA-nilearn-BSD3.txt",
+                 "vendor/three/three.module.min.js", "vendor/three/controls/OrbitControls.js",
+                 "vendor/three/LICENCIA-three-MIT.txt", "js/visor.js", "js/visor3d.js",
+                 "js/visor-comun.js", "fonts/plex-sans-latin-400.woff2",
+                 "fonts/plex-sans-latin-700.woff2", "fonts/plex-mono-latin-400.woff2",
+                 "fonts/plex-mono-latin-700.woff2", "fonts/LICENCIA-IBMPlex-OFL.txt"):
+        assert finders.find(ruta), ruta
+    # Sin JavaScript quedan los cuatro mapas con el valor de cada sensor.
+    assert "<noscript>" in html and len(mapas(html)) == 4
+
+
+def test_el_visor_avisa_de_que_es_orientativo(client):
+    html = client.get(url(grabacion_con(FIXTURE))).content.decode()
+    assert "Interpolación orientativa" in html
+    assert "no se puede localizar la actividad dentro del cerebro" in html
+    assert "fatiga" not in html.split('id="modelos"')[0].lower()
 
 
 def test_mapas_con_valores_y_descartados(client):
@@ -235,14 +263,14 @@ def test_mapas_con_valores_y_descartados(client):
             assert f"<title>{canal}: descartado, sin dato</title>" in svg
     assert "<title>AF3: 28,7 % de la potencia (alfa)</title>" in html
     # Leyenda con la escala de cada banda, y la aclaración de que no hay interpolación.
-    assert html.count('class="escala-barra"') == 4
+    assert html.count('class="barra-escala"') == 4
     assert "17,4 %" in html and "49,4 %" in html
-    assert "no hay interpolación" in html and "no se puede comparar entre bandas" in html
+    assert "sin interpolar" in html
 
 
 def test_los_descartados_no_aparecen_en_las_tablas_con_valor(client):
     html = client.get(url(grabacion_con(FIXTURE))).content.decode()
-    assert html.count("✖ Descartado: sin dato") == 4        # F7 y F3, en dos tablas por electrodo
+    assert html.count("</svg> Descartado: sin dato") == 4        # F7 y F3, en dos tablas por electrodo
     assert "Potencia relativa por electrodo" in html
     assert "Potencia absoluta por zona" in html and "Potencia absoluta por electrodo" in html
 

@@ -5,7 +5,11 @@ Solo usa el JSON que devolvió `analizar_grabacion` (no toca la base de datos ni
 la librería), así que se prueba con el fixture de la Fase 0.
 """
 
+import re
+
 from eeg_library.preprocesado.quality import CANALES_EPOC
+
+from grabaciones.geometria import geometria_visor
 
 # Umbrales de aviso. Son los de la librería, que no los expone como constantes:
 # `aplicar_car` omite la CAR con menos de 6 canales buenos y avisa por debajo de
@@ -32,12 +36,14 @@ CENTRO = (200, 235)
 RADIO = 165
 
 _AYUDA_MOTIVO = (
-    ("CQ medio bajo", "El casco indicó mal contacto del electrodo durante la grabación."),
+    ("CQ medio bajo", "El casco indicó mal contacto del electrodo durante la grabación. En la próxima, "
+                      "comprueba que apoya bien y que su fieltro está húmedo."),
     ("Exceso de muestras malas", "Durante más de una quinta parte del registro el casco "
-                                 "marcó el contacto como malo."),
-    ("Señal plana", "El electrodo no registró señal (desconectado o sin contacto)."),
+                                 "marcó el contacto como malo. Conviene revisar su colocación."),
+    ("Señal plana", "El electrodo no registró señal (desconectado o sin contacto). "
+                    "Comprueba que está bien enchufado."),
     ("Amplitud excesiva", "La señal tiene mucha más amplitud que la de los demás "
-                          "electrodos (ruido o artefactos)."),
+                          "electrodos (ruido o artefactos). Suele deberse a movimiento o a mal contacto."),
 )
 
 
@@ -57,6 +63,11 @@ def nivel_de_fiabilidad(n_buenos):
         return "aviso", (f"{n_buenos} electrodos buenos "
                          f"(se recomiendan al menos {RECOMENDADOS}).")
     return "normal", ""
+
+
+def _coma(texto):
+    """Coma decimal en los números de un texto de la librería («z=19.84» pasa a «z=19,84»)."""
+    return re.sub(r"(\d)\.(\d)", r"\1,\2", texto or "")
 
 
 def _ayuda(motivo):
@@ -90,10 +101,9 @@ def _car_texto(parametros):
 def _ica_texto(ica):
     eliminadas = ica.get("componentes_eliminadas") or []
     if not eliminadas:
-        return "Ninguna componente eliminada"
+        return "ninguna eliminada"
     lista = ", ".join(str(c) for c in eliminadas)
-    plural = "componente eliminada" if len(eliminadas) == 1 else "componentes eliminadas"
-    return f"{len(eliminadas)} {plural} (nº {lista})"
+    return f"{len(eliminadas)} {'eliminada' if len(eliminadas) == 1 else 'eliminadas'} (nº {lista})"
 
 
 def _epocas_texto(metadatos, parametros):
@@ -123,7 +133,7 @@ def resumen_calidad(resultado):
             "zona": (datos.get("region") or "").capitalize() or "—",
             "bueno": bueno,
             "estado": "Bueno" if bueno else "Descartado",
-            "motivo": datos.get("motivo") or "",
+            "motivo": _coma(datos.get("motivo")),
             "ayuda": "" if bueno else _ayuda(datos.get("motivo")),
             "cx": cx, "cy": cy,
             # Para el mapa (plantilla reutilizable): forma y símbolo, además del color.
@@ -131,7 +141,7 @@ def resumen_calidad(resultado):
             "clase": "bueno" if bueno else "descartado",
             "simbolo": "✔" if bueno else "✖",
             "titulo": (f"{canal}: bueno" if bueno else
-                       f"{canal}: descartado. {datos.get('motivo') or ''}".strip()),
+                       f"{canal}: descartado. {_coma(datos.get('motivo'))}".strip()),
         })
 
     n_total = len(electrodos)
@@ -152,14 +162,22 @@ def resumen_calidad(resultado):
     pipeline = [
         ("Referencia", _referencia_texto(parametros)),
         ("CAR", _car_texto(parametros)),
-        ("ICA", f"{parametros.get('ica', {}).get('n_componentes', '—')} componentes ajustadas; "
+        ("ICA", f"{parametros.get('ica', {}).get('n_componentes', '—')} componentes ajustadas, "
                 f"{_ica_texto(parametros.get('ica', {}))}"),
         ("Paso banda", f"{banda[0]:g}–{banda[1]:g} Hz" if banda else "—"),
         ("Notch", f"{notch:g} Hz" if notch else "No aplicado"),
         ("Épocas analizadas", _epocas_texto(metadatos, parametros)),
     ]
 
+    # Datos del mapa con el cerebro real (se pinta en el navegador; el SVG queda de respaldo).
+    mapa_real = {
+        "geometria": geometria_visor(),
+        "titular": f"{n_buenos} de {n_total} electrodos buenos",
+        "electrodos": [{"canal": e["canal"], "bueno": e["bueno"]} for e in electrodos],
+    }
+
     return {
+        "mapa_real": mapa_real,
         "electrodos": electrodos,
         "n_buenos": n_buenos,
         "n_total": n_total,

@@ -26,4 +26,19 @@
   // Un temporizador permanente: solo actúa si hay cola (data-activo="1"). Así
   // también se reactiva tras pulsar «Reintentar» sin recargar a mano.
   setInterval(actualizar, PERIODO_MS);
+
+  // Menús «más acciones»: se cierran al pulsar fuera, al elegir una opción o con Escape.
+  document.addEventListener("click", function (ev) {
+    document.querySelectorAll("details.menu[open]").forEach(function (m) {
+      if (!m.contains(ev.target)) m.removeAttribute("open");
+    });
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key !== "Escape") return;
+    document.querySelectorAll("details.menu[open], details.condicion[open]").forEach(function (m) {
+      m.removeAttribute("open");
+      var resumen = m.querySelector("summary");
+      if (resumen) resumen.focus();
+    });
+  });
 })();

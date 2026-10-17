@@ -14,17 +14,21 @@ from eeg_library.preprocesado.quality import CANALES_EPOC
 from eeg_library.procesado.matrix import REGIONES
 
 from grabaciones.calidad import POSICIONES, nivel_de_fiabilidad, punto_svg
+from grabaciones.geometria import geometria_visor
 
 NOMBRE_BANDA = {"delta": "Delta", "theta": "Theta", "alfa": "Alfa", "beta": "Beta"}
 BANDA_POR_DEFECTO = "alfa"
 
 # Colores de las series de la gráfica (paleta de Okabe-Ito, apta para daltonismo).
-COLOR_CABEZA = "#444444"
+COLOR_CABEZA = "#8a96a8"
 COLOR_ZONA = {"frontal": "#0072B2", "frontocentral": "#E69F00",
               "temporal": "#009E73", "posterior": "#CC79A7"}
 
-# Escala del mapa: viridis (perceptualmente uniforme, legible con daltonismo).
-ESCALA = ("#440154", "#3b528b", "#21908d", "#5dc863", "#fde725")
+# Escala del mapa: inferno (perceptualmente uniforme, legible con daltonismo). Se recorta
+# su extremo negro para que el valor mínimo no se confunda con el fondo oscuro del visor.
+# El visor (static/js/visor.js) usa la misma escala.
+ESCALA = ("#1b0c41", "#4a0c6b", "#781c6d", "#a52c60", "#cf4446",
+          "#ed6925", "#fb9b06", "#f7d13d", "#fcffa4")
 
 
 def _rgb(hexa):
@@ -185,7 +189,30 @@ def resumen_analisis(resultado):
                        "Sin electrodos válidos en: " + ", ".join(sin_electrodos) +
                        ". No hay valor para esa zona."})
 
+    # --- Titular: la banda con más potencia relativa en toda la cabeza ------------
+    titular = None
+    con_dato = {b: v for b, v in cabeza.items() if v is not None}
+    if con_dato:
+        mayor = max(con_dato, key=con_dato.get)
+        titular = (f"{NOMBRE_BANDA.get(mayor, mayor.capitalize())} reúne la mayor parte de la "
+                   f"potencia: {_porcentaje(con_dato[mayor])} % del total de "
+                   f"{paso_banda[0]:g}–{paso_banda[1]:g} Hz, media de {len(validos)} "
+                   f"electrodos válidos." if paso_banda else
+                   f"{NOMBRE_BANDA.get(mayor, mayor.capitalize())} reúne la mayor parte de la "
+                   f"potencia: {_porcentaje(con_dato[mayor])} % (media de {len(validos)} "
+                   f"electrodos válidos).")
+
+    # --- Datos del visor (mapas 2D y 3D, que se pintan en el navegador) -----------
+    visor = {
+        "geometria": geometria_visor(),
+        "bandas": bandas,
+        "banda_inicial": BANDA_POR_DEFECTO if BANDA_POR_DEFECTO in claves else claves[0],
+        "electrodos": [{"canal": e["canal"], "zona": e["zona"], "valido": e["valido"],
+                        "rel": e["relativa"], "log_abs": e["log_abs"]} for e in electrodos],
+    }
+
     return {
+        "titular": titular, "visor": visor,
         "bandas": bandas,
         "banda_inicial": BANDA_POR_DEFECTO if BANDA_POR_DEFECTO in claves else claves[0],
         "electrodos": electrodos, "zonas": zonas, "cabeza": cabeza,

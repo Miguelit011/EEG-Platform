@@ -13,6 +13,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 6 | Exportación CSV | EEG-Platform | [x] |
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [x] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [x] |
+| 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -186,6 +187,28 @@ Incluye:
 
 Aceptación:
 - Desde un clon limpio, siguiendo el README, la web funciona en Windows.
+
+## Fase 9 — Diseño — **hecha** (2026-10-17)
+**Objetivo:** una interfaz muy vistosa y profesional, pero clara para investigadores que no programan; que parezca una herramienta científica seria, no una plantilla genérica. No cambia la lógica ni los cálculos.
+
+Incluye:
+- Rediseño visual con Impeccable (`/teach-impeccable`, `/critique`, `/audit`, `/polish`) y capturas con chrome-devtools solo contra localhost.
+- Pantalla Análisis: mapas topográficos 2D por banda (delta, theta, alfa, beta), interactivos (valor por electrodo al pasar el ratón), con escala perceptualmente uniforme (viridis/inferno), escala común o por banda y potencia absoluta o relativa.
+- Modelo 3D interactivo de cabeza o cerebro (rotable, JS copiado en `static/`) con el mapa de cada banda proyectado sobre la superficie y los 14 electrodos marcados; quizá vista por las 4 regiones de la librería.
+- Aviso visible en 2D y 3D: es una interpolación sobre la superficie, no una localización de fuentes. Posiciones de electrodos tomadas del montaje de la librería.
+- Modelo 3D con licencia que permita redistribuirlo y tamaño razonable; origen y licencia anotados en `docs/DECISIONES.md`.
+
+Restricciones: sin CDN ni build de npm (fuentes, JS y librerías en `static/`); ningún texto sugiere que se detecta o mide fatiga; los modelos mantienen resultado en test, intervalo y nivel de azar; todos los valores salen de EEG-Library.
+
+Orden de trabajo (con parada del usuario en los pasos 1 y 2):
+1. `/teach-impeccable`, `/critique` de las pantallas actuales y propuesta de dirección visual (2–3 alternativas). **Parar.**
+2. Piloto solo en Análisis (2D y 3D), con capturas. **Parar y esperar visto bueno.**
+3. Extender el diseño al resto de pantallas.
+4. `/audit`, `/polish`, tests pasando, la app arranca y propuesta de mensaje de commit.
+
+Resultado: dirección «visor de neuroimagen» (tema oscuro y claro, IBM Plex), visor de potencia por banda con la cabeza y el cerebro reales de la plantilla fsaverage en 3D y los cuatro mapas 2D sobre el cerebro (interpolación orientativa rotulada), lista, calidad y análisis rediseñados, Lighthouse 100 y 221 tests. Decisiones y licencias en `docs/DECISIONES.md`.
+
+Nota: la Fase 5 decidió «un círculo por electrodo, sin interpolación». La Fase 9 la sustituye por una interpolación suave **rotulada como tal**, manteniendo el valor medido de cada electrodo visible y los descartados sin dato; se registrará en `DECISIONES.md`.
 
 ---
 

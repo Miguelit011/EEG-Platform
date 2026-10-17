@@ -10,7 +10,7 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 1. Subir uno o muchos EDF a la vez, con parámetros de procesado (referencia, paso banda, notch).
 2. Lista de grabaciones con su estado (subida, en cola, procesando, procesada, error).
 3. Por grabación: calidad de la señal (mapa de electrodos y electrodos descartados con su motivo).
-4. Por grabación: análisis espectral (potencia delta/theta/alfa/beta, por electrodo y por zona, y un mapa de la cabeza por banda).
+4. Por grabación: análisis espectral (potencia delta/theta/alfa/beta, por electrodo y por zona) con un visor de cabeza y cerebro reales en 3D y cuatro mapas 2D por banda. El color entre sensores es una interpolación orientativa y no localiza fuentes.
 5. Resultados de modelos de IA **enchufables**. Hoy son c1 (ojos abiertos/cerrados), c2 (reposo/tarea) y c3 (cuál de las 5 tareas); mañana, los que añadan otros investigadores.
 6. Descargar resultados en CSV (una grabación o el lote completo).
 
@@ -29,7 +29,7 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 
 ## Stack
 - Python 3.10 (el de EEG-Library), Django 5, SQLite y plantillas Django. scikit-learn 1.7.2, fijado por EEG-Library.
-- JS mínimo sin framework, Chart.js copiado en `static/`.
+- JS mínimo sin framework. Chart.js y Three.js (visor 3D) copiados en `static/vendor/`, fuentes IBM Plex en `static/fonts/` y mallas de cabeza y cerebro (plantilla fsaverage) en `static/models/`, cada uno con su licencia. Sin CDN ni npm.
 - pytest + pytest-django.
 - EEG-Library instalada en modo editable (`pip install -e ../EEG-Library`).
 

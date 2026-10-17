@@ -6,8 +6,8 @@ suyas, con nombres de archivo inventados. Nunca lee EDF ni resultados reales, po
 capturas se guardan en el repositorio y los participantes son menores de edad.
 
 Cómo funciona: crea una carpeta de datos temporal, la rellena con grabaciones de demostración,
-arranca la web, hace una captura de cada pantalla con Edge (o Chrome) sin ventana y recorta las
-tarjetas que interesan. Hay que ejecutarlo desde la carpeta EEG-Platform:
+arranca la web, hace una captura de cada pantalla con Edge (o Chrome) sin ventana (tema claro, con WebGL por
+software para el visor 3D) y recorta las tarjetas que interesan. Hay que ejecutarlo desde la carpeta EEG-Platform:
 
     .venv\\Scripts\\python.exe docs\\generar_capturas.py
 """
@@ -24,9 +24,9 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 SALIDA = RAIZ / "docs" / "capturas"
 PUERTO = 8790
-ANCHO = 1100
-FONDO = (246, 247, 249)   # --fondo de estilos.css
-BLANCO = (255, 255, 255)
+ANCHO = 1280
+FONDO = (238, 241, 246)   # --fondo del tema claro de estilos.css (las capturas se hacen con ?tema=claro)
+ALTO_CABECERA = 72        # la cabecera fija de la página no cuenta como tarjeta
 
 
 def buscar_navegador():
@@ -109,8 +109,10 @@ def marcar_procesador(activo):
 
 def capturar(navegador, url, destino, alto=4800):
     subprocess.run(
-        [str(navegador), "--headless", "--disable-gpu", "--hide-scrollbars",
-         f"--window-size={ANCHO},{alto}", "--virtual-time-budget=4000",
+        [str(navegador), "--headless", "--hide-scrollbars",
+         # WebGL por software: el visor 3D y los mapas del cerebro necesitan un contexto WebGL.
+         "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist",
+         f"--window-size={ANCHO},{alto}", "--virtual-time-budget=9000",
          f"--screenshot={destino}", url],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=120)
 
@@ -130,14 +132,19 @@ def recortar_pagina(ruta):
 
 
 def tarjetas(imagen):
-    """Rangos verticales (y0, y1) de las tarjetas blancas, leyendo una columna dentro de ellas."""
+    """
+    Rangos verticales (y0, y1) de las tarjetas, leyendo una columna dentro de ellas: una tarjeta
+    es todo lo que no es el fondo de la página (puede tener franjas de otro color por dentro).
+    Si dos tarjetas están en la misma fila, se detecta la de la izquierda y el recorte (de
+    lado a lado) incluye las dos.
+    """
     x = 34   # dentro del relleno de la tarjeta, a la izquierda del contenido
     rangos, y0 = [], None
-    for y in range(imagen.size[1]):
-        blanco = imagen.getpixel((x, y)) == BLANCO
-        if blanco and y0 is None:
+    for y in range(ALTO_CABECERA, imagen.size[1]):
+        en_tarjeta = imagen.getpixel((x, y)) != FONDO
+        if en_tarjeta and y0 is None:
             y0 = y
-        elif not blanco and y0 is not None:
+        elif not en_tarjeta and y0 is not None:
             if y - y0 > 40:
                 rangos.append((y0 - 1, y))
             y0 = None
@@ -149,6 +156,12 @@ def tarjetas(imagen):
 def guardar_recorte(imagen, rangos, desde, hasta, nombre):
     y0, y1 = rangos[desde][0], rangos[hasta][1]
     imagen.crop((12, max(0, y0 - 6), imagen.size[0] - 12, min(imagen.size[1], y1 + 6))).save(
+        SALIDA / nombre)
+
+
+def guardar_desde_arriba(imagen, rangos, hasta, nombre):
+    """Recorta desde el título de la página hasta el final de la tarjeta `hasta`."""
+    imagen.crop((12, ALTO_CABECERA, imagen.size[0] - 12, min(imagen.size[1], rangos[hasta][1] + 6))).save(
         SALIDA / nombre)
 
 
@@ -177,7 +190,7 @@ def main():
         tmp = datos / "tmp.png"
 
         def pagina(ruta_url, nombre):
-            capturar(navegador, base + ruta_url, tmp)
+            capturar(navegador, base + ruta_url + "?tema=claro", tmp)
             imagen = recortar_pagina(tmp)
             imagen.save(SALIDA / nombre)
             return imagen, tarjetas(imagen)
@@ -194,15 +207,15 @@ def main():
         # Pantalla 2: calidad
         imagen, t = pagina(f"/grabaciones/{ids['oa']}/calidad/", "pantalla_2_calidad.png")
         imagen, t = pagina(f"/grabaciones/{ids['pocos']}/calidad/", "calidad_pocos_electrodos.png")
-        guardar_recorte(imagen, t, 0, 0, "calidad_pocos_electrodos.png")
+        guardar_desde_arriba(imagen, t, 0, "calidad_pocos_electrodos.png")
 
         # Pantalla 3: análisis y modelos
         imagen, t = pagina(f"/grabaciones/{ids['oa']}/analisis/", "pantalla_3_analisis.png")
-        guardar_recorte(imagen, t, 0, 1, "analisis_grafica_y_tabla.png")
-        guardar_recorte(imagen, t, 2, 2, "analisis_mapa.png")
-        guardar_recorte(imagen, t, 3, 3, "analisis_modelos.png")
+        guardar_recorte(imagen, t, 1, 1, "analisis_grafica_y_tabla.png")
+        guardar_recorte(imagen, t, 0, 0, "analisis_mapa.png")
+        guardar_recorte(imagen, t, 2, 2, "analisis_modelos.png")
         imagen, t = pagina(f"/grabaciones/{ids['sin']}/analisis/", "analisis_sin_condicion.png")
-        guardar_recorte(imagen, t, 3, 3, "analisis_modelos_condicion_estimada.png")
+        guardar_recorte(imagen, t, 2, 2, "analisis_modelos_condicion_estimada.png")
         os.remove(SALIDA / "analisis_sin_condicion.png")
     finally:
         if servidor:

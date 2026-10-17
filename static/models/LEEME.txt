@@ -1,0 +1,29 @@
+Mallas del visor 3D de EEG-Platform
+===================================
+
+Contenido
+- cabeza.bin    Cabeza (cuero cabelludo) de la plantilla fsaverage.
+- cerebro.bin   Superficie pial (corteza) de fsaverage5, los dos hemisferios.
+- electrodos.json  Posición de los 14 electrodos del Emotiv sobre la cabeza.
+
+Origen
+- Plantilla fsaverage, del proyecto FreeSurfer (The General Hospital Corporation, Boston).
+  Licencia: LICENCIA-FreeSurfer.txt. Uso de investigación; no clínico.
+- La cabeza viene en MNE-Python (mne/data/fsaverage/fsaverage-head.fif), licencia BSD de 3 cláusulas:
+  LICENCIA-MNE-BSD3.txt.
+- El cerebro (fsaverage5, pial_left.gii.gz y pial_right.gii.gz) se tomó de nilearn
+  (nilearn/datasets/data/fsaverage5), licencia BSD de 3 cláusulas: LICENCIA-nilearn-BSD3.txt.
+- Posiciones de los electrodos: montaje 10-20 de MNE-Python que usa EEG-Library (MONTAJE_1020).
+- Ninguna plantilla contiene datos de participantes.
+
+Modificaciones (versiones modificadas, no las originales)
+- La cabeza se ha suavizado y subdividido una vez (subdivisión de Loop): 2.033 -> 8.126 vértices.
+- Los dos hemisferios se han unido en una malla; todo se ha convertido a decímetros y a binario
+  (float32 y uint32) para cargarlo en el navegador.
+- Cada electrodo se ha llevado a la superficie de la cabeza por el rayo desde el centro del cerebro
+  (desvío medio 2 mm, máximo 4,4 mm; consta en electrodos.json).
+- Se pueden regenerar con docs/generar_mallas.py.
+
+Aviso
+- La cabeza y el cerebro son plantillas promedio, no los de ninguna persona. Con 14 sensores el mapa
+  que se pinta encima es una interpolación orientativa y no localiza fuentes de actividad.

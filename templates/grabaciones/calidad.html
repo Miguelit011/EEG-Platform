@@ -1,16 +1,26 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Calidad · {{ grabacion.nombre_original }}{% endblock %}
 
 {% block contenido %}
-<p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
-<h1>Calidad de la señal</h1>
-<p class="subtitulo">
-  <strong>{{ grabacion.nombre_original }}</strong>
-  · Condición: {% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}
-  · {{ grabacion.duracion_texto }}
-  · Lote {{ grabacion.lote_id }}
-</p>
+<div class="cabecera-pagina">
+  <div>
+    <p class="migas"><a href="{% url 'grabaciones:lista' %}">← Grabaciones</a></p>
+    <h1>Calidad de la señal</h1>
+    <ul class="fichas" aria-label="Datos de la grabación">
+      <li>Archivo <span class="dato">{{ grabacion.nombre_original }}</span></li>
+      <li>Condición <span class="dato">{% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}</span></li>
+      <li>Duración <span class="dato">{{ grabacion.duracion_texto }}</span></li>
+      <li>Lote <span class="dato">{{ grabacion.lote_id }}</span></li>
+    </ul>
+  </div>
+  {% if resumen %}
+  <div class="acciones">
+    <a class="boton primario" href="{% url 'grabaciones:analisis' grabacion.pk %}">Análisis</a>
+  </div>
+  {% endif %}
+</div>
 
 {% if not resumen %}
   <section class="tarjeta">
@@ -25,13 +35,12 @@
   </section>
 {% else %}
 
-<section class="tarjeta" aria-labelledby="titulo-resumen">
-  <h2 id="titulo-resumen">Resumen</h2>
-  <p class="titular titular-{{ resumen.nivel }}">{{ resumen.titular }}</p>
-  <p>{{ resumen.frase }}</p>
+<section class="resumen-calidad" aria-labelledby="titulo-resumen">
+  <h2 id="titulo-resumen" class="titular titular-{{ resumen.nivel }}">{{ resumen.titular }}</h2>
+  <p class="frase-resumen">{{ resumen.frase }}</p>
   {% if resumen.aviso %}
     <p class="aviso {% if resumen.nivel == 'critico' %}aviso-alerta{% else %}aviso-info{% endif %}" role="alert">
-      ⚠ {{ resumen.aviso }}
+      <svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{{ resumen.aviso }}
       {% if resumen.car_omitida %}No se aplicó la CAR.{% endif %}
       La grabación se procesa igualmente; interpreta sus resultados con cautela.
     </p>
@@ -41,10 +50,13 @@
 <div class="dos-columnas">
   <section class="tarjeta" aria-labelledby="titulo-mapa">
     <h2 id="titulo-mapa">Mapa de electrodos</h2>
-    {% include "grabaciones/_mapa_cabeza.html" with puntos=resumen.electrodos mapa_titulo="Estado de los electrodos" mapa_descripcion=resumen.titular %}
+    <div id="mapa-calidad" data-malla-cabeza="{% static 'models/cabeza.bin' %}" data-malla-cerebro="{% static 'models/cerebro.bin' %}">
+      {% include "grabaciones/_mapa_cabeza.html" with puntos=resumen.electrodos mapa_titulo="Estado de los electrodos" mapa_descripcion=resumen.titular %}
+    </div>
+    {{ resumen.mapa_real|json_script:"datos-calidad-mapa" }}
     <ul class="leyenda" aria-label="Leyenda">
-      <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><g class="punto punto-bueno"><circle cx="11" cy="11" r="9"/></g></svg> ✔ Bueno</li>
-      <li><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g class="punto punto-descartado"><polygon points="13,2 24,13 13,24 2,13"/></g></svg> ✖ Descartado</li>
+      <li><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><g class="punto punto-bueno"><circle cx="11" cy="11" r="9"/></g></svg> Bueno</li>
+      <li><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g class="punto punto-descartado"><polygon points="13,2 24,13 13,24 2,13"/></g></svg> Descartado</li>
     </ul>
   </section>
 
@@ -56,10 +68,10 @@
       <tbody>
       {% for e in resumen.electrodos %}
         <tr class="{% if not e.bueno %}fila-descartado{% endif %}">
-          <th scope="row">{{ e.canal }}</th>
+          <th scope="row"><span class="dato">{{ e.canal }}</span></th>
           <td>{{ e.zona }}</td>
-          <td><span class="estado estado-calidad-{{ e.clase }}">{{ e.simbolo }} {{ e.estado }}</span></td>
-          <td>{% if e.motivo %}{{ e.motivo }}{% if e.ayuda %}<br><span class="nota">{{ e.ayuda }}</span>{% endif %}{% else %}—{% endif %}</td>
+          <td><span class="estado estado-calidad-{{ e.clase }}"><svg class="ico" aria-hidden="true"><use href="#{% if e.bueno %}i-ok{% else %}i-x{% endif %}"/></svg>{{ e.estado }}</span></td>
+          <td>{% if e.motivo %}<span class="dato">{{ e.motivo }}</span>{% if e.ayuda %}<br><span class="nota">{{ e.ayuda }}</span>{% endif %}{% else %}—{% endif %}</td>
         </tr>
       {% endfor %}
       </tbody>
@@ -79,5 +91,10 @@
     <p class="nota">La grabación original estaba a {{ grabacion.sfreq_original_hz|floatformat:"-1" }} Hz y se remuestreó a 256 Hz.</p>
   {% endif %}
 </section>
+{% endif %}
+
+{% if resumen %}
+<script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>
+<script type="module" src="{% static 'js/mapa-calidad.js' %}"></script>
 {% endif %}
 {% endblock %}
