@@ -72,3 +72,11 @@ def test_portada_en_la_raiz(client):
     assert 'id="escena"' in html and 'models/electrodos.json' in html
     assert 'href="/grabaciones/"' in html
     assert "fatiga" not in html.lower()
+
+
+def test_portada_respaldo_webp_claro_y_oscuro(client):
+    """Sin WebGL o con movimiento reducido la portada muestra una imagen fija, en cada tema."""
+    html = client.get("/").content.decode()
+    for modo in ("claro", "oscuro"):
+        assert f"img/portada-{modo}.webp" in html
+        assert (settings.BASE_DIR / "static" / "img" / f"portada-{modo}.webp").stat().st_size > 1000

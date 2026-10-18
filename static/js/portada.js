@@ -256,10 +256,9 @@ async function escena() {
   pedir();
 }
 
-if (!webglDisponible()) {
+if (reducido || !webglDisponible()) {      // movimiento reducido o sin WebGL: imagen fija, sin cargar la escena
   leerTema();
   portada.dataset.sin3d = "1";
 } else {
   escena().catch(function () { leerTema(); portada.dataset.sin3d = "1"; });
 }
-if (reducido) portada.dataset.reducido = "1";

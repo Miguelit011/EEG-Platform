@@ -20,14 +20,10 @@
 
   <div class="portada-escena">
     <canvas id="escena" aria-hidden="true"></canvas>
-    <svg class="portada-fallback" viewBox="0 0 400 400" role="img" aria-label="Ilustración de una cabeza con un cerebro y sensores EEG">
-      <ellipse class="fb-cabeza" cx="200" cy="200" rx="120" ry="150"/>
-      <ellipse class="fb-cerebro" cx="200" cy="170" rx="85" ry="70"/>
-      <path class="fb-cerebro-linea" d="M130 170c20-30 40-20 55-35 15 15 35 5 50 20 15-8 25 0 35 15"/>
-      <circle class="fb-punto" cx="150" cy="120" r="6"/><circle class="fb-punto" cx="250" cy="120" r="6"/>
-      <circle class="fb-punto" cx="115" cy="200" r="6"/><circle class="fb-punto" cx="285" cy="200" r="6"/>
-      <circle class="fb-punto" cx="150" cy="275" r="6"/><circle class="fb-punto" cx="250" cy="275" r="6"/>
-    </svg>
+    <div class="portada-fallback" role="img" aria-label="Cabeza con el cerebro dentro y los 14 sensores del casco, con una rejilla sobre la cabeza">
+      <img class="fb-oscuro" src="{% static 'img/portada-oscuro.webp' %}" alt="" width="673" height="600">
+      <img class="fb-claro" src="{% static 'img/portada-claro.webp' %}" alt="" width="673" height="600">
+    </div>
   </div>
 </section>
 <script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>

@@ -51,7 +51,7 @@
             <tr>
               <td data-etiqueta="Archivo" class="archivo"><div class="celda"><span class="dato">{{ g.nombre_original }}</span></div></td>
               <td data-etiqueta="Condición"><div class="celda">
-                <details class="condicion">
+                <details class="condicion" data-pk="{{ g.pk }}">
                   <summary aria-label="Cambiar la condición de {{ g.nombre_original }}">
                     <span class="chip{% if not g.condicion %} chip-vacio{% endif %}">{% if g.condicion %}{{ g.condicion }}{% else %}sin condición{% endif %}</span>
                     <svg class="ico" aria-hidden="true"><use href="#i-lapiz"/></svg>
@@ -86,7 +86,7 @@
               <td data-etiqueta="Acciones" class="acciones-fila"><div class="celda">
                 {% if g.estado == "procesada" %}
                   <a class="boton primario" href="{% url 'grabaciones:analisis' g.pk %}">Análisis</a>
-                  <details class="menu">
+                  <details class="menu" data-pk="{{ g.pk }}">
                     <summary class="boton" aria-label="Más acciones de {{ g.nombre_original }}"><svg class="ico" aria-hidden="true"><use href="#i-mas"/></svg></summary>
                     <div class="menu-lista">
                       <a href="{% url 'grabaciones:calidad' g.pk %}">Calidad</a>
