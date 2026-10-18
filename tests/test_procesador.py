@@ -264,7 +264,8 @@ def test_progreso_del_lote(client, bytes_edf):
     subir(client, [bytes_edf, bytes_edf, bytes_edf, b"esto no es un edf"])
     Grabacion.objects.filter(pk=Grabacion.objects.first().pk).update(estado="procesada")
     html = client.get("/grabaciones/").content.decode()
-    assert "1 de 4 procesadas" in html and "1 con error" in html and "2 pendientes" in html
+    assert "1 de 4 procesadas" in html and "1 con error" in html
+    assert 'title="2 pendientes"' in html          # los pendientes van en el tooltip del contador, no en el texto
     assert Lote.objects.get().progreso == {
         "total": 4, "procesadas": 1, "con_error": 1, "pendientes": 2}
 

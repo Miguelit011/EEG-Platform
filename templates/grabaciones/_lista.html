@@ -20,14 +20,13 @@
       <section class="lote-bloque" aria-label="Lote {{ lote.pk }}">
         {% with p=lote.progreso %}
         <div class="lote-cab">
-          <h3 class="lote">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}
-            <span class="nota">{{ lote.resumen_parametros }}</span></h3>
+          <h3 class="lote" title="Parámetros de procesado: {{ lote.resumen_parametros }}">
+            <span class="lote-nombre">Lote {{ lote.pk }} · {{ lote.fecha|date:"d/m/Y H:i" }}</span>
+            {% if not lote.con_parametros_del_estudio %}<span class="nota lote-parametros">{{ lote.resumen_parametros }}</span>{% endif %}</h3>
           <div class="lote-estado">
             <progress max="{{ p.total }}" value="{{ p.procesadas|add:p.con_error }}"
                       aria-label="Progreso del lote {{ lote.pk }}"></progress>
-            <span class="dato">{{ p.procesadas }} de {{ p.total }} procesadas
-              {% if p.con_error %}· {{ p.con_error }} con error{% endif %}
-              {% if p.pendientes %}· {{ p.pendientes }} pendientes{% endif %}</span>
+            <span class="dato"{% if p.pendientes %} title="{{ p.pendientes }} pendiente{{ p.pendientes|pluralize }}"{% endif %}>{{ p.procesadas }} de {{ p.total }} procesadas{% if p.con_error %} · {{ p.con_error }} con error{% endif %}</span>
             {% if lote.hay_fallidas_reintentables %}
               <form method="post" action="{% url 'grabaciones:reintentar_lote' lote.pk %}" class="en-linea">
                 {% csrf_token %}<button type="submit" class="secundario">Reintentar las fallidas</button>

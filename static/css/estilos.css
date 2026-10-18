@@ -539,8 +539,19 @@ select { max-width: 100%; }
 /* Cabecera de cada lote: título, progreso y CSV en una sola fila (se parte solo si no cabe). */
 .lote-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1.5rem; margin: 1.25rem 0 0.75rem; }
 .lote-cab .lote { margin: 0; font-size: 1rem; }
+/* En pantallas anchas la cabecera del lote es una sola línea: si falta sitio, se recorta el resumen de parámetros
+   (con «…»; el texto completo está en el tooltip), nunca se baja el estado a otra línea. */
+@media (min-width: 901px) {
+  .lote-cab { flex-wrap: nowrap; }
+  .lote-cab .lote { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; flex: 1 1 auto; }
+  .lote-nombre { flex: none; white-space: nowrap; }
+  .lote-parametros { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lote-cab .lote-estado { flex: none; flex-wrap: nowrap; }
+}
+/* Con menos sitio se quita antes lo menos importante: la barra (el contador ya dice cuántas van). */
+@media (min-width: 901px) and (max-width: 1180px) { .lote-cab .lote-estado progress { display: none; } }
 .lote-estado { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.6rem 1rem; margin-left: auto; }   /* el botón CSV queda anclado a la derecha: lo que cambia (texto, «Reintentar») se mueve a su izquierda */
-.lote-estado progress { width: 9rem; accent-color: var(--acento); }
+.lote-estado progress { width: 7rem; accent-color: var(--acento); }
 .lote-estado .dato { font-size: 0.9rem; white-space: nowrap; }
 .lote-estado .en-linea { margin: 0; }
 .lote-estado .boton-desactivado svg { opacity: 0.6; }
