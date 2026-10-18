@@ -69,6 +69,9 @@
   --aviso-borde: #c8902a;
   --aviso-texto: #f2c46d;
   --alerta: #ff8a80;
+  --peligro: #c62f29;
+  --peligro-hover: #de3b34;
+  --sobre-peligro: #ffffff;
   --foco: #ffd166;
   --descartado: #f2a65a;
   --cabeza-vacia: #1c2636;
@@ -96,6 +99,9 @@
     --aviso-borde: #b26a00;
     --aviso-texto: #6b3f00;
     --alerta: #b3261e;
+    --peligro: #b3261e;
+    --peligro-hover: #961e17;
+    --sobre-peligro: #ffffff;
     --foco: #b45309;
     --descartado: #8a3a00;
     --cabeza-vacia: #e3e8f0;
@@ -121,6 +127,9 @@
   --aviso-borde: #b26a00;
   --aviso-texto: #6b3f00;
   --alerta: #b3261e;
+  --peligro: #b3261e;
+  --peligro-hover: #961e17;
+  --sobre-peligro: #ffffff;
   --foco: #b45309;
   --descartado: #8a3a00;
   --cabeza-vacia: #e3e8f0;
@@ -673,8 +682,8 @@ select { max-width: 100%; }
   }
 
 /* ---- Eliminar de la plataforma ------------------------------------------ */
-button.peligro { background: var(--alerta); border-color: var(--alerta); color: var(--fondo); font-weight: 600; }
-button.peligro:hover { filter: brightness(1.08); }
+button.peligro { background: var(--peligro); border-color: var(--peligro); color: var(--sobre-peligro); font-weight: 600; }
+button.peligro:hover { background: var(--peligro-hover); border-color: var(--peligro-hover); }
 .menu-lista a.peligro { color: var(--alerta); }
 .menu-lista a.peligro:hover { background: var(--aviso-fondo); color: var(--alerta); }
 a.boton.boton-icono { padding-left: 0.6rem; padding-right: 0.6rem; min-width: 40px; justify-content: center; flex: none; }
