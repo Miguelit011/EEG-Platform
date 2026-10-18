@@ -401,11 +401,21 @@ details h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
 .etq.orient { transform: translate(-50%, -50%); background: transparent; border: 0; color: var(--texto-suave); font-family: var(--fuente); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; text-shadow: 0 0 6px var(--fondo), 0 0 2px var(--fondo); }
 
 /* ---- Lista de grabaciones ---------------------------------------------- */
-.intro { color: var(--texto-suave); margin: 0 0 1.5rem; max-width: 60ch; }
+.intro { color: var(--texto-suave); margin: 0 0 1.5rem; max-width: none; }
+p.nota { max-width: none; }
 .ico-grande { display: block; width: 36px; height: 36px; margin: 0 auto 0.5rem; color: var(--acento); }
+/* Columnas con el mismo ancho en todos los lotes. */
+@media (min-width: 761px) {
+  .tabla-lista { table-layout: fixed; width: 100%; min-width: 50rem; }
+  .tabla-lista th:nth-child(1) { width: 30%; }
+  .tabla-lista th:nth-child(2) { width: 18%; }
+  .tabla-lista th:nth-child(3) { width: 12%; }
+  .tabla-lista th:nth-child(4) { width: 25%; }
+  .tabla-lista th:nth-child(5) { width: 15%; }
+}
 .tabla-lista th { white-space: nowrap; }
 .tabla-lista td { vertical-align: middle; }
-.tabla-lista .archivo { min-width: 15rem; overflow-wrap: break-word; }
+.tabla-lista .archivo { overflow-wrap: anywhere; }
 .tabla-lista .archivo .dato { font-size: 0.9rem; }
 .chip { display: inline-block; white-space: nowrap; padding: 0.1rem 0.7rem; border: 1px solid var(--acento); border-radius: 999px; font-family: var(--fuente-datos); font-size: 0.85rem; font-weight: 600; color: var(--acento); background: var(--acento-fondo); }
 .chip-vacio { border-color: var(--borde-fuerte); color: var(--texto-suave); background: transparent; font-weight: 400; }
