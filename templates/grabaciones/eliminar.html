@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="cabecera-pagina">
+  <div>
+    <h1>{{ titulo }}</h1>
+  </div>
+</div>
+
+<section class="tarjeta confirmar-eliminar" aria-labelledby="titulo-confirmar">
+  {% if bloqueadas %}
+    <p class="aviso aviso-alerta" role="alert">
+      <svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>
+      No se puede eliminar ahora: {% if bloqueadas|length == 1 %}una grabación se está procesando{% else %}{{ bloqueadas|length }} grabaciones se están procesando{% endif %}.
+      Espera a que termine{% if bloqueadas|length != 1 %}n{% endif %} y vuelve a intentarlo.
+    </p>
+    <p><a class="boton" href="{% url 'grabaciones:lista' %}">Volver a la lista</a></p>
+  {% else %}
+    <h2 id="titulo-confirmar" class="solo-lectores">Confirmar la eliminación</h2>
+    <p>
+      {% if lote %}Se va a eliminar de la plataforma el <strong>lote {{ lote.pk }}</strong> ({{ grabaciones|length }} grabaci{{ grabaciones|length|pluralize:"ón,ones" }}):
+      {% else %}Se va a eliminar de la plataforma esta grabación:{% endif %}
+    </p>
+    <ul class="lista-eliminar">
+      {% for g in grabaciones|slice:":12" %}
+        <li><span class="dato">{{ g.nombre_original }}</span>{% if g.condicion %} <span class="chip">{{ g.condicion }}</span>{% endif %}
+          <span class="nota">· {{ g.get_estado_display|lower }}</span></li>
+      {% endfor %}
+      {% if grabaciones|length > 12 %}<li class="nota">… y {{ grabaciones|length|add:"-12" }} más.</li>{% endif %}
+    </ul>
+
+    <div class="aviso aviso-info" role="note">
+      <svg class="ico" aria-hidden="true"><use href="#i-ok"/></svg>
+      <span><strong>No se toca el archivo original.</strong> La plataforma solo guarda una copia del EDF; el que tienes en tu equipo queda como está.</span>
+    </div>
+
+    <p>Se borrará de la plataforma:</p>
+    <ul>
+      <li>el registro{% if grabaciones|length != 1 %} de cada grabación{% endif %} y sus resultados{% if n_procesadas %} (calidad, análisis y predicciones de los modelos){% endif %};</li>
+      <li>la copia del EDF que la plataforma guardó en su carpeta de datos.</li>
+    </ul>
+    <p class="nota">Esta acción no se puede deshacer. Para volver a verlo tendrías que subir de nuevo el archivo.</p>
+    {% if url_csv %}
+      <p><a class="boton" href="{{ url_csv }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>Descargar el CSV antes</a></p>
+    {% endif %}
+
+    <form method="post" class="acciones-eliminar">
+      {% csrf_token %}
+      <button type="submit" class="peligro">Eliminar de la plataforma</button>
+      <a class="boton" href="{% url 'grabaciones:lista' %}">Cancelar</a>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

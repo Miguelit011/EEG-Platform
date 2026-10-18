@@ -37,6 +37,7 @@
             {% else %}
               <span class="boton boton-csv boton-desactivado" title="Aún no hay grabaciones procesadas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>CSV del lote</span>
             {% endif %}
+            <a class="boton boton-icono peligro-suave" href="{% url 'grabaciones:eliminar_lote' lote.pk %}" title="Eliminar el lote {{ lote.pk }} de la plataforma" aria-label="Eliminar el lote {{ lote.pk }} de la plataforma"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 12a1.5 1.5 0 0 0 1.500 1.400h7A1.500 1.500 0 0 0 17 19l1-12M9 7V4.500A.5.500 0 0 1 9.500 4h5a.5.500 0 0 1 .5.500V7"/></svg></a>
           </div>
         </div>
         {% endwith %}
@@ -96,10 +97,18 @@
                         <button type="submit" class="secundario">Reprocesar</button>
                       </form>
                       {% endif %}
+                      <a class="peligro" href="{% url 'grabaciones:eliminar_grabacion' g.pk %}">Eliminar…</a>
                     </div>
                   </details>
+                {% elif g.estado == "procesando" %}
+                  <span class="desactivado" aria-disabled="true" title="Se podrá eliminar cuando termine de procesarse">—</span>
                 {% else %}
-                  <span class="desactivado" aria-disabled="true" title="Disponible cuando la grabación se procese">—</span>
+                  <details class="menu" data-pk="{{ g.pk }}">
+                    <summary class="boton" aria-label="Más acciones de {{ g.nombre_original }}"><svg class="ico" aria-hidden="true"><use href="#i-mas"/></svg></summary>
+                    <div class="menu-lista">
+                      <a class="peligro" href="{% url 'grabaciones:eliminar_grabacion' g.pk %}">Eliminar…</a>
+                    </div>
+                  </details>
                 {% endif %}
               </div></td>
             </tr>

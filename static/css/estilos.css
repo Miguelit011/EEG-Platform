@@ -671,3 +671,16 @@ select { max-width: 100%; }
   .portada { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .portada-escena { height: 56vh; min-height: 320px; }
   }
+
+/* ---- Eliminar de la plataforma ------------------------------------------ */
+button.peligro { background: var(--alerta); border-color: var(--alerta); color: var(--fondo); font-weight: 600; }
+button.peligro:hover { filter: brightness(1.08); }
+.menu-lista a.peligro { color: var(--alerta); }
+.menu-lista a.peligro:hover { background: var(--aviso-fondo); color: var(--alerta); }
+a.boton.boton-icono { padding-left: 0.6rem; padding-right: 0.6rem; min-width: 40px; justify-content: center; flex: none; }
+a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta); }
+.confirmar-eliminar .aviso { display: flex; align-items: flex-start; gap: 0.6rem; margin: 1rem 0; }
+.confirmar-eliminar .aviso .ico { flex: none; margin-top: 0.15rem; }
+.lista-eliminar { padding-left: 1.2rem; }
+.lista-eliminar li { margin-bottom: 0.3rem; }
+.acciones-eliminar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.25rem; }

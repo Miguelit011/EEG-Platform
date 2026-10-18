@@ -48,6 +48,12 @@ def comprobar_que_no_hay_otro():
             f"a la fuerza, espera unos segundos y vuelve a intentarlo.")
 
 
+def _guardar_si_existe(grabacion, campos):
+    """Guarda los campos; `False` si la grabación ya no existe (la han eliminado de la plataforma)."""
+    valores = {campo: getattr(grabacion, campo) for campo in campos}
+    return Grabacion.objects.filter(pk=grabacion.pk).update(**valores) > 0
+
+
 def _reclamar():
     """Toma la siguiente grabación en cola y la marca como en proceso."""
     grabacion = (Grabacion.objects.filter(estado=Grabacion.Estado.EN_COLA)
@@ -55,7 +61,9 @@ def _reclamar():
     if grabacion is not None:
         grabacion.estado = Grabacion.Estado.PROCESANDO
         grabacion.mensaje_error = ""
-        grabacion.save(update_fields=["estado", "mensaje_error"])
+        # Condición de carrera: si la eliminan justo ahora, se pasa a la siguiente.
+        if not _guardar_si_existe(grabacion, ["estado", "mensaje_error"]):
+            return _reclamar()
     return grabacion
 
 
@@ -68,7 +76,8 @@ def _guardar(grabacion, salida):
     else:
         grabacion.estado = Grabacion.Estado.ERROR
         grabacion.mensaje_error = salida["mensaje"]
-    grabacion.save(update_fields=["resultado", "n_canales_buenos", "estado", "mensaje_error"])
+    # Si la eliminaron mientras se procesaba, el resultado se descarta sin tumbar el procesador.
+    _guardar_si_existe(grabacion, ["resultado", "n_canales_buenos", "estado", "mensaje_error"])
 
 
 def _marcar_error_si_sigue_procesando(grabacion, mensaje):

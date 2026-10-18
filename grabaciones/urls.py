@@ -19,6 +19,8 @@ urlpatterns = [
     path("grabaciones/<int:pk>/modelos/", views.modelos_grabacion, name="modelos_grabacion"),
     path("grabaciones/<int:pk>/csv/", views.csv_grabacion, name="csv_grabacion"),
     path("lotes/<int:pk>/csv/", views.csv_lote, name="csv_lote"),
+    path("grabaciones/<int:pk>/eliminar/", views.eliminar_grabacion, name="eliminar_grabacion"),
+    path("lotes/<int:pk>/eliminar/", views.eliminar_lote, name="eliminar_lote"),
     path("grabaciones/<int:pk>/encolar/", views.encolar, name="encolar"),
     path("lotes/<int:pk>/reintentar/", views.reintentar_lote, name="reintentar_lote"),
 ]

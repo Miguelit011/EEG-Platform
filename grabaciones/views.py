@@ -2,11 +2,13 @@ from django.contrib import messages
 from django.db.models import Prefetch
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from grabaciones import contexto, modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
+from grabaciones.eliminacion import eliminar_grabaciones, procesandose
 from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
 from grabaciones.models import Grabacion, Lote, Procesador
 from grabaciones.subida import LoteForm, guardar_lote
@@ -182,3 +184,49 @@ def reintentar_lote(request, pk):
         estado=Grabacion.Estado.EN_COLA, mensaje_error="")
     messages.success(request, f"Lote {lote.pk}: {n} grabaciones vuelven a la cola.")
     return redirect("grabaciones:lista")
+
+
+def _confirmar_eliminacion(request, grabaciones, titulo, mensaje_ok, url_csv, lote=None):
+    """
+    Pantalla de confirmación (GET) y borrado (POST) de una o varias grabaciones.
+
+    Se borra de la plataforma (registro, resultados y la copia del EDF que guardó); el archivo
+    original no se toca. Las que se están procesando bloquean la operación entera.
+    """
+    bloqueadas = procesandose(grabaciones)
+    if request.method == "POST" and not bloqueadas:
+        resultado = eliminar_grabaciones(grabaciones)
+        if resultado["eliminadas"]:
+            messages.success(request, f"{mensaje_ok} de la plataforma. El archivo original no se ha tocado.")
+        if resultado["copias_sin_borrar"]:
+            n = resultado["copias_sin_borrar"]
+            messages.error(request, ("Una copia del EDF no se pudo borrar" if n == 1
+                                     else f"{n} copias del EDF no se pudieron borrar")
+                                    + " de la carpeta de datos de la plataforma.")
+        return redirect("grabaciones:lista")
+    if request.method == "POST":
+        messages.error(request, "No se puede eliminar mientras se procesa: espera a que termine.")
+    return render(request, "grabaciones/eliminar.html", {
+        "pantalla": "grabaciones", "titulo": titulo, "grabaciones": grabaciones, "lote": lote,
+        "bloqueadas": bloqueadas, "n_procesadas": sum(g.estado == Grabacion.Estado.PROCESADA for g in grabaciones),
+        "url_csv": url_csv,
+    })
+
+
+def eliminar_grabacion(request, pk):
+    """Confirma y elimina una grabación de la plataforma."""
+    grabacion = get_object_or_404(Grabacion, pk=pk)
+    url_csv = (reverse("grabaciones:csv_grabacion", args=[pk])
+               if grabacion.estado == Grabacion.Estado.PROCESADA else None)
+    return _confirmar_eliminacion(request, [grabacion], "Eliminar grabación de la plataforma",
+                                  "Grabación eliminada", url_csv)
+
+
+def eliminar_lote(request, pk):
+    """Confirma y elimina un lote entero (todas sus grabaciones) de la plataforma."""
+    lote = get_object_or_404(Lote, pk=pk)
+    grabaciones = list(lote.grabaciones.all())
+    url_csv = (reverse("grabaciones:csv_lote", args=[pk])
+               if any(g.estado == Grabacion.Estado.PROCESADA for g in grabaciones) else None)
+    return _confirmar_eliminacion(request, grabaciones, f"Eliminar el lote {lote.pk} de la plataforma",
+                                  f"Lote {lote.pk} eliminado", url_csv, lote=lote)

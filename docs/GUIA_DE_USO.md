@@ -91,6 +91,12 @@ La lista **se actualiza sola** cada pocos segundos mientras haya algo pendiente.
   *Reintentar las fallidas* lo hace con todas las del lote. *Reprocesar* repite una ya procesada
   (el resultado anterior se conserva hasta que termine el nuevo). Un archivo rechazado al subir
   no se puede reintentar: hay que volver a subirlo, corregido.
+- **Eliminar grabaciones y lotes.** En el menú **···** de cada fila está **Eliminar…**, y en la cabecera
+  de cada lote hay un botón con una papelera. Antes de borrar se muestra una pantalla que lo explica y
+  ofrece **Descargar el CSV antes**. Se elimina **de la plataforma**: el registro con sus resultados y
+  la copia del EDF que la plataforma guardó. **El archivo original que subiste no se toca**: la
+  plataforma solo trabaja con una copia. No se puede borrar lo que se está procesando; hay que esperar a
+  que termine. Borrar no se puede deshacer: para volver a verlo hay que subir de nuevo el archivo.
 - **El aviso ⚠ «N electrodos buenos».** Si una grabación tiene menos de 8 electrodos buenos, la
   lista lo avisa («se recomiendan al menos 8»); con menos de 6, dice que los **resultados no son
   fiables**. La grabación se procesa igualmente: es un aviso, no un bloqueo.
@@ -244,5 +250,6 @@ Un modelo nuevo se añade con **dos archivos y una línea de configuración**, s
 ## 10. Privacidad
 
 Los EDF y los resultados son de **participantes menores de edad**. Se guardan en la carpeta
-`EEG-Platform-datos`, **fuera del repositorio**, y no se envían a ningún servicio externo. No los
+`EEG-Platform-datos`, **fuera del repositorio**, y no se envían a ningún servicio externo. Puedes eliminar de la plataforma cualquier grabación o lote (se borra también la copia
+del EDF que guardó); tus archivos originales no se tocan. No los
 copies a git ni compartas capturas o CSV con datos reales sin permiso.
