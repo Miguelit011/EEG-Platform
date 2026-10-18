@@ -222,6 +222,8 @@ def aplicar(resultado, condicion):
     if condicion:
         aplicables = [(n, m) for n, m in cargados
                       if condicion.upper() in _mayus(m.ficha["condiciones_aplicables"])]
+        # Primero el que cubre todas las condiciones (reposo/tarea) y luego el de su grupo.
+        aplicables.sort(key=lambda par: _mayus(par[1].ficha["condiciones_aplicables"]) != universo)
         for nombre, modelo in aplicables:
             tarjetas.append(_tarjeta(nombre, modelo, resultado, "conocida", condicion)[0])
         if not aplicables:

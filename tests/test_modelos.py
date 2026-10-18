@@ -90,7 +90,7 @@ def por_id(resultado):
 
 def test_condicion_conocida_de_reposo():
     r = modelos.aplicar(FIXTURE, "OA")
-    assert [t["id"] for t in r["tarjetas"]] == [C1, C2]
+    assert [t["id"] for t in r["tarjetas"]] == [C2, C1]
     assert all(t["origen"] == "conocida" and t["estado"] == "ok" for t in r["tarjetas"])
     assert por_id(r)[C1]["clase"] == "OA" and por_id(r)[C2]["clase"] == "reposo"
     assert r["mensajes"] == []
@@ -102,7 +102,7 @@ def test_condicion_conocida_de_tarea():
 
 
 def test_la_condicion_no_distingue_mayusculas():
-    assert [t["id"] for t in modelos.aplicar(FIXTURE, "oa")["tarjetas"]] == [C1, C2]
+    assert [t["id"] for t in modelos.aplicar(FIXTURE, "oa")["tarjetas"]] == [C2, C1]
 
 
 def test_comparacion_con_la_condicion_usa_las_condiciones_por_clase():
