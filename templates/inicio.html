@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<canvas id="red-neuronal" class="red-neuronal" aria-hidden="true"></canvas>
+<section class="portada" id="portada" data-modo="oscuro"
+         data-cabeza="{% static 'models/cabeza.bin' %}" data-cerebro="{% static 'models/cerebro.bin' %}"
+         data-electrodos="{% static 'models/electrodos.json' %}" aria-labelledby="titulo-portada">
+  <div class="portada-texto">
+    <p class="portada-etiqueta dato">Emotiv EPOC X</p>
+    <h1 id="titulo-portada">Tu EEG, de la grabación al análisis</h1>
+    <p class="portada-lema">Procesa las grabaciones del casco, revisa la calidad de la señal y explora la potencia por banda. Todo en tu equipo.</p>
+    <a class="boton primario portada-boton" href="{% url 'grabaciones:lista' %}">
+      Ir a las grabaciones
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+    </a>
+  </div>
+
+  <div class="portada-escena">
+    <canvas id="escena" aria-hidden="true"></canvas>
+    <svg class="portada-fallback" viewBox="0 0 400 400" role="img" aria-label="Ilustración de una cabeza con un cerebro y sensores EEG">
+      <ellipse class="fb-cabeza" cx="200" cy="200" rx="120" ry="150"/>
+      <ellipse class="fb-cerebro" cx="200" cy="170" rx="85" ry="70"/>
+      <path class="fb-cerebro-linea" d="M130 170c20-30 40-20 55-35 15 15 35 5 50 20 15-8 25 0 35 15"/>
+      <circle class="fb-punto" cx="150" cy="120" r="6"/><circle class="fb-punto" cx="250" cy="120" r="6"/>
+      <circle class="fb-punto" cx="115" cy="200" r="6"/><circle class="fb-punto" cx="285" cy="200" r="6"/>
+      <circle class="fb-punto" cx="150" cy="275" r="6"/><circle class="fb-punto" cx="250" cy="275" r="6"/>
+    </svg>
+  </div>
+</section>
+<script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>
+<script type="module" src="{% static 'js/red-neuronal.js' %}"></script>
+<script type="module" src="{% static 'js/portada.js' %}"></script>
+{% endblock %}

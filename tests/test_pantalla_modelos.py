@@ -64,7 +64,7 @@ def test_sin_grabaciones_las_pestanas_llevan_a_una_pantalla_que_lo_explica(clien
 
 def test_las_pestanas_apuntan_a_la_ultima_grabacion_procesada_por_defecto(client):
     primera, ultima = procesada("uno_OA.edf"), procesada("dos_OA.edf")
-    html = pagina(client, "/")
+    html = pagina(client, "/grabaciones/")
     for nombre in SECCIONES.values():
         assert f'href="{reverse(nombre, args=[ultima.pk])}"' in html
         assert f'href="{reverse(nombre, args=[primera.pk])}"' not in html.split("<main")[0]
@@ -81,7 +81,7 @@ def test_se_recuerda_la_ultima_grabacion_abierta_en_cualquier_pantalla(client):
     primera, ultima = procesada("uno_OA.edf"), procesada("dos_OA.edf")
     client.get(reverse("grabaciones:analisis", args=[primera.pk]))
     assert client.cookies["grabacion_activa"].value == str(primera.pk)
-    html = pagina(client, "/")                                   # en la lista, la activa es la recordada
+    html = pagina(client, "/grabaciones/")                                   # en la lista, la activa es la recordada
     assert f'href="{reverse("grabaciones:calidad", args=[primera.pk])}"' in html
     assert client.get("/modelos/").url == reverse("grabaciones:modelos_grabacion", args=[primera.pk])
     assert ultima.pk != primera.pk

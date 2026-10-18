@@ -215,7 +215,7 @@ def test_la_palabra_fatiga_solo_aparece_en_el_bloque_de_modelos(client):
         html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
         assert "fatiga" in html.lower()                      # el aviso fijo, dentro del bloque
         assert "fatiga" not in sin_bloque_de_modelos(html).lower()
-    for url in ("/", reverse("grabaciones:calidad", args=[g.pk])):
+    for url in ("/grabaciones/", reverse("grabaciones:calidad", args=[g.pk])):
         assert "fatiga" not in client.get(url).content.decode().lower()
 
 

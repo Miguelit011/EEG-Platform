@@ -21,7 +21,7 @@ def test_grabaciones_vacia(client):
 
 
 def test_navegacion_a_las_tres_pantallas(client):
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert 'aria-current="page">Grabaciones' in html
     # Calidad, Análisis y Modelos son de una grabación, pero la barra siempre funciona: sin
     # ninguna procesada llevan a una pantalla que lo explica.
@@ -32,7 +32,7 @@ def test_navegacion_a_las_tres_pantallas(client):
 
 
 def test_css_servido_desde_static(client):
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert '/static/css/estilos.css' in html
 
 
@@ -63,3 +63,12 @@ def test_runserver_propio_y_estaticos_sin_cache():
     respuesta = manejador.get_response(RequestFactory().get("/static/css/estilos.css"))
     assert respuesta.status_code == 200 and respuesta["Cache-Control"] == "no-cache"
     respuesta.close()
+
+
+def test_portada_en_la_raiz(client):
+    respuesta = client.get("/")
+    html = respuesta.content.decode()
+    assert respuesta.status_code == 200 and "inicio.html" in [t.name for t in respuesta.templates]
+    assert 'id="escena"' in html and 'models/electrodos.json' in html
+    assert 'href="/grabaciones/"' in html
+    assert "fatiga" not in html.lower()

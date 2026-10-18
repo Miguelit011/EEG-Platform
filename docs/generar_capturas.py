@@ -196,7 +196,7 @@ def main():
             return imagen, tarjetas(imagen)
 
         # Pantalla 1: grabaciones
-        imagen, t = pagina("/", "pantalla_1_grabaciones.png")
+        imagen, t = pagina("/grabaciones/", "pantalla_1_grabaciones.png")
         guardar_recorte(imagen, t, 0, 0, "lista_subida.png")
         guardar_recorte(imagen, t, 1, 1, "lista_lotes.png")
         marcar_procesador(activo=False)

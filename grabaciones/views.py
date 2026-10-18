@@ -33,6 +33,11 @@ def _pagina(request, formulario):
                   {"pantalla": "grabaciones", "formulario": formulario, **_contexto_lista()})
 
 
+def inicio(request):
+    """Portada: ilustración y acceso a las grabaciones. No consulta datos."""
+    return render(request, "inicio.html", {"pantalla": "inicio"})
+
+
 def lista(request):
     """Pantalla 1: subida de EDF y lista de grabaciones."""
     return _pagina(request, LoteForm())

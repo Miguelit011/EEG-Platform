@@ -256,7 +256,7 @@ def test_la_lista_enlaza_a_calidad_y_avisa(client):
                               ("mal.edf", "procesada", 5), ("cola.edf", "en_cola", None)]:
         Grabacion.objects.create(lote=lote, nombre_original=nombre, estado=estado,
                                  n_canales_buenos=n)
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     tabla = html[html.index("<table"):html.index("</table>")]
     assert tabla.count(">Calidad</a>") == 3         # solo las procesadas, en el menú de cada fila
     assert "7 electrodos buenos (se recomiendan al menos 8)." in html
@@ -266,7 +266,7 @@ def test_la_lista_enlaza_a_calidad_y_avisa(client):
 
 def test_la_lista_no_carga_el_json_de_resultados(client):
     grabacion_con(FIXTURE)
-    contexto = client.get("/").context
+    contexto = client.get("/grabaciones/").context
     g = contexto["lotes"][0].grabaciones.all()[0]
     assert "resultado" in g.get_deferred_fields()
 

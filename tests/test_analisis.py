@@ -322,7 +322,7 @@ def test_navegacion_y_enlaces(client):
     html = client.get(url(g)).content.decode()
     assert re.search(r'<a href="[^"]+analisis/"\s+aria-current="page">Análisis', html)
     assert reverse("grabaciones:calidad", args=[g.pk]) in html
-    lista = client.get("/").content.decode()
+    lista = client.get("/grabaciones/").content.decode()
     assert f'href="{url(g)}">Análisis</a>' in lista
 
 

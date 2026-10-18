@@ -210,7 +210,7 @@ def test_no_se_reintenta_lo_rechazado_al_subir(client):
     client.post(reverse("grabaciones:encolar", args=[g.pk]))
     g.refresh_from_db()
     assert g.estado == "error"
-    assert "Reintentar" not in client.get("/").content.decode()
+    assert "Reintentar" not in client.get("/grabaciones/").content.decode()
 
 
 def test_reintentar_las_fallidas_del_lote(client, bytes_edf):
@@ -232,7 +232,7 @@ def test_reintentar_las_fallidas_del_lote(client, bytes_edf):
 
 def test_aviso_si_hay_cola_y_no_hay_procesador(client, bytes_edf):
     subir(client, [bytes_edf])
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert "el procesador no está en marcha" in html
     assert "manage.py procesar" in html
 
@@ -240,7 +240,7 @@ def test_aviso_si_hay_cola_y_no_hay_procesador(client, bytes_edf):
 def test_sin_aviso_si_el_procesador_da_senales(client, bytes_edf):
     subir(client, [bytes_edf])
     Procesador.objects.create(pid=1234, procesos=3, ultimo_latido=timezone.now())
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert "no está en marcha" not in html
     assert "Procesando en segundo plano con 3 proceso(s)" in html
 
@@ -250,20 +250,20 @@ def test_aviso_si_las_senales_caducan(client, bytes_edf, settings):
     Procesador.objects.create(
         pid=1234, procesos=3,
         ultimo_latido=timezone.now() - timedelta(seconds=settings.PROCESADOR_LATIDO_CADUCA_S + 1))
-    assert "el procesador no está en marcha" in client.get("/").content.decode()
+    assert "el procesador no está en marcha" in client.get("/grabaciones/").content.decode()
 
 
 def test_sin_cola_no_hay_aviso(client, bytes_edf):
     subir(client, [bytes_edf])
     procesador.trabajar(1, una_vez=True, fabrica_ejecutor=EjecutorSincrono())
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert "no está en marcha" not in html and 'data-activo="0"' in html
 
 
 def test_progreso_del_lote(client, bytes_edf):
     subir(client, [bytes_edf, bytes_edf, bytes_edf, b"esto no es un edf"])
     Grabacion.objects.filter(pk=Grabacion.objects.first().pk).update(estado="procesada")
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert "1 de 4 procesadas" in html and "1 con error" in html and "2 pendientes" in html
     assert Lote.objects.get().progreso == {
         "total": 4, "procesadas": 1, "con_error": 1, "pendientes": 2}

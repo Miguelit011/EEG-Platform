@@ -87,7 +87,7 @@ def test_sin_archivos_no_crea_lote(client):
 
 
 def test_parametros_por_defecto_son_los_del_estudio(client):
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert '<option value="car_condicional" selected>' in html
     assert '<option value="1-30" selected>' in html
     assert 'name="notch" id="id_notch" checked' in html

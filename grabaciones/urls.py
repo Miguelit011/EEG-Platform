@@ -5,7 +5,8 @@ from grabaciones import views
 app_name = "grabaciones"
 
 urlpatterns = [
-    path("", views.lista, name="lista"),
+    path("", views.inicio, name="inicio"),
+    path("grabaciones/", views.lista, name="lista"),
     path("subir/", views.subir, name="subir"),
     path("lista/", views.lista_parcial, name="lista_parcial"),
     path("calidad/", views.atajo, {"seccion": "calidad"}, name="atajo_calidad"),

@@ -210,6 +210,8 @@ Resultado: dirección «visor de neuroimagen» (tema oscuro y claro, IBM Plex), 
 
 Nota: la Fase 5 decidió «un círculo por electrodo, sin interpolación». La Fase 9 la sustituye por una interpolación suave **rotulada como tal**, manteniendo el valor medido de cada electrodo visible y los descartados sin dato; se registrará en `DECISIONES.md`.
 
+**Ampliación (2026-10-18): portada.** La web abre en `/` con una portada visual y la lista de grabaciones pasa a `/grabaciones/`. Escena 3D (cabeza translúcida, cerebro, 14 sensores y pulsos), fondo de neuronas a la izquierda con efecto al pasar el ratón, título, frase y un botón a Grabaciones; respaldo sin 3D y tema claro propio. Decisiones en `docs/DECISIONES.md`. **Pendiente:** capturas WebP del respaldo y `/critique` + `/polish` de Impeccable sobre la portada.
+
 ---
 
 ## Prompts

@@ -279,7 +279,7 @@ def test_exportar_algo_que_no_existe(client):
 def test_botones_en_la_lista(client):
     g = grabacion_con(FIXTURE)
     Grabacion.objects.create(lote=g.lote, nombre_original="x.edf", estado="en_cola")
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     # Botón compacto del lote: lleva el recuento de procesadas en su título.
     assert re.search(rf'href="{reverse("grabaciones:csv_lote", args=[g.lote_id])}" '
                      r'title="Descargar el CSV del lote \(1 procesadas\)">.*?CSV del lote</a>', html, re.S)
@@ -289,7 +289,7 @@ def test_botones_en_la_lista(client):
 
 def test_boton_del_lote_desactivado_sin_procesadas(client):
     grabacion_con(None, estado="en_cola")
-    html = client.get("/").content.decode()
+    html = client.get("/grabaciones/").content.decode()
     assert "boton-desactivado" in html and "csv/" not in html
 
 

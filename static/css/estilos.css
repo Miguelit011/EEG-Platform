@@ -616,3 +616,32 @@ a.boton-csv { padding-left: 0.7rem; padding-right: 0.8rem; }
   .modelo-ficha { padding: 1.25rem 1.1rem; }
   .mini-datos { grid-template-columns: auto auto; }
 }
+
+/* ---- Portada ------------------------------------------------------------ */
+.portada { position: relative; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 1rem 2rem; align-items: center; min-height: min(78vh, 680px); margin: 0 0 1rem; }
+/* Fondo de neuronas: fijo detrás de todo el contenido, solo existe en la portada. */
+.red-neuronal { opacity: 0.85; position: fixed; top: 0; left: 0; width: 50vw; height: 100vh; z-index: -1; pointer-events: none; -webkit-mask-image: linear-gradient(to right, #000 55%, transparent); mask-image: linear-gradient(to right, #000 55%, transparent); }
+.portada-etiqueta { margin: 0 0 0.6rem; color: var(--acento); font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.portada h1 { font-size: clamp(2.3rem, 1.5rem + 3vw, 4rem); line-height: 1.04; margin: 0 0 1.1rem; }
+.portada-texto h1, .portada-lema { text-shadow: 0 0 14px var(--fondo), 0 0 28px var(--fondo); }
+.portada-lema { color: var(--texto-suave); font-size: 1.2rem; max-width: 40ch; margin: 0 0 1.75rem; }
+.portada-boton { min-height: 48px; padding: 0.6rem 1.4rem; font-size: 1.05rem; border-radius: 999px; }
+.portada-boton svg { width: 20px; height: 20px; }
+.portada-escena { position: relative; height: min(70vh, 600px); }
+.portada-escena::before { content: ""; position: absolute; inset: 4% 0; border-radius: 50%; background: radial-gradient(closest-side, var(--acento-fondo), transparent); filter: blur(24px); }
+.portada-escena canvas { position: relative; display: block; width: 100%; height: 100%; -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent); mask-image: linear-gradient(to bottom, #000 78%, transparent); }
+
+/* Respaldo sin 3D (sin WebGL, lento o movimiento reducido): ilustración fija con los mismos tokens. */
+.portada-fallback { display: none; position: relative; width: 100%; height: 100%; }
+.portada[data-sin3d] .portada-fallback { display: block; }
+.portada[data-sin3d] canvas { display: none; }
+.fb-cabeza { fill: var(--superficie-2); stroke: var(--borde-fuerte); stroke-width: 3; }
+.fb-cerebro { fill: var(--acento-fondo); stroke: var(--acento); stroke-width: 3; }
+.fb-cerebro-linea { fill: none; stroke: var(--acento); stroke-width: 2; stroke-linecap: round; }
+.fb-punto { fill: var(--acento); }
+
+@media (max-width: 860px) {
+  .red-neuronal { width: 100vw; height: 55vh; -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent); mask-image: linear-gradient(to bottom, #000 50%, transparent); }
+  .portada { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .portada-escena { height: 56vh; min-height: 320px; }
+  }
