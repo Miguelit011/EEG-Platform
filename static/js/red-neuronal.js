@@ -1,14 +1,29 @@
-// Fondo de la portada (zona izquierda): neuronas con soma, dendritas ramificadas y axones, con pulsos de
+// Fondo de la portada: neuronas con soma, dendritas ramificadas y axones, con pulsos de
 // luz que viajan por los axones. Es decorativo y procedural: no representa datos. Canvas 2D.
 const lienzo = document.getElementById("red-neuronal");
 if (lienzo) {
   const ctx = lienzo.getContext("2d");
+  const texto = document.querySelector(".portada-texto");
+  const escena3d = document.querySelector(".portada-escena");
+  // Caja del texto realmente visible (no de la columna entera): une las líneas de título, frase y etiqueta y el botón.
+  function cajaTexto() {
+    if (!texto) return null;
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+    texto.querySelectorAll("h1, .portada-lema, .portada-etiqueta, .portada-boton").forEach(function (el) {
+      const rango = document.createRange(); rango.selectNodeContents(el);
+      const c = el.classList.contains("portada-boton") ? el.getBoundingClientRect() : rango.getBoundingClientRect();
+      if (!c.width) return;
+      l = Math.min(l, c.left); t = Math.min(t, c.top); r = Math.max(r, c.right); b = Math.max(b, c.bottom);
+    });
+    return r > l ? { left: l, top: t, right: r, bottom: b, width: r - l, height: b - t } : null;
+  }
   const reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let ancho = 0, alto = 0, ratio = 1;
   let nodos = [], aristas = [], pulsos = [];
   let oscuro = true, acento = [76, 201, 240];
   let ratonX = -9999, ratonY = -9999;     // posición del ratón en el lienzo; lejos = sin efecto
-  const RADIO_LUZ = 260;                  // distancia (px) a la que una neurona se ilumina por el ratón
+  const ESC = 1.05;                       // escala del tamaño de las neuronas
+  const RADIO_LUZ = 200;                  // distancia (px) a la que una neurona se ilumina por el ratón
   let visible = !document.hidden, ultimo = 0, acumulado = 0, cuadros = 0;
 
   // Generador con semilla: la red es la misma en cada visita y al redimensionar.
@@ -28,26 +43,49 @@ if (lienzo) {
     lienzo.width = Math.round(ancho * ratio); lienzo.height = Math.round(alto * ratio);
     if (!ancho || !alto) return;
     const rnd = semilla(20261018);
-    const n = Math.max(6, Math.min(20, Math.round(ancho * alto / 52000)));
     nodos = [];
-    for (let intento = 0; nodos.length < n && intento < n * 80; intento++) {
-      const x = 30 + rnd() * (ancho - 60), y = 30 + rnd() * (alto - 60);
-      if (nodos.some(function (o) { return Math.hypot(o.x - x, o.y - y) < 150; })) continue;
-      const z = 0.55 + rnd() * 0.45;
+    const crear = function (x, y, zFija) {
+      const z = zFija || 0.55 + rnd() * 0.45;
       const lobulos = 6 + Math.floor(rnd() * 3), blob = [];
       for (let i = 0; i < lobulos; i++) blob.push(0.78 + rnd() * 0.44);
       const dendritas = [], k = 5 + Math.floor(rnd() * 3), base = rnd() * 6.283;
       for (let i = 0; i < k; i++) {
         const ang = base + (i / k) * 6.283 + (rnd() - 0.5) * 0.5;
-        const largo = (55 + rnd() * 60) * z;
+        const largo = (55 + rnd() * 60) * z * ESC;
         const ramas = [];
         const nr = 1 + Math.floor(rnd() * 2);
         for (let j = 0; j < nr; j++) ramas.push({ t: 0.45 + rnd() * 0.3, da: (rnd() < 0.5 ? -1 : 1) * (0.5 + rnd() * 0.6), l: largo * (0.35 + rnd() * 0.3) });
         dendritas.push({ a: ang, l: largo, c: (rnd() - 0.5) * 0.8, ramas: ramas });
       }
-      nodos.push({ x: x, y: y, z: z, r: (7 + rnd() * 4) * z, blob: blob, rot: rnd() * 6.283,
+      nodos.push({ x: x, y: y, z: z, r: (7 + rnd() * 4) * z * ESC, blob: blob, rot: rnd() * 6.283,
                    ax: 8 + rnd() * 14, ay: 8 + rnd() * 14, w1: 0.05 + rnd() * 0.07, w2: 0.04 + rnd() * 0.07,
                    f1: rnd() * 6.28, f2: rnd() * 6.28, luz: 0, dendritas: dendritas, vecinos: [], px: x, py: y });
+    };
+    // Reparto homogéneo ("mejor candidato"): cada neurona se coloca donde queda más lejos de las ya puestas,
+    // fuera de las zonas despejadas (texto y cabeza), para no dejar huecos grandes ni amontonarlas.
+    const caja = lienzo.getBoundingClientRect(), t = cajaTexto(), e3 = escena3d && escena3d.getBoundingClientRect();
+    const hueco = [];
+    if (t) hueco.push(function (x, y) { return x > t.left - caja.left - 30 && x < t.right - caja.left + 30 && y > t.top - caja.top - 30 && y < t.bottom - caja.top + 30; });
+    if (e3) {
+      const cx = e3.left - caja.left + e3.width / 2, cy = e3.top - caja.top + e3.height / 2;
+      const rx = e3.width * (e3.width < 600 ? 0.55 : 0.36) + 30, ry = e3.height * 0.56 + 30;
+      hueco.push(function (x, y) { return Math.pow((x - cx) / rx, 2) + Math.pow((y - cy) / ry, 2) < 1; });
+    }
+    const prohibido = function (x, y) { return hueco.some(function (f) { return f(x, y); }); };
+    let libre = 0;                                          // área libre estimada (muestreo)
+    for (let i = 0; i < 400; i++) if (!prohibido(rnd() * ancho, rnd() * alto)) libre++;
+    const espaciado = 160;
+    const objetivo = Math.max(5, Math.min(70, Math.round((libre / 400) * ancho * alto / (espaciado * espaciado))));
+    for (let i = 0; i < objetivo; i++) {
+      let mejor = null, mejorD = -1;
+      for (let c = 0; c < 40; c++) {
+        const x = rnd() * ancho, y = 10 + rnd() * (alto - 20);
+        if (prohibido(x, y)) continue;
+        let d = Infinity;
+        for (let j = 0; j < nodos.length; j++) d = Math.min(d, Math.hypot(nodos[j].x - x, nodos[j].y - y));
+        if (d > mejorD) { mejorD = d; mejor = [x, y]; }
+      }
+      if (mejor) crear(mejor[0], mejor[1]);
     }
     aristas = [];
     const yaHay = {};
@@ -116,7 +154,7 @@ if (lienzo) {
     aristas.forEach(function (e, i) {
       const a = nodos[e.a], b = nodos[e.b], z = (a.z + b.z) / 2, c = controles[i];
       const lz = (a.luz + b.luz) / 2;
-      [[5 * z * (1 + lz), 0.07 + 0.12 * lz], [1.6 * z * (1 + 0.5 * lz), Math.min(1, (oscuro ? 0.5 : 0.45) + 0.4 * lz)]].forEach(function (par) {
+      [[4 * z * (1 + lz), 0.07 + 0.12 * lz], [1.1 * z * (1 + 0.5 * lz), Math.min(1, (oscuro ? 0.5 : 0.45) + 0.4 * lz)]].forEach(function (par) {
         ctx.strokeStyle = col(fibra, par[1]); ctx.lineWidth = par[0]; ctx.lineCap = "round";
         ctx.beginPath(); ctx.moveTo(a.px, a.py); ctx.quadraticCurveTo(c[0], c[1], b.px, b.py); ctx.stroke();
       });
@@ -128,11 +166,11 @@ if (lienzo) {
       n.dendritas.forEach(function (d) {
         const x2 = n.px + Math.cos(d.a) * d.l, y2 = n.py + Math.sin(d.a) * d.l;
         const cx = n.px + Math.cos(d.a + d.c) * d.l * 0.55, cy = n.py + Math.sin(d.a + d.c) * d.l * 0.55;
-        afinada(n.px, n.py, cx, cy, x2, y2, 4.2 * n.z);
+        afinada(n.px, n.py, cx, cy, x2, y2, 4.2 * n.z * ESC);
         d.ramas.forEach(function (r) {
           const p = bez(n.px, n.py, cx, cy, x2, y2, r.t), ang = d.a + r.da;
           const x3 = p[0] + Math.cos(ang) * r.l, y3 = p[1] + Math.sin(ang) * r.l;
-          afinada(p[0], p[1], (p[0] + x3) / 2 + Math.sin(ang) * 6, (p[1] + y3) / 2 - Math.cos(ang) * 6, x3, y3, 2.4 * n.z);
+          afinada(p[0], p[1], (p[0] + x3) / 2 + Math.sin(ang) * 6 * ESC, (p[1] + y3) / 2 - Math.cos(ang) * 6 * ESC, x3, y3, 2.4 * n.z * ESC);
         });
       });
       // soma: contorno irregular con un núcleo más claro
@@ -171,16 +209,37 @@ if (lienzo) {
       for (let i = 0; i < cola; i++) {
         const q0 = tramo(Math.max(0, p.u - (i + 1) * 0.02)), q1 = tramo(Math.max(0, p.u - i * 0.02));
         ctx.strokeStyle = col(pulso, (1 - i / cola) * 0.9);
-        ctx.lineWidth = (3 - i * 0.3) * p.r;
+        ctx.lineWidth = (2.2 - i * 0.22) * p.r;
         ctx.beginPath(); ctx.moveTo(q0[0], q0[1]); ctx.lineTo(q1[0], q1[1]); ctx.stroke();
       }
-      const h = tramo(p.u), r = 11 * p.r;
+      const h = tramo(p.u), r = 8 * p.r;
       const g = ctx.createRadialGradient(h[0], h[1], 0, h[0], h[1], r);
       g.addColorStop(0, oscuro ? "rgba(255,240,215,0.98)" : col(pulso, 1));
       g.addColorStop(0.3, col(pulso, 0.55)); g.addColorStop(1, col(pulso, 0));
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(h[0], h[1], r, 0, 6.283); ctx.fill();
     });
+    despejarZonas();
     ctx.globalCompositeOperation = "source-over";
+  }
+
+  // Zonas sin neuronas, con bordes suaves: el bloque de texto (rectángulo) y la escena 3D (elipse).
+  function despejarZonas() {
+    const c = lienzo.getBoundingClientRect();
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    if (texto && cajaTexto()) {
+      const r = cajaTexto(), x = r ? r.left - c.left : 0, y = r ? r.top - c.top : 0;
+      for (let i = 12; i >= 0; i--) { const m = 12 + i * 3; ctx.fillRect(x - m, y - m, r.width + 2 * m, r.height + 2 * m); }
+    }
+    if (escena3d) {
+      const r = escena3d.getBoundingClientRect();
+      const cx = r.left - c.left + r.width / 2, cy = r.top - c.top + r.height / 2;
+      const rx = r.width * (r.width < 600 ? 0.55 : 0.36), ry = r.height * 0.56;
+      for (let i = 16; i >= 0; i--) {
+        const m = i * 6.25;
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx + m, ry + m, 0, 0, 6.283); ctx.fill();
+      }
+    }
   }
 
   function cuadro(ahora) {

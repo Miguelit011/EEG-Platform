@@ -38,6 +38,32 @@ async function cargarMalla(url) {
   return g;
 }
 
+// Curvas de nivel de una malla (cortes con planos x, y o z constantes): la misma rejilla del visor de Análisis.
+function contornos(geometria, planos) {
+  const pos = geometria.attributes.position.array, idx = geometria.index.array;
+  const segmentos = [];
+  planos.forEach(function (plano) {
+    const eje = plano[0], nivel = plano[1];
+    for (let t = 0; t < idx.length; t += 3) {
+      const cortes = [];
+      for (let k = 0; k < 3; k++) {
+        const a = idx[t + k], b = idx[t + ((k + 1) % 3)];
+        const da = pos[a * 3 + eje] - nivel, db = pos[b * 3 + eje] - nivel;
+        if ((da < 0) !== (db < 0)) {
+          const f = da / (da - db);
+          cortes.push(pos[a * 3] + (pos[b * 3] - pos[a * 3]) * f,
+                      pos[a * 3 + 1] + (pos[b * 3 + 1] - pos[a * 3 + 1]) * f,
+                      pos[a * 3 + 2] + (pos[b * 3 + 2] - pos[a * 3 + 2]) * f);
+        }
+      }
+      if (cortes.length === 6) segmentos.push.apply(segmentos, cortes);
+    }
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(segmentos), 3));
+  return g;
+}
+
 const GLSL_PULSOS = `
   uniform vec3 uSens[14]; uniform float uFase[14]; uniform float uT; uniform vec3 uCentro;
   float pulsos(vec3 p) {
@@ -120,6 +146,16 @@ async function escena() {
   cabeza.renderOrder = 1;
   modelo.add(cabeza);
 
+  // Malla de la cabeza, como en Análisis (mismos niveles de corte).
+  const niveles = [];
+  [-0.9, -0.45, 0, 0.45, 0.9].forEach(function (n) { niveles.push([2, n]); });
+  [-0.8, -0.4, 0, 0.4, 0.8].forEach(function (n) { niveles.push([0, n]); });
+  [-1.2, -0.8, -0.4, 0, 0.4, 0.8].forEach(function (n) { niveles.push([1, n]); });
+  const matRejilla = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.5, depthWrite: false });
+  const rejilla = new THREE.LineSegments(contornos(cabezaG, niveles), matRejilla);
+  rejilla.renderOrder = 2;
+  modelo.add(rejilla);
+
   // Sensores como en el visor de Análisis: discos concentricos pegados al cuero cabelludo y orientados a él.
   const sensores = nombres.map(function (_, i) {
     const normal = normales[i], p = pos[i];
@@ -149,6 +185,8 @@ async function escena() {
       uni.uBase.value.set(0.52, 0.72, 0.9);
       uni.uPulso.value.set(0.82, 0.3, 0.0);
     }
+    matRejilla.color.copy(t.oscuro ? t.acento : new THREE.Color(0.1, 0.25, 0.45));
+    matRejilla.opacity = t.oscuro ? 0.45 : 0.5;
     cabeza.material.blending = t.oscuro ? THREE.AdditiveBlending : THREE.NormalBlending;
     cabeza.material.needsUpdate = true;
     sensores.forEach(function (s) {
