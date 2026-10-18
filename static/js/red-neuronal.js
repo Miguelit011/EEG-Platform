@@ -230,6 +230,10 @@ if (lienzo) {
     if (texto && cajaTexto()) {
       const r = cajaTexto(), x = r ? r.left - c.left : 0, y = r ? r.top - c.top : 0;
       for (let i = 12; i >= 0; i--) { const m = 12 + i * 3; ctx.fillRect(x - m, y - m, r.width + 2 * m, r.height + 2 * m); }
+      // El núcleo del texto queda totalmente limpio: ni un píxel de neurona bajo las letras.
+      ctx.fillStyle = "#000";
+      ctx.fillRect(x - 12, y - 12, r.width + 24, r.height + 24);
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
     }
     if (escena3d) {
       const r = escena3d.getBoundingClientRect();

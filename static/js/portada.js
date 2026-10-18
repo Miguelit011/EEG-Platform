@@ -1,7 +1,8 @@
 // Portada: cabeza translúcida con el cerebro dentro, los 14 sensores en su sitio y pulsos de luz
 // que salen de cada sensor. Es decorativo: los pulsos no son datos. Mallas de la plantilla
 // fsaverage (las mismas del visor de Análisis) y posiciones de electrodos de EEG-Library.
-import * as THREE from "three";
+// Three.js se carga solo cuando hace falta (con movimiento reducido o sin WebGL no se descarga).
+let THREE;
 
 const portada = document.getElementById("portada");
 const lienzo = document.getElementById("escena");
@@ -12,10 +13,13 @@ function leerTema() {
   const s = getComputedStyle(document.documentElement);
   const acento = (s.getPropertyValue("--acento") || "#4cc9f0").trim();
   const fondo = (s.getPropertyValue("--fondo") || "#0b0f15").trim();
-  const c = new THREE.Color(fondo);
-  const oscuro = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) < 0.5;
+  const canal = function (i) {                       // sRGB (0-255) a luminancia lineal
+    const v = parseInt(fondo.replace("#", "").substr(i * 2, 2), 16) / 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  const oscuro = (0.2126 * canal(0) + 0.7152 * canal(1) + 0.0722 * canal(2)) < 0.5;
   portada.dataset.modo = oscuro ? "oscuro" : "claro";
-  return { acento: new THREE.Color(acento), oscuro: oscuro };
+  return { acentoCss: acento, oscuro: oscuro };
 }
 
 // ---- Escena ---------------------------------------------------------------------------------------
@@ -175,7 +179,8 @@ async function escena() {
   // Tema
   function aplicarTema() {
     const t = leerTema();
-    uni.uAcento.value.copy(t.acento);
+    const acento = new THREE.Color(t.acentoCss);
+    uni.uAcento.value.copy(acento);
     uni.uOscuro.value = t.oscuro ? 1 : 0;
     const fondo = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue("--fondo").trim() || "#0b0f15");
     if (t.oscuro) {
@@ -185,12 +190,12 @@ async function escena() {
       uni.uBase.value.set(0.52, 0.72, 0.9);
       uni.uPulso.value.set(0.82, 0.3, 0.0);
     }
-    matRejilla.color.copy(t.oscuro ? t.acento : new THREE.Color(0.1, 0.25, 0.45));
+    matRejilla.color.copy(t.oscuro ? acento : new THREE.Color(0.1, 0.25, 0.45));
     matRejilla.opacity = t.oscuro ? 0.45 : 0.5;
     cabeza.material.blending = t.oscuro ? THREE.AdditiveBlending : THREE.NormalBlending;
     cabeza.material.needsUpdate = true;
     sensores.forEach(function (s) {
-      s.halo.material.color.copy(t.acento); s.aro.material.color.copy(fondo); s.centro.material.color.copy(t.acento);
+      s.halo.material.color.copy(acento); s.aro.material.color.copy(fondo); s.centro.material.color.copy(acento);
     });
   }
   aplicarTema();
@@ -260,5 +265,7 @@ if (reducido || !webglDisponible()) {      // movimiento reducido o sin WebGL: i
   leerTema();
   portada.dataset.sin3d = "1";
 } else {
-  escena().catch(function () { leerTema(); portada.dataset.sin3d = "1"; });
+  import("three")
+    .then(function (modulo) { THREE = modulo; return escena(); })
+    .catch(function () { leerTema(); portada.dataset.sin3d = "1"; });
 }
