@@ -47,9 +47,10 @@
 </section>
 
 <div class="dos-columnas">
+  <div class="columna-mapa">
   <section class="tarjeta" aria-labelledby="titulo-mapa">
     <h2 id="titulo-mapa">Mapa de electrodos</h2>
-    <div id="mapa-calidad" data-malla-cabeza="{% static 'models/cabeza.bin' %}" data-malla-cerebro="{% static 'models/cerebro.bin' %}">
+    <div id="mapa-calidad" class="mapa-cargando cargando" data-malla-cabeza="{% static 'models/cabeza.bin' %}" data-malla-cerebro="{% static 'models/cerebro.bin' %}">
       {% include "grabaciones/_mapa_cabeza.html" with puntos=resumen.electrodos mapa_titulo="Estado de los electrodos" mapa_descripcion=resumen.titular %}
     </div>
     {{ resumen.mapa_real|json_script:"datos-calidad-mapa" }}
@@ -58,6 +59,19 @@
       <li><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g class="punto punto-descartado"><circle class="cruz-aro" cx="13" cy="13" r="10"/><line class="cruz-raya" x1="9" y1="9" x2="17" y2="17"/><line class="cruz-raya" x1="17" y1="9" x2="9" y2="17"/></g></svg> Descartado</li>
     </ul>
   </section>
+
+  <section class="tarjeta" aria-labelledby="titulo-pipeline">
+    <h2 id="titulo-pipeline">Lo que aplicó el procesado</h2>
+    <dl class="datos">
+      {% for nombre, valor in resumen.pipeline %}
+        <dt>{{ nombre }}</dt><dd>{{ valor }}</dd>
+      {% endfor %}
+    </dl>
+    {% if grabacion.remuestreada %}
+      <p class="nota">La grabación original estaba a {{ grabacion.sfreq_original_hz|floatformat:"-1" }} Hz y se remuestreó a 256 Hz.</p>
+    {% endif %}
+  </section>
+  </div>
 
   <section class="tarjeta" aria-labelledby="titulo-tabla">
     <h2 id="titulo-tabla">Electrodos</h2>
@@ -78,21 +92,10 @@
     </div>
   </section>
 </div>
-
-<section class="tarjeta" aria-labelledby="titulo-pipeline">
-  <h2 id="titulo-pipeline">Lo que aplicó el procesado</h2>
-  <dl class="datos">
-    {% for nombre, valor in resumen.pipeline %}
-      <dt>{{ nombre }}</dt><dd>{{ valor }}</dd>
-    {% endfor %}
-  </dl>
-  {% if grabacion.remuestreada %}
-    <p class="nota">La grabación original estaba a {{ grabacion.sfreq_original_hz|floatformat:"-1" }} Hz y se remuestreó a 256 Hz.</p>
-  {% endif %}
-</section>
 {% endif %}
 
 {% if resumen %}
+<noscript><style>.mapa-cargando svg { opacity: 1; animation: none; } .cargando::after { display: none; }</style></noscript>
 <script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>
 <script type="module" src="{% static 'js/mapa-calidad.js' %}"></script>
 {% endif %}

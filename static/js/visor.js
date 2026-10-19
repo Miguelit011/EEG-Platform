@@ -44,7 +44,7 @@ const mapas = bandas.map(function (b) {
   figura.className = "mapa-banda";
   figura.innerHTML =
     '<figcaption>' + b.nombre + ' <small>' + b.rango + '</small></figcaption>' +
-    '<div class="lienzo-2d"><canvas role="img"></canvas></div>' +
+    '<div class="lienzo-2d cargando"><canvas role="img"></canvas></div>' +
     '<div class="escala-mapa"><span class="min"></span><div class="barra-escala"></div><span class="max"></span></div>';
   figura.querySelector(".barra-escala").style.background = degradadoCss();
   const seleccionar = function () { cambiar({ banda: b.clave }); };
@@ -199,20 +199,28 @@ function actualizarTextos() {
                               : "Potencia absoluta: log₁₀ de la potencia en V², por sensor. ") + texto;
 }
 
-function redibujar() { actualizarTextos(); mapas.forEach(dibujarMapa); }
+const escena3d = document.getElementById("escena-3d");
+if (escena3d) escena3d.classList.add("cargando");
+let listo = false;   // los mapas se dibujan cuando se sabe si hay cerebro 3D, para no mostrar antes el respaldo circular
+function redibujar() { actualizarTextos(); if (listo) mapas.forEach(dibujarMapa); }
 suscribir(redibujar);
 document.addEventListener("tema:cambio", redibujar);
 window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", function () { setTimeout(redibujar, 0); });
 let pendiente = null;
 window.addEventListener("resize", function () { clearTimeout(pendiente); pendiente = setTimeout(redibujar, 120); });
-redibujar();
+actualizarTextos();
 
 // ---- Cabeza 3D (si el navegador lo permite) ------------------------------
 import("./visor3d.js").then(function (m) { return m.iniciar3D({ mostrarTip, ocultarTip }); }).then(function (api) {
   api2D = api;
+  listo = true;
+  document.querySelectorAll(".cargando").forEach(function (el) { el.classList.remove("cargando"); });
   redibujar();
 }).catch(function (error) {
   console.warn("Visor 3D no disponible:", error);
+  listo = true;
+  document.querySelectorAll(".cargando").forEach(function (el) { el.classList.remove("cargando"); });
+  redibujar();
   const escena = document.getElementById("escena-3d");
   if (escena) escena.innerHTML = '<p class="sin-webgl">La vista 3D no está disponible en este navegador. Los mapas 2D muestran los mismos valores.</p>';
 });

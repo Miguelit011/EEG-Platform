@@ -15,11 +15,10 @@
     </ul>
   </div>
   <div class="acciones">
-    <a class="boton" href="{% url 'grabaciones:calidad' grabacion.pk %}">Ver calidad de la señal</a>
-    {% if resumen %}<a class="boton boton-csv" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}" title="Descargar el CSV de esta grabación" aria-label="Descargar el CSV de esta grabación">
+    {% if resumen %}<a class="boton boton-csv boton-icono" href="{% url 'grabaciones:csv_grabacion' grabacion.pk %}" title="Descargar el CSV de esta grabación" aria-label="Descargar el CSV de esta grabación">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>
       CSV</a>
-    <a class="boton primario" href="{% url 'grabaciones:modelos_grabacion' grabacion.pk %}">Ver modelos</a>{% endif %}
+    <a class="boton primario" href="{% url 'grabaciones:modelos_grabacion' grabacion.pk %}">Modelos</a>{% endif %}
   </div>
 </div>
 

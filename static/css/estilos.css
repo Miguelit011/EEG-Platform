@@ -693,3 +693,16 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 .lista-eliminar { padding-left: 1.2rem; }
 .lista-eliminar li { margin-bottom: 0.3rem; }
 .acciones-eliminar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.25rem; }
+
+/* Mapa de calidad: el SVG de respaldo reserva su sitio pero no se ve mientras carga el cerebro real
+   (si el script no llega a ejecutarse, aparece solo a los 3 s). */
+.mapa-cargando svg { opacity: 0; animation: mapa-respaldo 0s 3s forwards; }
+@keyframes mapa-respaldo { to { opacity: 1; } }
+
+/* Indicador «Cargando…» mientras llegan las mallas del cerebro (se quita la clase al terminar). */
+.cargando { position: relative; }
+.cargando::after { content: "Cargando…"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--texto-suave); font-size: 0.9rem; pointer-events: none; animation: pulso-cargando 1.2s ease-in-out infinite; }
+@keyframes pulso-cargando { 50% { opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .cargando::after { animation: none; } }
+
+.columna-mapa { min-width: 0; }

@@ -50,6 +50,7 @@ async function iniciar() {
   lienzo.setAttribute("aria-label", "Mapa de calidad de los electrodos sobre el cerebro, vista desde arriba. " + datos.titular + "." +
     (descartados.length ? " Descartados: " + descartados.join(", ") + "." : "") + " El detalle está en la tabla.");
   contenedor.insertBefore(lienzo, svg);
+  contenedor.classList.remove("mapa-cargando", "cargando");
   svg.hidden = true;
   svg.style.display = "none";   // `.mapa-cabeza` fija display y anula `hidden`
 
@@ -108,4 +109,5 @@ async function iniciar() {
 
 iniciar().catch(function (error) {
   console.warn("Mapa 3D no disponible, se queda el SVG:", error);
+  contenedor.classList.remove("mapa-cargando", "cargando");
 });

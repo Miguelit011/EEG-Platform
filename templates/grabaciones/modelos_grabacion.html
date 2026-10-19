@@ -14,8 +14,7 @@
     </ul>
   </div>
   <div class="acciones">
-    {% if procesada %}<a class="boton" href="{% url 'grabaciones:analisis' grabacion.pk %}">Ver análisis</a>
-    <a class="boton" href="{% url 'grabaciones:modelos_resumen' %}">Todas las grabaciones</a>{% endif %}
+    {% if procesada %}<a class="boton" href="{% url 'grabaciones:modelos_resumen' %}">Todas las grabaciones</a>{% endif %}
   </div>
 </div>
 
