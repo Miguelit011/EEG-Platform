@@ -419,12 +419,12 @@ p.nota { max-width: none; }
    una altura mínima común para que no salten al cambiar de estado. */
 @media (min-width: 901px) {
   .tabla-lista { table-layout: fixed; width: 100%; min-width: 52rem; }
-  .tabla-lista th:nth-child(2) { width: 11rem; }
-  .tabla-lista th:nth-child(3) { width: 8rem; }
+  .tabla-lista th:nth-child(2) { width: 10.5rem; }
+  .tabla-lista th:nth-child(3) { width: 8.5rem; }
   .tabla-lista th:nth-child(4) { width: 22%; }
   .tabla-lista th:nth-child(5) { width: 9.5rem; }
   .tabla-lista tbody td { height: 4.75rem; }
-  .tabla-lista td:nth-child(3) .dato { white-space: nowrap; }
+  .tabla-lista td:nth-child(2) .origen, .tabla-lista td:nth-child(3) .celda { white-space: nowrap; }
 }
 .tabla-lista th { white-space: nowrap; }
 .tabla-lista td { vertical-align: middle; }

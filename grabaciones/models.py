@@ -138,6 +138,13 @@ class Grabacion(models.Model):
         return f"{minutos} min {segundos:02d} s"
 
     @property
+    def frecuencia_corta(self):
+        """«128 → 256 Hz»: lo que cabe en la columna de la lista; el texto completo va en el título."""
+        if self.sfreq_original_hz is None:
+            return "—"
+        return f"{self.sfreq_original_hz:g} → {TARGET_SFREQ:g} Hz"
+
+    @property
     def frecuencia_texto(self):
         if self.sfreq_original_hz is None:
             return "—"

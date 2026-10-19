@@ -64,11 +64,11 @@
                     <button type="submit" class="secundario">Guardar</button>
                   </form>
                 </details>
-                {% if g.condicion %}<span class="nota origen">{{ g.get_origen_condicion_display }}</span>{% endif %}
+                {% if g.condicion %}<span class="nota origen" title="{{ g.get_origen_condicion_display }}">{% if g.origen_condicion == "nombre" %}Del nombre{% else %}A mano{% endif %}</span>{% endif %}
               </div></td>
               <td data-etiqueta="Duración"><div class="celda">
                 <span class="dato">{{ g.duracion_texto }}</span>
-                {% if g.remuestreada %}<br><span class="nota">{{ g.frecuencia_texto }}</span>{% endif %}
+                {% if g.remuestreada %}<br><span class="nota" title="{{ g.frecuencia_texto }}">{{ g.frecuencia_corta }}</span>{% endif %}
               </div></td>
               <td data-etiqueta="Estado"><div class="celda">
                 <span class="estado estado-{{ g.estado }}"><svg class="ico{% if g.estado == 'procesando' %} gira{% endif %}" aria-hidden="true"><use href="#{% if g.estado == 'procesada' %}i-ok{% elif g.estado == 'error' %}i-x{% elif g.estado == 'procesando' %}i-proc{% else %}i-cola{% endif %}"/></svg>{{ g.get_estado_display }}</span>
