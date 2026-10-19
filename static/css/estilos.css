@@ -212,6 +212,7 @@ code, .num, .dato { font-family: var(--fuente-datos); font-variant-numeric: tabu
 .tarjeta h2 { margin-top: 0; font-size: 1.25rem; font-weight: 650; }
 .subida { border-style: dashed; }
 .nota, .vacio { color: var(--texto-suave); }
+p.vacio { max-width: none; }
 .nota { font-size: 0.92rem; }
 
 .mensajes { list-style: none; padding: 0; }
