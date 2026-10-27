@@ -200,7 +200,7 @@ def main():
         guardar_recorte(imagen, t, 0, 0, "lista_subida.png")
         guardar_recorte(imagen, t, 1, 1, "lista_lotes.png")
         marcar_procesador(activo=False)
-        imagen, t = pagina("/", "lista_sin_procesador.png")
+        imagen, t = pagina("/grabaciones/", "lista_sin_procesador.png")
         guardar_recorte(imagen, t, 1, 1, "lista_sin_procesador.png")
         marcar_procesador(activo=True)
 
