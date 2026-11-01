@@ -12,6 +12,9 @@ prepara para pintar:
   la cifra del test.
 - **Escala fija** en toda la grabación (por banda, percentiles 2–98 de los electrodos válidos),
   para que el cambio se vea al reproducir y un electrodo extremo no aplane el resto.
+- **EEGNet (Fase 11)** con su propio apartado de resultado y una segunda pista en la cinta, con
+  su puntuación ya calculada al procesar (`puntuar_eegnet`). Si la grabación se procesó antes,
+  la pestaña sigue con la logística y el apartado de EEGNet lo avisa.
 """
 
 import numpy as np
@@ -22,10 +25,11 @@ from eeg_library.modelado.fatiga_aguda import (
     leer_ficha_fatiga_aguda,
     puntuar,
 )
+from eeg_library.modelado.fatiga_aguda_eegnet import leer_ficha_eegnet, puntuar_eegnet
 
 from grabaciones.analisis_espectral import NOMBRE_BANDA
 from grabaciones.geometria import geometria_visor
-from grabaciones.modelos import _ficha_para_pantalla
+from grabaciones.modelos import _ficha_para_pantalla, resultado_test_para_pantalla
 
 VENTANAS_SUAVIZADO = 15    # ventanas cada 2 s: ≈ 30 s
 BANDA_INICIAL = "beta"     # la firma confirmada en PVTB (H3 de la línea)
@@ -60,13 +64,45 @@ def _bandas(resultado):
             for b in BANDAS]
 
 
-def para_csv(grabacion):
+def para_csv(grabacion, modelo="logistica"):
     """Lo que exporta el CSV: la salida de la librería sin suavizar, o None si no se aplica."""
     condicion = (grabacion.condicion or "").strip().upper()
     if grabacion.estado != "procesada" or not grabacion.resultado or condicion not in CONDICIONES:
         return None
-    p = puntuar(grabacion.resultado, condicion)
+    p = (puntuar_eegnet if modelo == "eegnet" else puntuar)(grabacion.resultado, condicion)
     return p if p["disponible"] else None
+
+
+def _veredicto(final):
+    """La frase de resultado de un modelo a partir de su veredicto de tercios."""
+    if final is None:
+        return "En esta grabación el primer y el último tercio puntúan igual."
+    if final:
+        return "El último tercio de esta grabación se parece más al final de la tarea que el primero."
+    return ("En esta grabación no se aprecia el cambio: el último tercio no se parece más al "
+            "final de la tarea que el primero.")
+
+
+def _eegnet(resultado, condicion):
+    """El apartado de EEGNet: veredicto, fiabilidad, cifras y cinta, o el motivo de que no esté."""
+    e = puntuar_eegnet(resultado, condicion)
+    if not e["disponible"]:
+        return {"disponible": False, "motivo": e["motivo"]}, None
+    ficha = leer_ficha_eegnet()
+    final = e["tercios"]["final_mayor"]
+    comparacion = ficha["comparacion_logistica"]
+    dlo, dhi = comparacion["ic95"]
+    cinta = suavizar(e["puntuacion"])
+    escala = float(np.max(np.abs(cinta))) or 1.0
+    return {
+        "disponible": True, "final_mayor": final, "veredicto": _veredicto(final),
+        # La cifra del test es de PASAT y PVTB juntas: el análisis no la dio por tarea.
+        "test": resultado_test_para_pantalla(ficha["resultado_test"]),
+        "rho_texto": "—" if e["rho"] is None else f"{e['rho']:+.2f}".replace(".", ","),
+        "rho_test": f"{ficha['resultado_test_rho']['valor']:+.2f}".replace(".", ","),
+        "comparacion": (f"no se distinguen (diferencia de ρ {comparacion['diferencia_rho']:+.3f}, "
+                        f"IC 95 % {dlo:+.3f} a {dhi:+.3f})").replace(".", ","),
+    }, np.round(cinta / escala, 4).tolist()
 
 
 def resumen_fatiga_aguda(grabacion):
@@ -130,6 +166,7 @@ def resumen_fatiga_aguda(grabacion):
              "rango_cambio": rangos_cambio, "metrica_inicial": "cambio"}
 
     final = p["tercios"]["final_mayor"]
+    eegnet, cinta_eegnet = _eegnet(resultado, condicion)
     # Los tercios se cortan como en la librería: por el inicio de la ventana, frente al de la última.
     ultima = float(instantes[-1])
     duracion = ultima + resultado["parametros_aplicados"]["epocado"]["duracion_s"]
@@ -138,19 +175,14 @@ def resumen_fatiga_aguda(grabacion):
         "condicion": condicion,
         "titulo": ficha.get("titulo", ficha["id"]),
         "final_mayor": final,
-        "veredicto": (
-            "El último tercio de esta grabación se parece más al final de la tarea que el primero."
-            if final else
-            "En esta grabación no se aprecia el cambio: el último tercio no se parece más al "
-            "final de la tarea que el primero." if final is False else
-            "En esta grabación el primer y el último tercio puntúan igual."),
+        "veredicto": _veredicto(final),
         "rho": p["rho"],
         "rho_texto": "—" if p["rho"] is None else f"{p['rho']:+.2f}".replace(".", ","),
         "rho_test": f"{ficha['resultado_test_rho']['valor']:+.2f}".replace(".", ","),
         "ficha": _ficha_para_pantalla(ficha),
-        "acierto_texto": f"{ficha['resultado_test']['valor'] * 100:.0f} %",
         "duracion_texto": _mmss(duracion),
         "n_ventanas": p["n_ventanas"],
+        "eegnet": eegnet,
         "visor": visor,
         "fatiga": {
             "instante_s": instantes.tolist(),
@@ -159,5 +191,6 @@ def resumen_fatiga_aguda(grabacion):
             "tercios_s": [ultima / 3, 2 * ultima / 3],
             "fotogramas": fotogramas,
             "cambios": cambios,
+            "puntuacion_eegnet": cinta_eegnet,
         },
     }

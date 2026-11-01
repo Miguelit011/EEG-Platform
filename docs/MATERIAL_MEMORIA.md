@@ -122,7 +122,8 @@ aguda de EEG-Library, evaluada una vez en el test independiente: una frase con e
 la grabación (¿el último tercio se parece más al final de la tarea que el primero?) junto a la
 fiabilidad del modelo (acierto 0,735 en PASAT y 0,835 en PVTB, azar 0,5); el cerebro 3D animado,
 que muestra cuánto sube o baja la potencia de cada zona respecto al principio; una cinta de tiempo
-que colorea cada momento según a qué parte de la tarea se parece. Mide el cambio con el tiempo en tarea, no el nivel de fatiga, y lo dice siempre.
+que colorea cada momento según a qué parte de la tarea se parece, con una segunda pista de la red
+neuronal EEGNet (exportada a ONNX), que en el test no se distingue de la logística. Mide el cambio con el tiempo en tarea, no el nivel de fatiga, y lo dice siempre.
 
 ### Navegación
 
@@ -146,15 +147,16 @@ sin salir de la pestaña.
 | Exportación a CSV | Columnas estables y documentadas, coincidencia valor a valor con el JSON, formato de Excel, protección contra fórmulas | 27 |
 | Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 15 |
 | Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 11 |
-| Fatiga aguda | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, mapas de pesos, CSV y la excepción de la palabra «fatiga» | 22 |
-| **Total EEG-Platform** | | **288** |
+| Fatiga aguda | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, EEGNet (su apartado de resultado, segunda cinta, grabaciones sin EEGNet), CSV y la excepción de la palabra «fatiga» | 25 |
+| **Total EEG-Platform** | | **291** |
 
 *(Recuento del 2026-11-01; algunas filas son de fases anteriores y no se han vuelto a contar una a
 una.)*
 
-EEG-Library, la librería que usa, tiene **577 tests** automáticos (más 6 que necesitan el
+EEG-Library, la librería que usa, tiene **589 tests** automáticos (más 7 que necesitan el
 dataset real) y mantiene la paridad exacta de las 70 características con la matriz del estudio
-y la de los modelos de fatiga aguda con su análisis (20 grabaciones, diferencia máxima 1,4·10⁻¹⁴).
+y la de los modelos de fatiga aguda con su análisis: logística (20 grabaciones, diferencia
+máxima 1,4·10⁻¹⁴) y EEGNet (20 grabaciones, diferencia 0).
 
 Tipos de prueba: unitarias de funciones puras (por ejemplo, el resumen de calidad se prueba
 solo con el JSON de ejemplo), pruebas de vistas con el cliente de Django, pruebas de extremo a

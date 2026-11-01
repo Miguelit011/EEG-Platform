@@ -211,3 +211,13 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 - **CSV:** cuatro columnas al final (`fatiga_aguda_rho`, `_p_primer_tercio`, `_p_ultimo_tercio`, `_final_mayor`), sin suavizar y vacías fuera de PASAT y PVTB. Al ir detrás de todas, no se mueve ninguna columna anterior.
 - **Grabaciones antiguas:** las procesadas con la librería 0.14.0 no tienen `por_ventana`; la pestaña lo dice y ofrece volver a procesarlas.
 - **Capturas:** con el ejemplo anónimo PASAT de la librería, elegido para que se vea el cambio (está declarado en `generar_ejemplo.py`); `?momento=0.93` abre la grabación avanzada y `--force-prefers-reduced-motion` fija la vista del cerebro.
+
+## Fatiga aguda con EEGNet (Fase 11, 2026-11-01)
+
+- **Segunda pista en la misma cinta** (decisión del autor, frente a un selector de modelo o solo una frase): las dos cintas, una sobre otra y con un solo cabezal, enseñan de un vistazo que los dos modelos ven lo mismo, que es el resultado del test («no se distinguen»). Sus cifras van en «Detalles», para no cargar la pantalla.
+- **ONNX, no PyTorch, en la librería y la web.** Los tres modelos finales se exportaron una vez con el entorno `C:\venvs\eeg-dl` (paso 5 de la sublínea de deep learning); `onnxruntime` ya era dependencia (ICLabel). Paridad: ONNX = PyTorch (2,2·10⁻⁶) y librería = análisis (diferencia 0).
+- **Se puntúa al procesar.** EEGNet necesita la señal de cada ventana, que no se guarda; `analizar_grabacion` la puntúa y guarda una cifra por ventana (+0,13 s por grabación). Un fallo de EEGNet no impide procesar: la pestaña sigue con la logística.
+- **Una puntuación por ventana: la media de los logits de las tres semillas.** El test evaluó cada semilla por separado y promedió las cifras; se declara en la ficha y en «Detalles».
+- **Veredicto de EEGNet como en su análisis:** media de la puntuación del último tercio frente a la del primero.
+- **Cada pista se normaliza por su propio máximo**, porque las puntuaciones de los dos modelos no están en la misma escala; el color dice hacia dónde se inclina cada uno, no cuánto más que el otro.
+- **Un apartado de resultado por modelo** (2026-11-02, a petición del autor; sustituye a la frase «llega a la misma conclusión» bajo el veredicto de la logística): la tarjeta de arriba tiene dos apartados iguales, uno al lado del otro, cada uno con su frase y su escala de fiabilidad en test; el cerebro y la cinta siguen siendo una sola vista. Con los dos veredictos a la vista, la frase de acuerdo sobraba. La cifra de EEGNet es de PASAT y PVTB juntas (el análisis no la dio por tarea) y el apartado lo dice, para que no parezca calculada igual que la de la logística, que es la de la tarea de la grabación.

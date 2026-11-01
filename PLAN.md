@@ -15,7 +15,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [x] |
 | 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
 | 10 (A) | Fatiga aguda con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [x] |
-| 11 (B) | Fatiga aguda con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [ ] |
+| 11 (B) | Fatiga aguda con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [x] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -274,7 +274,13 @@ Orden de trabajo (con parada del usuario en los pasos 1, 2 y 3):
 3. Piloto de la pestaña con capturas (cerebro, cinta y veredicto). **Parar y esperar visto bueno.**
 4. Resto de la pantalla, CSV, documentación, `/audit` y `/polish`, tests y propuesta de mensaje de commit.
 
-## Fase 11 (B) — Fatiga aguda con EEGNet
+## Fase 11 (B) — Fatiga aguda con EEGNet — **hecha** (2026-11-01)
+
+Resultado:
+- **Exportación** (`EEG-Library/analisis/fatiga_aguda/deep_learning/05_onnx/`): ONNX = PyTorch con una diferencia máxima de 2,2·10⁻⁶ en 1 757 ventanas de `train`. `onnx`, `onnxscript` y `onnxruntime` solo en `C:\venvs\eeg-dl` (visto bueno del autor).
+- **EEG-Library 0.16.0:** `modelado/fatiga_aguda_eegnet.py`; `analizar_grabacion` guarda `por_ventana["eegnet"]` (media de las tres semillas; +0,13 s por grabación típica). **Paridad exacta** con el análisis en 20 grabaciones de `train` y `val`: entrada de la red y puntuación idénticas (diferencia 0).
+- **EEG-Platform:** segunda pista «Red neuronal (EEGNet)» en la cinta, con el mismo cabezal; su propio apartado de resultado al lado del de la logística (frase y escala de fiabilidad: acierto 0,737 en PASAT y PVTB juntas; al principio fue una frase de acuerdo bajo el veredicto, cambiada el 2026-11-02 a petición del autor); ρ y «no se distinguen» de la logística en «Detalles»; 2 columnas `fatiga_aguda_eegnet_*` al final del CSV; grabaciones sin EEGNet siguen con la logística y un aviso. Decisión del autor: segunda cinta (no selector ni solo frase).
+- Declarado en la ficha y en la pantalla: el test evaluó cada semilla por separado; la plataforma combina las tres.
 **Objetivo:** añadir EEGNet como segundo modelo en la misma pestaña, para enseñar que un modelo clásico y uno de deep learning ven lo mismo. **Es prescindible:** si la paridad no sale, la fase se para y la Fase 10 queda intacta.
 
 Incluye:

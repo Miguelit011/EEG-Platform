@@ -292,8 +292,8 @@ def test_un_modelo_nuevo_aparece_en_la_pantalla_y_en_el_csv(client, settings):
     assert "exactitud balanceada 0,700" in html and "0,600–0,800" in html
 
     nombres = [c.nombre for c in columnas()]
-    # Las del modelo nuevo van tras las de los demás modelos y antes de las 4 de fatiga aguda.
-    assert nombres[-8:-4] == ["prueba_externo_clase", "prueba_externo_p_alta", "prueba_externo_p_baja",
+    # Las del modelo nuevo van tras las de los demás modelos y antes de las 6 de fatiga aguda.
+    assert nombres[-10:-6] == ["prueba_externo_clase", "prueba_externo_p_alta", "prueba_externo_p_baja",
                               "prueba_externo_condicion_estimada"]
     filas = list(csv.DictReader(io.StringIO(csv_de([g, otro]).decode("utf-8-sig")), delimiter=";"))
     esperado = modelos.aplicar(FIXTURE, "OA")["tarjetas"][-1]

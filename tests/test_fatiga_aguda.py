@@ -205,3 +205,59 @@ def test_pagina_marca_la_pestana_activa(client):
 def test_los_estados_no_dependen_de_un_objeto_raro():
     g = Grabacion(estado="procesada", condicion="PVTB", resultado=None)
     assert resumen_fatiga_aguda(g) == {"estado": "sin_procesar"}
+
+
+# ---------------------------------------------------------------------------
+# EEGNet (Fase 11): su apartado de resultado, segunda cinta, detalles y CSV
+# ---------------------------------------------------------------------------
+
+def sin_eegnet():
+    r = copy.deepcopy(PASAT)
+    del r["por_ventana"]["eegnet"]
+    return r
+
+
+def test_eegnet_apartado_propio_y_segunda_cinta(client):
+    from eeg_library.modelado.fatiga_aguda_eegnet import puntuar_eegnet
+    fa = resumen_fatiga_aguda(grabacion())
+    e = puntuar_eegnet(PASAT, "PASAT")
+    assert fa["eegnet"]["disponible"] and e["tercios"]["final_mayor"] is fa["eegnet"]["final_mayor"] is True
+    assert fa["eegnet"]["veredicto"] == fa["veredicto"]          # misma frase cuando coinciden
+    assert fa["eegnet"]["test"]["valor"] == "0,737" and fa["eegnet"]["test"]["ic"] == "0,683–0,787"
+    serie = fa["fatiga"]["puntuacion_eegnet"]
+    assert len(serie) == len(fa["fatiga"]["puntuacion"]) and max(abs(x) for x in serie) == pytest.approx(1.0)
+    html = pagina(client, grabacion())
+    assert html.count('class="fa-apartado"') == 2 and html.count('class="fa-fiabilidad"') == 2
+    assert html.count('class="fa-pista"') == 2 and "Red neuronal (EEGNet)" in html
+    assert html.count(fa["veredicto"]) == 2
+    assert "PASAT y PVTB juntas" in html                         # su cifra del test no es por tarea
+    assert "no se distinguen" in html                            # comparación con la logística, en Detalles
+
+
+def test_eegnet_conclusion_contraria():
+    r = copy.deepcopy(PASAT)
+    r["por_ventana"]["eegnet"] = [-x for x in r["por_ventana"]["eegnet"]]   # invierte la tendencia
+    fa = resumen_fatiga_aguda(grabacion(resultado=r))
+    assert fa["final_mayor"] is True and fa["eegnet"]["final_mayor"] is False
+    assert fa["eegnet"]["veredicto"].startswith("En esta grabación no se aprecia el cambio")
+
+
+def test_sin_eegnet_la_pestana_sigue_con_la_logistica(client):
+    g = grabacion(resultado=sin_eegnet())
+    fa = resumen_fatiga_aguda(g)
+    assert fa["estado"] == "ok" and not fa["eegnet"]["disponible"]
+    assert fa["fatiga"]["puntuacion_eegnet"] is None
+    html = pagina(client, g)
+    assert html.count('class="fa-pista"') == 1 and html.count('class="fa-fiabilidad"') == 1
+    assert html.count('class="fa-apartado"') == 2                # el apartado está, con el aviso
+    assert "no está disponible para esta grabación" in html and "volver a procesarla" in html
+
+
+def test_csv_eegnet():
+    from eeg_library.modelado.fatiga_aguda_eegnet import puntuar_eegnet
+    g, vieja = grabacion(), grabacion(resultado=sin_eegnet())
+    filas = list(csv.DictReader(io.StringIO(csv_de([g, vieja]).decode("utf-8-sig")), delimiter=";"))
+    e = puntuar_eegnet(PASAT, "PASAT")
+    assert float(filas[0]["fatiga_aguda_eegnet_rho"].replace(",", ".")) == pytest.approx(e["rho"], abs=1e-6)
+    assert filas[0]["fatiga_aguda_eegnet_final_mayor"] == "1"
+    assert filas[1]["fatiga_aguda_eegnet_rho"] == "" and filas[1]["fatiga_aguda_rho"] != ""

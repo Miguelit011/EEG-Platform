@@ -19,7 +19,6 @@ const textoPlay = document.getElementById("fa-play-texto");
 const tiempo = document.getElementById("fa-tiempo");
 let reloj = document.getElementById("fa-reloj");
 const cinta = document.getElementById("fa-cinta");
-const lienzo = document.getElementById("fa-cinta-lienzo");
 const cabezal = document.getElementById("fa-cabezal");
 const pestanas = document.getElementById("pestanas-banda");
 
@@ -137,8 +136,9 @@ document.querySelectorAll(".fa-velocidad button").forEach(function (b) {
 // ---- Cinta de tiempo ------------------------------------------------------------------------
 function mezclar(a, b, t) { return [0, 1, 2].map(function (k) { return Math.round(a[k] + (b[k] - a[k]) * t); }); }
 
-function dibujarCinta() {
-  const ancho = cinta.clientWidth, alto = cinta.clientHeight;
+// Una pista por modelo (logística y, si está, EEGNet), con el mismo eje de tiempo y un solo cabezal.
+function dibujarPista(lienzo, serie) {
+  const ancho = lienzo.clientWidth, alto = lienzo.clientHeight;
   if (!ancho || !alto) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   lienzo.width = Math.round(ancho * dpr);
@@ -149,7 +149,7 @@ function dibujarCinta() {
   const neutro = hexARgb(css("--fa-neutro")), principio = hexARgb(css("--fa-principio")), final = hexARgb(css("--fa-final"));
   const x = function (t) { return ancho * t / datos.duracion_s; };
   for (let i = 0; i < n; i++) {
-    const s = datos.puntuacion[i];
+    const s = serie[i];
     const c = s < 0 ? mezclar(neutro, principio, -s) : mezclar(neutro, final, s);
     ctx.fillStyle = "rgb(" + c.join(",") + ")";
     const desde = x(instantes[i]), hasta = x(i + 1 < n ? instantes[i] + paso : datos.duracion_s);
@@ -165,6 +165,13 @@ function dibujarCinta() {
   });
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
+}
+
+function dibujarCinta() {
+  cinta.querySelectorAll("canvas.fa-pista").forEach(function (lienzo) {
+    const serie = datos[lienzo.dataset.serie];
+    if (serie) dibujarPista(lienzo, serie);
+  });
   // Rótulos de los tercios, debajo de la cinta y alineados con las líneas.
   const marcas = [0].concat(datos.tercios_s.map(function (t) { return (t + 2) / datos.duracion_s; }), [1]);
   document.querySelectorAll("#fa-tercios span").forEach(function (el, k) {

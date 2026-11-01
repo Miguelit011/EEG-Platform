@@ -1,0 +1,19 @@
+<div class="fa-fiabilidad">
+  <h4>Fiabilidad en el test</h4>
+  <p class="cifra"><span class="dato">{{ test.valor }}</span> <span class="nota">{{ test.metrica }}</span></p>
+  <div class="acierto" role="img"
+       aria-label="{{ test.metrica|capfirst }} {{ test.valor }}, con un intervalo de confianza del 95 % de {{ test.ic }}. Nivel de azar: {{ test.azar }}. Escala de 0 a 1.">
+    <div class="acierto-pista">
+      <span class="acierto-ic" style="left: {{ test.pos_ic_desde }}%; width: {{ test.pos_ic_ancho }}%"></span>
+      <span class="acierto-azar" style="left: {{ test.pos_azar }}%"></span>
+      <span class="acierto-punto" style="left: {{ test.pos_valor }}%"></span>
+      <span class="acierto-etiqueta" style="left: {{ test.pos_azar }}%">azar {{ test.azar }}</span>
+    </div>
+    <div class="acierto-ejes" aria-hidden="true"><span>0</span><span>1</span></div>
+  </div>
+  <dl class="mini-datos">
+    <div><dt>Intervalo 95 %</dt><dd class="dato">{{ test.ic }}</dd></div>
+    <div><dt>Test</dt><dd>{{ test.n_personas }} personas · {{ test.n_grabaciones }} grabaciones</dd></div>
+    <div><dt>Tareas</dt><dd>{{ tareas }}</dd></div>
+  </dl>
+</div>

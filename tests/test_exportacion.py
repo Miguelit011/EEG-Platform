@@ -60,10 +60,11 @@ def test_columnas_estables():
         "logabs_AF3_delta", "logabs_AF3_theta", "logabs_AF3_alfa", "logabs_AF3_beta"]
     assert nombres[165:167] == ["version_eeg_library", "fecha_analisis"]
     # 8 + 9 + 4 + 4 zonas × 8 + 14 electrodos × 8 + 2, los modelos (4 + 4 + 7) y, al final,
-    # fatiga aguda (4): añadirlas al final no movió ninguna columna anterior.
-    assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 + 15 + 4 == 186
+    # fatiga aguda (4 de la logística y 2 de EEGNet): añadirlas al final no movió ninguna columna.
+    assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 + 15 + 6 == 188
     assert nombres[182:] == ["fatiga_aguda_rho", "fatiga_aguda_p_primer_tercio",
-                             "fatiga_aguda_p_ultimo_tercio", "fatiga_aguda_final_mayor"]
+                             "fatiga_aguda_p_ultimo_tercio", "fatiga_aguda_final_mayor",
+                             "fatiga_aguda_eegnet_rho", "fatiga_aguda_eegnet_final_mayor"]
     assert nombres[167:182] == [
         "c1_oa_oc_logistica_clase", "c1_oa_oc_logistica_p_OA", "c1_oa_oc_logistica_p_OC",
         "c1_oa_oc_logistica_condicion_estimada",
@@ -130,8 +131,8 @@ def test_valores_del_fixture():
     assert f["referencia"] == "car_condicional" and f["car_aplicada"] == "1"
     assert (f["banda_min_hz"], f["banda_max_hz"], f["notch_hz"]) == ("1", "30", "50")
     assert f["ica_n_componentes_eliminadas"] == "0" and f["ica_componentes_eliminadas"] == ""
-    assert f["version_eeg_library"] == "0.15.0"
-    assert f["fecha_analisis"] == "2026-11-01T19:41:01"
+    assert f["version_eeg_library"] == "0.16.0"
+    assert f["fecha_analisis"] == "2026-11-01T21:52:47"
 
 
 def test_las_potencias_coinciden_con_el_json():

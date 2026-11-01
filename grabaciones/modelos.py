@@ -102,24 +102,27 @@ def texto_parametros(parametros):
             + (f"con notch {notch:g} Hz" if notch else "sin notch"))
 
 
+def resultado_test_para_pantalla(test):
+    """El resultado en test de una ficha, listo para la escala de fiabilidad (o None)."""
+    if not test:
+        return None
+    lo, hi = test["ic95"]
+    return {
+        "metrica": test["metrica"].replace("_", " "),
+        "valor": _numero(test["valor"]), "ic": f"{_numero(lo)}–{_numero(hi)}",
+        "azar": _numero(test["azar"], 2), "n_personas": test.get("n_personas"),
+        "n_grabaciones": test.get("n_grabaciones"), "fuente": test.get("fuente", ""),
+        # Posiciones en la escala de 0 a 1 como porcentajes enteros: en un atributo style
+        # un decimal saldría con coma. Solo sirven para dibujar la escala.
+        "pos_valor": round(test["valor"] * 100), "pos_azar": round(test["azar"] * 100),
+        "pos_ic_desde": round(lo * 100), "pos_ic_ancho": max(1, round(hi * 100) - round(lo * 100)),
+    }
+
+
 def _ficha_para_pantalla(ficha):
-    test = ficha.get("resultado_test") or {}
-    prueba = None
-    if test:
-        lo, hi = test["ic95"]
-        prueba = {
-            "metrica": test["metrica"].replace("_", " "),
-            "valor": _numero(test["valor"]), "ic": f"{_numero(lo)}–{_numero(hi)}",
-            "azar": _numero(test["azar"], 2), "n_personas": test.get("n_personas"),
-            "n_grabaciones": test.get("n_grabaciones"), "fuente": test.get("fuente", ""),
-            # Posiciones en la escala de 0 a 1 como porcentajes enteros: en un atributo style
-            # un decimal saldría con coma. Solo sirven para dibujar la escala.
-            "pos_valor": round(test["valor"] * 100), "pos_azar": round(test["azar"] * 100),
-            "pos_ic_desde": round(lo * 100), "pos_ic_ancho": max(1, round(hi * 100) - round(lo * 100)),
-        }
     entrenamiento = ficha.get("entrenamiento") or {}
     return {
-        "test": prueba,
+        "test": resultado_test_para_pantalla(ficha.get("resultado_test")),
         "avisos": list(ficha.get("avisos") or []),
         "entrenamiento": {"fecha": entrenamiento.get("fecha", ""),
                           "variante": entrenamiento.get("variante", "")},

@@ -718,9 +718,16 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 
 /* ---- Fatiga aguda ---------------------------------------------------------- */
 .subtitulo-pagina { margin: -0.35rem 0 0.9rem; color: var(--texto-suave); font-size: 1.05rem; }
-.fa-veredicto { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.5rem 0; padding: 1.5rem 1.75rem; }
-.fa-veredicto-texto { padding-right: 2.5rem; }
-.fa-veredicto .parte-fiabilidad h3 { margin: 0 0 1rem; font-size: 0.95rem; font-weight: 650; color: var(--texto-suave); }
+.fa-veredicto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem 0; padding: 1.5rem 1.75rem; }
+.fa-apartado { display: flex; flex-direction: column; min-width: 0; }
+.fa-apartado:first-of-type { padding-right: 2.5rem; }
+.fa-apartado + .fa-apartado { padding-left: 2.5rem; border-left: 1px solid var(--borde); }
+.fa-apartado h3 { margin: 0 0 0.9rem; font-size: 0.95rem; font-weight: 650; letter-spacing: 0.01em; color: var(--texto-suave); }
+.fa-apartado > .nota { margin: 0 0 1.25rem; }
+.fa-fiabilidad { margin-top: auto; padding-top: 1.1rem; border-top: 1px solid var(--borde); }
+.fa-fiabilidad h4 { margin: 0 0 0.6rem; font-size: 0.85rem; font-weight: 600; color: var(--texto-suave); }
+.fa-fiabilidad .cifra { margin-bottom: 0.9rem; }
+.fa-fiabilidad .cifra .dato { font-size: 1.6rem; }
 .fa-frase { display: flex; gap: 0.7rem; align-items: flex-start; margin: 0 0 0.9rem; font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem); line-height: 1.35; font-weight: 550; text-wrap: pretty; }
 .fa-frase .ico { flex: none; width: 1.3em; height: 1.3em; margin-top: 0.05em; }
 .fa-frase-si .ico { color: var(--ok); }
@@ -746,9 +753,18 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 .fa-velocidad button:hover { color: var(--texto); background: transparent; }
 .fa-velocidad button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 650; }
 
-.fa-cinta { position: relative; height: 58px; border-radius: 10px; border: 1px solid var(--borde-fuerte); overflow: hidden; cursor: pointer; touch-action: none; background: var(--fa-neutro); }
+.fa-cinta-marco { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.9rem; }
+.fa-cinta-marco > .fa-leyenda { grid-column: 1 / -1; }
+.fa-cinta-columna { min-width: 0; }
+.fa-rotulos { display: grid; grid-auto-rows: 58px; row-gap: 3px; padding-top: 1px; font-size: 0.85rem; font-weight: 600; color: var(--texto); text-align: right; }
+.fa-rotulos span { display: flex; align-items: center; justify-content: flex-end; }
+.fa-dos-cintas .fa-rotulos { grid-auto-rows: 44px; }
+.fa-cinta { position: relative; display: grid; row-gap: 3px; border-radius: 10px; border: 1px solid var(--borde-fuerte); overflow: hidden; cursor: pointer; touch-action: none; background: var(--superficie); }
 .fa-cinta:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
-.fa-cinta canvas { display: block; width: 100%; height: 100%; }
+.fa-cinta canvas { display: block; width: 100%; height: 58px; background: var(--fa-neutro); }
+.fa-dos-cintas .fa-cinta canvas { height: 44px; }
+.fa-eegnet-falta { margin: 0 0 1rem; }
+.fa-detalles-titulo { margin: 1.25rem 0 0; font-size: 0.95rem; }
 .fa-cabezal { position: absolute; top: 0; bottom: 0; left: 0; width: 3px; margin-left: -1.5px; background: var(--texto); box-shadow: 0 0 0 1.5px var(--superficie); pointer-events: none; }
 .fa-cinta-ejes { display: flex; justify-content: space-between; margin-top: 0.35rem; font-family: var(--fuente-datos); font-size: 0.78rem; color: var(--texto-suave); }
 .fa-leyenda { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; list-style: none; padding: 0; margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--texto-suave); }
@@ -763,12 +779,13 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 
 @media (max-width: 900px) {
   .fa-veredicto { grid-template-columns: minmax(0, 1fr); }
-  .fa-veredicto-texto { padding-right: 0; }
-  .fa-veredicto .parte-fiabilidad { padding: 1.5rem 0 0; border-left: 0; border-top: 1px solid var(--borde); }
+  .fa-apartado:first-of-type { padding-right: 0; }
+  .fa-apartado + .fa-apartado { padding: 1.5rem 0 0; border-left: 0; border-top: 1px solid var(--borde); }
   .fa-escena { aspect-ratio: 1 / 0.9; }
 }
 @media (max-width: 640px) {
   .fa-escena-marco, .fa-reproductor { padding-left: 1rem; padding-right: 1rem; }
+  .fa-rotulos { font-size: 0.75rem; max-width: 6.5rem; }
   .fa-velocidad { margin-left: 0; }
 }
 .fa-escala-titulo { margin: 0.9rem 0 0.25rem; font-size: 0.85rem; color: var(--texto-suave); }

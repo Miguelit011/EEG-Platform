@@ -196,6 +196,15 @@ def _celdas(grabacion=None):
               "1 si el último tercio se parece más al final de la tarea que el primero; 0 si no "
               "(vacía si empatan o no se aplica)", "1/0",
               _booleano(tercios["final_mayor"]) if p and tercios["final_mayor"] is not None else "")
+    e = fatiga_aguda.para_csv(g, modelo="eegnet") if g is not None else None
+    yield col("fatiga_aguda_eegnet_rho", fa,
+              "Lo mismo que fatiga_aguda_rho, con la red neuronal EEGNet (vacía si no es PASAT ni "
+              "PVTB, o si la grabación se procesó antes de que la plataforma incluyera EEGNet)",
+              "−1 a 1", _numero(e["rho"], DECIMALES_REL) if e else "")
+    yield col("fatiga_aguda_eegnet_final_mayor", fa,
+              "1 si, según EEGNet, el último tercio se parece más al final de la tarea que el "
+              "primero; 0 si no (vacía si empatan o no se aplica)", "1/0",
+              _booleano(e["tercios"]["final_mayor"]) if e and e["tercios"]["final_mayor"] is not None else "")
 
 
 def columnas():

@@ -13,7 +13,7 @@ Generado con `manage.py documentar_csv`; no se edita a mano. Un test comprueba q
 - Los electrodos descartados no tienen valor de potencia: se calculó con señal que no pasó por CAR ni ICA y no es comparable.
 - Bandas: `delta` (1–4 Hz), `theta` (4–8 Hz), `alfa` (8–13 Hz), `beta` (13–30 Hz). Zonas: `frontal`, `frontocentral`, `temporal`, `posterior`.
 
-Total: 186 columnas.
+Total: 188 columnas.
 
 ## Identificación
 
@@ -240,3 +240,5 @@ Total: 186 columnas.
 | `fatiga_aguda_p_primer_tercio` | Probabilidad de «último tercio» que el modelo da a la media del primer tercio | proporción 0–1 |
 | `fatiga_aguda_p_ultimo_tercio` | Probabilidad de «último tercio» que el modelo da a la media del último tercio | proporción 0–1 |
 | `fatiga_aguda_final_mayor` | 1 si el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |
+| `fatiga_aguda_eegnet_rho` | Lo mismo que fatiga_aguda_rho, con la red neuronal EEGNet (vacía si no es PASAT ni PVTB, o si la grabación se procesó antes de que la plataforma incluyera EEGNet) | −1 a 1 |
+| `fatiga_aguda_eegnet_final_mayor` | 1 si, según EEGNet, el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |

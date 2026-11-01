@@ -223,12 +223,20 @@ pestaña lo explica; si la condición está mal, se corrige en la lista.
 
 No hay que hacer nada: al abrir una grabación PASAT o PVTB procesada aparece todo.
 
-![Resultado de la grabación y fiabilidad del modelo](capturas/fatiga_aguda_veredicto.png)
+![Resultado de cada modelo y su fiabilidad](capturas/fatiga_aguda_veredicto.png)
 
-**Arriba, el resultado en una frase.** El modelo de esa tarea compara la media del **primer
-tercio** de la grabación con la del **último** y dice si el final se parece más al final de la
-tarea que el principio. A la derecha, lo fiable que es: en el test independiente de 28 personas
-acertó en el **74 %** de las grabaciones PASAT y en el **84 %** de las PVTB (azar: 50 %).
+**Arriba, el resultado de cada modelo, uno al lado del otro.** Los dos comparan la media del
+**primer tercio** de la grabación con la del **último** y dicen, en una frase, si el final se
+parece más al final de la tarea que el principio:
+
+- **Regresión logística**, que usa la potencia de cada banda en cada zona. En el test
+  independiente de 28 personas acertó en el **74 %** de las grabaciones PASAT y en el **84 %** de
+  las PVTB (azar: 50 %).
+- **Red neuronal (EEGNet)**, que analiza la señal directamente. Acertó en el **74 %** de las
+  grabaciones PASAT y PVTB juntas (el test no dio la cifra por tarea). En el test no se distingue
+  de la logística, así que lo esperable es que lleguen a la misma conclusión.
+
+Debajo de cada frase, su fiabilidad en el test con el intervalo y el nivel de azar.
 
 ![El cerebro a lo largo de la grabación](capturas/fatiga_aguda_cerebro.png)
 
@@ -239,7 +247,8 @@ acertó en el **74 %** de las grabaciones PASAT y en el **84 %** de las PVTB (az
   **baja (morado)** la potencia de cada zona respecto al primer tercio. Con **Valor en cada
   momento** se ve el porcentaje de la potencia en esa banda.
 - La **cinta** de debajo colorea cada momento según a qué parte de la tarea se parece: **azul**, al
-  principio; **naranja**, al final. Se puede pinchar o arrastrar para ir a un momento, y con el
+  principio; **naranja**, al final. Tiene dos pistas: la de arriba es la de la **regresión
+  logística** y la de abajo, la de la **red neuronal EEGNet**. Se puede pinchar o arrastrar para ir a un momento, y con el
   teclado, las flechas avanzan o retroceden y la barra espaciadora reproduce o pausa.
 - Las dos van **suavizadas** sobre unos 30 s: un trozo de 4 s suelto apenas dice nada.
 
@@ -247,7 +256,8 @@ acertó en el **74 %** de las grabaciones PASAT y en el **84 %** de las PVTB (az
 persona ni lo cansada que dice estar. Parte del cambio puede deberse a que el casco se asienta (en
 reposo también aparece algo), y el orden de las tareas del protocolo es siempre el mismo. Si una
 grabación se procesó con una versión anterior de la plataforma, la pestaña pide **volver a
-procesarla**.
+procesarla** (si es anterior solo a la red neuronal, se ve la logística y el apartado de EEGNet
+avisa de que falta, con su botón para volver a procesarla).
 
 ## 8. Descargar los resultados en CSV
 
@@ -263,8 +273,8 @@ columna: [`COLUMNAS_CSV.md`](COLUMNAS_CSV.md). Algunas claves:
   nunca un cero.
 - La potencia **relativa** va de 0 a 1 (no en %); la **absoluta**, en log<sub>10</sub> de V².
 - Las columnas de los modelos están al final (`c1_oa_oc_logistica_clase`, sus probabilidades…),
-  y detrás las cuatro de fatiga aguda (`fatiga_aguda_rho`, `fatiga_aguda_final_mayor`…), que solo
-  se rellenan en grabaciones PASAT y PVTB.
+  y detrás las seis de fatiga aguda (`fatiga_aguda_rho`, `fatiga_aguda_final_mayor`… y las dos de
+  EEGNet, `fatiga_aguda_eegnet_*`), que solo se rellenan en grabaciones PASAT y PVTB.
 
 **En SPSS:** importa el archivo como datos de texto (*Archivo → Importar datos*; los menús varían
 según la versión) y marca el separador `;` y la coma como decimal. Si en tu equipo SPSS usa otra configuración regional, el formato internacional
