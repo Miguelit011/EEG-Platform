@@ -75,6 +75,9 @@
   --foco: #ffd166;
   --descartado: #f2a65a;
   --cabeza-vacia: #1c2636;
+  --fa-principio: #56b4e9;
+  --fa-final: #f0a23a;
+  --fa-neutro: #222c3b;
   --sombra: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -16px rgba(0, 0, 0, 0.7);
   --fuente: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --fuente-datos: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
@@ -105,6 +108,9 @@
     --foco: #b45309;
     --descartado: #8a3a00;
     --cabeza-vacia: #e3e8f0;
+    --fa-principio: #0072b2;
+    --fa-final: #d55e00;
+    --fa-neutro: #e9edf3;
     --sombra: 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 24px -16px rgba(15, 23, 42, 0.25);
   }
 }
@@ -133,6 +139,9 @@
   --foco: #b45309;
   --descartado: #8a3a00;
   --cabeza-vacia: #e3e8f0;
+  --fa-principio: #0072b2;
+  --fa-final: #d55e00;
+  --fa-neutro: #e9edf3;
   --sombra: 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 24px -16px rgba(15, 23, 42, 0.25);
 }
 
@@ -706,3 +715,63 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 @media (prefers-reduced-motion: reduce) { .cargando::after { animation: none; } }
 
 .columna-mapa { min-width: 0; }
+
+/* ---- Fatiga aguda ---------------------------------------------------------- */
+.subtitulo-pagina { margin: -0.35rem 0 0.9rem; color: var(--texto-suave); font-size: 1.05rem; }
+.fa-veredicto { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.5rem 0; padding: 1.5rem 1.75rem; }
+.fa-veredicto-texto { padding-right: 2.5rem; }
+.fa-veredicto .parte-fiabilidad h3 { margin: 0 0 1rem; font-size: 0.95rem; font-weight: 650; color: var(--texto-suave); }
+.fa-frase { display: flex; gap: 0.7rem; align-items: flex-start; margin: 0 0 0.9rem; font-size: clamp(1.15rem, 1rem + 0.6vw, 1.45rem); line-height: 1.35; font-weight: 550; text-wrap: pretty; }
+.fa-frase .ico { flex: none; width: 1.3em; height: 1.3em; margin-top: 0.05em; }
+.fa-frase-si .ico { color: var(--ok); }
+.fa-frase-no .ico { color: var(--texto-suave); }
+
+.fa-visor .visor-cab { gap: 0.9rem 1.5rem; }
+.fa-visor .pestanas-banda { margin: 0; }
+.fa-escena-marco { padding: 1.25rem 1.5rem 0.5rem; }
+.fa-escena { aspect-ratio: 16 / 9; max-height: 560px; }
+.fa-reloj { position: absolute; top: 0.9rem; right: 1.1rem; margin: 0; font-family: var(--fuente-datos); font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.6rem); font-weight: 600; line-height: 1; color: var(--texto); opacity: 0.85; pointer-events: none; font-variant-numeric: tabular-nums; }
+
+.fa-reproductor { padding: 0.5rem 1.5rem 1.25rem; }
+.fa-mandos { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-bottom: 0.9rem; }
+.fa-play { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 9.5rem; justify-content: center; }
+.fa-play svg { width: 1.15em; height: 1.15em; fill: currentColor; }
+.fa-play .fa-icono-pausa, .fa-play.en-pausa .fa-icono-play { display: none; }
+.fa-play.en-pausa .fa-icono-pausa { display: inline; }
+.fa-tiempo { margin: 0; font-variant-numeric: tabular-nums; }
+.fa-tiempo .dato { font-size: 1.15rem; font-weight: 600; }
+.fa-velocidad { margin-left: auto; }
+.fa-velocidad button { min-height: 40px; padding: 0.35rem 0.85rem; border: 0; border-radius: 0; background: transparent; color: var(--texto-suave); font-size: 0.95rem; font-weight: 500; }
+.fa-velocidad button + button { border-left: 1px solid var(--borde-fuerte); }
+.fa-velocidad button:hover { color: var(--texto); background: transparent; }
+.fa-velocidad button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 650; }
+
+.fa-cinta { position: relative; height: 58px; border-radius: 10px; border: 1px solid var(--borde-fuerte); overflow: hidden; cursor: pointer; touch-action: none; background: var(--fa-neutro); }
+.fa-cinta:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.fa-cinta canvas { display: block; width: 100%; height: 100%; }
+.fa-cabezal { position: absolute; top: 0; bottom: 0; left: 0; width: 3px; margin-left: -1.5px; background: var(--texto); box-shadow: 0 0 0 1.5px var(--superficie); pointer-events: none; }
+.fa-cinta-ejes { display: flex; justify-content: space-between; margin-top: 0.35rem; font-family: var(--fuente-datos); font-size: 0.78rem; color: var(--texto-suave); }
+.fa-leyenda { display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; list-style: none; padding: 0; margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--texto-suave); }
+.fa-leyenda li { display: inline-flex; align-items: center; gap: 0.5rem; }
+.fa-muestra { display: inline-block; width: 28px; height: 12px; border-radius: 3px; }
+.fa-muestra-principio { background: linear-gradient(to right, var(--fa-principio), var(--fa-neutro)); }
+.fa-muestra-final { background: linear-gradient(to right, var(--fa-neutro), var(--fa-final)); }
+
+.fa-detalles { padding: 1rem 1.5rem; }
+.fa-detalles summary { cursor: pointer; font-weight: 600; }
+.fa-detalles .mini-datos { margin-top: 1rem; }
+
+@media (max-width: 900px) {
+  .fa-veredicto { grid-template-columns: minmax(0, 1fr); }
+  .fa-veredicto-texto { padding-right: 0; }
+  .fa-veredicto .parte-fiabilidad { padding: 1.5rem 0 0; border-left: 0; border-top: 1px solid var(--borde); }
+  .fa-escena { aspect-ratio: 1 / 0.9; }
+}
+@media (max-width: 640px) {
+  .fa-escena-marco, .fa-reproductor { padding-left: 1rem; padding-right: 1rem; }
+  .fa-velocidad { margin-left: 0; }
+}
+.fa-escala-titulo { margin: 0.9rem 0 0.25rem; font-size: 0.85rem; color: var(--texto-suave); }
+.fa-tercios { position: relative; height: 1.2rem; margin-top: 0.35rem; font-size: 0.8rem; color: var(--texto-suave); }
+.fa-tercios span { position: absolute; top: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fa-tercios span:nth-child(1), .fa-tercios span:nth-child(3) { color: var(--texto); font-weight: 600; }

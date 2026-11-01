@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "../vendor/three/controls/OrbitControls.js";
 import {
-  bandas, electrodos, estado, suscribir, geo, rango, valor, puntosBanda, estimar, opacidad,
+  bandas, electrodos, estado, suscribir, geo, rango, valor, puntosBanda, opacidad, SIGMA,
   colorDeValor, fmt, decimales, textoValor, degradadoCss, css, hexARgb,
 } from "./visor-comun.js";
 
@@ -64,22 +64,52 @@ function contornos(geometria, planos) {
   return g;
 }
 
+// Pesos de la interpolación de cada vértice: solo dependen de qué sensores son válidos, no de sus
+// valores, así que se calculan una vez por malla y conjunto de sensores (los de `estimar`, ya
+// normalizados). Con ellos, repintar un momento nuevo de la grabación es una suma por vértice.
+const pesosCache = new Map();
+function pesosDe(malla, puntos) {
+  const clave = malla.n + "|" + puntos.map(function (p) { return p.canal; }).join(",");
+  if (pesosCache.has(clave)) return pesosCache.get(clave);
+  const k = puntos.length;
+  const pesos = new Float32Array(malla.n * k), alfa = new Float32Array(malla.n);
+  const u = [0, 0, 0];
+  for (let i = 0; i < malla.n; i++) {
+    u[0] = malla.dirs[i * 3]; u[1] = malla.dirs[i * 3 + 1]; u[2] = malla.dirs[i * 3 + 2];
+    let sw = 0, amin = Infinity;
+    for (let j = 0; j < k; j++) {
+      const p = puntos[j];
+      const d = Math.min(1, Math.max(-1, u[0] * p.u[0] + u[1] * p.u[1] + u[2] * p.u[2]));
+      const ang = Math.acos(d);
+      const w = Math.exp(-(ang * ang) / (SIGMA * SIGMA));
+      pesos[i * k + j] = w; sw += w;
+      if (ang < amin) amin = ang;
+    }
+    if (sw > 1e-12) { for (let j = 0; j < k; j++) pesos[i * k + j] /= sw; alfa[i] = opacidad(amin); }
+    else alfa[i] = -1;   // sin sensores válidos cerca: sin dato
+  }
+  const salida = { k: k, pesos: pesos, alfa: alfa };
+  pesosCache.set(clave, salida);
+  return salida;
+}
+
 // Colores por vértice de una banda; se guardan por estado para no recalcular al cambiar de vista.
 const cache = new Map();
 function coloresDe(malla, banda) {
-  const clave = [banda, estado.metrica, estado.escala, css("--cabeza-vacia")].join("|");
+  const clave = [banda, estado.metrica, estado.escala, estado.fotograma, css("--cabeza-vacia")].join("|");
   if (cache.has(clave)) return cache.get(clave);
   const [min, max] = rango(banda);
   const puntos = puntosBanda(banda);
   const vacia = hexARgb(css("--cabeza-vacia"));
   const salida = new Float32Array(malla.n * 3);
-  const u = [0, 0, 0];
+  const p = puntos.length ? pesosDe(malla, puntos) : null;
+  const valores = puntos.map(function (x) { return x.v; });
   for (let i = 0; i < malla.n; i++) {
-    u[0] = malla.dirs[i * 3]; u[1] = malla.dirs[i * 3 + 1]; u[2] = malla.dirs[i * 3 + 2];
     let col = vacia;
-    if (puntos.length) {
-      const est = estimar(u, puntos);
-      if (est.v !== null) col = mezclar(vacia, colorDeValor(est.v, min, max), opacidad(est.ang));
+    if (p && p.alfa[i] >= 0) {
+      let v = 0;
+      for (let j = 0; j < p.k; j++) v += p.pesos[i * p.k + j] * valores[j];
+      col = mezclar(vacia, colorDeValor(v, min, max), p.alfa[i]);
     }
     salida[i * 3] = lineal(col[0]); salida[i * 3 + 1] = lineal(col[1]); salida[i * 3 + 2] = lineal(col[2]);
   }
@@ -333,7 +363,7 @@ export async function iniciar3D(ayudas) {
     c.fillStyle = css("--texto-suave"); c.font = "16px " + css("--fuente");
     const nombre = bandas.find(function (x) { return x.clave === estado.banda; }).nombre;
     c.fillText("Interpolación orientativa sobre 14 sensores, no localiza fuentes · plantilla fsaverage · " + nombre + " · " +
-               (estado.metrica === "rel" ? "potencia relativa (%)" : "potencia absoluta (log10 V²)"), 12, lienzo.height + 28);
+               ({ rel: "potencia relativa (%)", abs: "potencia absoluta (log10 V²)", cambio: "cambio de la potencia relativa desde el primer tercio (pp)" }[estado.metrica]), 12, lienzo.height + 28);
     const a = document.createElement("a");
     a.download = "cerebro-" + estado.banda + "-" + estado.metrica + ".png";
     a.href = lado.toDataURL("image/png");

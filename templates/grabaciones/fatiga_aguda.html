@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Fatiga aguda · {{ grabacion.nombre_original }}{% endblock %}
+
+{% block contenido %}
+<div class="cabecera-pagina">
+  <div>
+    <h1>Fatiga aguda</h1>
+    <p class="subtitulo-pagina">Cambio del EEG a lo largo de la tarea{% if fa.condicion %} · {{ fa.condicion }}{% endif %}</p>
+    <ul class="fichas" aria-label="Datos de la grabación">
+      <li>Archivo <span class="dato">{{ grabacion.nombre_original }}</span></li>
+      <li>Condición <span class="dato">{% if grabacion.condicion %}{{ grabacion.condicion }}{% else %}sin condición{% endif %}</span></li>
+      <li>Duración <span class="dato">{{ grabacion.duracion_texto }}</span></li>
+      <li>Lote <span class="dato">{{ grabacion.lote_id }}</span></li>
+    </ul>
+  </div>
+</div>
+
+{% if fa.estado != "ok" %}
+  <section class="tarjeta">
+    {% if fa.estado == "sin_procesar" %}
+      {% if grabacion.estado == "error" %}
+        <p class="aviso aviso-alerta" role="alert">Esta grabación no se pudo procesar: {{ grabacion.mensaje_error }}</p>
+      {% else %}
+        <p class="aviso aviso-info" role="status">Esta grabación todavía no se ha procesado ({{ grabacion.get_estado_display|lower }}). La pestaña se rellenará cuando termine.</p>
+      {% endif %}
+    {% elif fa.estado == "sin_condicion" or fa.estado == "otra_condicion" %}
+      <p class="aviso aviso-info" role="status">
+        {% if fa.estado == "sin_condicion" %}No se conoce la condición de esta grabación.{% else %}Esta grabación es de {{ fa.condicion }}.{% endif %}
+        Los modelos de fatiga aguda solo existen para las tareas largas <strong>PASAT</strong> y <strong>PVTB</strong>, que es donde el estudio confirmó el cambio a lo largo de la tarea.
+        Si la condición es otra, se puede corregir en la lista de grabaciones.
+      </p>
+    {% else %}
+      <p class="aviso aviso-info" role="status">{{ fa.motivo }}</p>
+      {% if fa.reprocesar and grabacion.reprocesable %}
+      <form method="post" action="{% url 'grabaciones:encolar' grabacion.pk %}">{% csrf_token %}
+        <button type="submit" class="boton primario">Volver a procesar</button>
+      </form>
+      {% endif %}
+    {% endif %}
+    <p><a href="{% url 'grabaciones:lista' %}">Volver a la lista</a></p>
+  </section>
+{% else %}
+
+<section class="tarjeta fa-veredicto" aria-labelledby="titulo-veredicto">
+  <div class="fa-veredicto-texto">
+    <h2 id="titulo-veredicto" class="solo-lectores">Resultado en esta grabación</h2>
+    <p class="fa-frase {% if fa.final_mayor %}fa-frase-si{% else %}fa-frase-no{% endif %}">
+      <svg class="ico" aria-hidden="true"><use href="#{% if fa.final_mayor %}i-ok{% else %}i-aviso{% endif %}"/></svg>
+      <span>{{ fa.veredicto }}</span>
+    </p>
+    <p class="nota">Lo calcula el modelo de {{ fa.condicion }} comparando la media del primer tercio con la del último. En personas que no usó para aprender, acertó en el <strong>{{ fa.acierto_texto }}</strong> de las grabaciones.</p>
+  </div>
+  {% with test=fa.ficha.test %}
+  <div class="parte parte-fiabilidad">
+    <h3>Fiabilidad del modelo</h3>
+    <p class="cifra"><span class="dato">{{ test.valor }}</span> <span class="nota">{{ test.metrica }}</span></p>
+    <div class="acierto" role="img"
+         aria-label="{{ test.metrica|capfirst }} {{ test.valor }}, con un intervalo de confianza del 95 % de {{ test.ic }}. Nivel de azar: {{ test.azar }}. Escala de 0 a 1.">
+      <div class="acierto-pista">
+        <span class="acierto-ic" style="left: {{ test.pos_ic_desde }}%; width: {{ test.pos_ic_ancho }}%"></span>
+        <span class="acierto-azar" style="left: {{ test.pos_azar }}%"></span>
+        <span class="acierto-punto" style="left: {{ test.pos_valor }}%"></span>
+        <span class="acierto-etiqueta" style="left: {{ test.pos_azar }}%">azar {{ test.azar }}</span>
+      </div>
+      <div class="acierto-ejes" aria-hidden="true"><span>0</span><span>1</span></div>
+    </div>
+    <dl class="mini-datos">
+      <div><dt>Intervalo 95 %</dt><dd class="dato">{{ test.ic }}</dd></div>
+      <div><dt>Azar</dt><dd class="dato">{{ test.azar }}</dd></div>
+      <div><dt>Test</dt><dd>{{ test.n_personas }} personas · {{ test.n_grabaciones }} grabaciones</dd></div>
+    </dl>
+  </div>
+  {% endwith %}
+</section>
+
+<section class="visor fa-visor" id="visor" aria-labelledby="titulo-visor"
+         data-malla-cabeza="{% static 'models/cabeza.bin' %}" data-malla-cerebro="{% static 'models/cerebro.bin' %}">
+  <div class="visor-cab">
+    <h2 id="titulo-visor">El cerebro a lo largo de la grabación</h2>
+    <div class="controles">
+      <fieldset class="control">
+        <legend>Qué se ve</legend>
+        <div class="segmentado">
+          <label><input type="radio" name="fa-metrica" value="cambio" checked>Cambio desde el principio</label>
+          <label><input type="radio" name="fa-metrica" value="rel">Valor en cada momento</label>
+        </div>
+      </fieldset>
+      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se muestra en el cerebro"></div>
+    </div>
+  </div>
+
+  <div class="fa-escena-marco">
+    <div class="escena-3d fa-escena" id="escena-3d">
+      <div class="etiquetas-3d" id="etiquetas-3d" aria-hidden="true"></div>
+      <p class="fa-reloj" id="fa-reloj" aria-hidden="true">0:00</p>
+    </div>
+    <div class="herramientas-3d" id="herramientas-3d" role="toolbar" aria-label="Opciones del cerebro 3D"></div>
+    <p class="fa-escala-titulo" id="fa-escala-titulo"></p>
+    <div class="escala-mapa" id="escala-3d"></div>
+  </div>
+
+  <div class="fa-reproductor" id="fa-reproductor">
+    <div class="fa-mandos">
+      <button type="button" class="boton primario fa-play" id="fa-play" aria-label="Reproducir">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fa-icono-play" d="M8 5.5v13l10.5-6.5z"/><path class="fa-icono-pausa" d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z"/></svg>
+        <span id="fa-play-texto">Reproducir</span>
+      </button>
+      <p class="fa-tiempo"><span class="dato" id="fa-tiempo">0:00</span> <span class="nota">de {{ fa.duracion_texto }}</span></p>
+      <div class="segmentado fa-velocidad" role="group" aria-label="Velocidad de reproducción">
+        <button type="button" data-velocidad="0.5" aria-pressed="false">0,5×</button>
+        <button type="button" data-velocidad="1" aria-pressed="true">1×</button>
+        <button type="button" data-velocidad="2" aria-pressed="false">2×</button>
+      </div>
+    </div>
+
+    <div class="fa-cinta-marco">
+      <div class="fa-cinta" id="fa-cinta" tabindex="0" role="slider" aria-label="Momento de la grabación"
+           aria-valuemin="0" aria-valuemax="{{ fa.n_ventanas|add:'-1' }}" aria-valuenow="0" aria-valuetext="0:00">
+        <canvas id="fa-cinta-lienzo"></canvas>
+        <span class="fa-cabezal" id="fa-cabezal" aria-hidden="true"></span>
+      </div>
+      <div class="fa-tercios" id="fa-tercios" aria-hidden="true">
+        <span>Primer tercio</span><span>Tercio central</span><span>Último tercio</span>
+      </div>
+      <div class="fa-cinta-ejes" aria-hidden="true"><span>0:00</span><span>{{ fa.duracion_texto }}</span></div>
+      <ul class="fa-leyenda" aria-label="Cómo leer la cinta">
+        <li><span class="fa-muestra fa-muestra-principio"></span>Se parece al principio de la tarea</li>
+        <li><span class="fa-muestra fa-muestra-final"></span>Se parece al final de la tarea</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="orientativo" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>
+    <span><strong>Cómo se lee.</strong> El cerebro muestra, para la banda elegida, cuánto ha subido o bajado la potencia relativa de cada zona respecto al primer tercio (o, si se elige, su valor en cada momento), con la escala fija en toda la grabación. La cinta colorea cada momento según a qué parte de la tarea se parece, según el modelo. Las dos van suavizadas sobre unos 30 s, porque un trozo de 4 s suelto apenas dice nada. Los colores entre sensores son una interpolación orientativa sobre una plantilla de cerebro (fsaverage): no localizan la actividad.</span>
+  </p>
+  {{ fa.visor|json_script:"datos-visor" }}
+  {{ fa.fatiga|json_script:"datos-fatiga" }}
+</section>
+
+<details class="tarjeta fa-detalles">
+  <summary>Detalles</summary>
+  <dl class="mini-datos">
+    <div><dt>Tendencia en esta grabación (ρ)</dt><dd class="dato">{{ fa.rho_texto }}</dd></div>
+    <div><dt>Media en test</dt><dd class="dato">{{ fa.rho_test }}</dd></div>
+    <div><dt>Ventanas de 4 s</dt><dd class="dato">{{ fa.n_ventanas }}</dd></div>
+  </dl>
+  <p class="nota">ρ es la correlación entre la puntuación de cada ventana y su momento en la grabación: 0 significa que no hay tendencia y 1 que las ventanas se ordenan perfectamente del principio al final.</p>
+</details>
+
+<p class="aviso aviso-alerta aviso-modelos" role="note"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg><span><strong>Importante.</strong> {{ aviso_fijo }}</span></p>
+
+<script type="importmap">{"imports": {"three": "{% static 'vendor/three/three.module.min.js' %}"}}</script>
+<script type="module" src="{% static 'js/fatiga.js' %}"></script>
+{% endif %}
+{% endblock %}

@@ -12,11 +12,13 @@ from django.urls import reverse
 from grabaciones.models import Grabacion
 
 COOKIE = "grabacion_activa"
-VISTAS = {"calidad": "calidad", "analisis": "analisis", "modelos_grabacion": "modelos"}
+VISTAS = {"calidad": "calidad", "analisis": "analisis", "modelos_grabacion": "modelos",
+          "fatiga_aguda": "fatiga_aguda"}
 NOMBRE_VISTA = {"calidad": "grabaciones:calidad", "analisis": "grabaciones:analisis",
-                "modelos": "grabaciones:modelos_grabacion"}
+                "modelos": "grabaciones:modelos_grabacion",
+                "fatiga_aguda": "grabaciones:fatiga_aguda"}
 ATAJO = {"calidad": "grabaciones:atajo_calidad", "analisis": "grabaciones:atajo_analisis",
-         "modelos": "grabaciones:atajo_modelos"}
+         "modelos": "grabaciones:atajo_modelos", "fatiga_aguda": "grabaciones:atajo_fatiga_aguda"}
 
 
 def url_de(seccion, pk):
@@ -78,6 +80,7 @@ def navegacion(request):
         "nav_url_calidad": url_de("calidad", pk),
         "nav_url_analisis": url_de("analisis", pk),
         "nav_url_modelos": url_de("modelos", pk),
+        "nav_url_fatiga_aguda": url_de("fatiga_aguda", pk),
     }
     if seccion and posicion is not None:
         contexto["nav_seccion"] = seccion

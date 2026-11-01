@@ -5,12 +5,12 @@
 {% block contenido %}
 <div class="cabecera-pagina">
   <div>
-    <h1>{% if seccion == "calidad" %}Calidad de la señal{% elif seccion == "modelos" %}Modelos{% else %}Análisis espectral{% endif %}</h1>
+    <h1>{% if seccion == "calidad" %}Calidad de la señal{% elif seccion == "modelos" %}Modelos{% elif seccion == "fatiga_aguda" %}Fatiga aguda{% else %}Análisis espectral{% endif %}</h1>
   </div>
 </div>
 
 <section class="tarjeta">
-  <p class="vacio">Todavía no hay ninguna grabación para ver. Esta pantalla muestra {% if seccion == "calidad" %}la calidad de la señal{% elif seccion == "modelos" %}lo que predicen los modelos{% else %}el análisis espectral{% endif %} de una grabación procesada.</p>
+  <p class="vacio">Todavía no hay ninguna grabación para ver. Esta pantalla muestra {% if seccion == "calidad" %}la calidad de la señal{% elif seccion == "modelos" %}lo que predicen los modelos{% elif seccion == "fatiga_aguda" %}cómo cambia el EEG a lo largo de una tarea PASAT o PVTB{% else %}el análisis espectral{% endif %} de una grabación procesada.</p>
   <p><a class="boton primario" href="{% url 'grabaciones:lista' %}">Subir grabaciones</a></p>
 </section>
 {% endblock %}
