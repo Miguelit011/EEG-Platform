@@ -1,7 +1,7 @@
 // Visor de potencia por banda: cuatro mapas 2D (vista desde arriba) y cabeza 3D.
 import {
   bandas, electrodos, estado, cambiar, suscribir, geo, rango, valor, puntosBanda, estimar, opacidad,
-  colorDeValor, fmt, decimales, textoValor, degradadoCss, css, hexARgb,
+  colorDeValor, fmt, decimales, textoValor, degradadoCss, css, hexARgb, dibujarCirculo2D,
 } from "./visor-comun.js";
 
 const controles = document.getElementById("controles-visor");
@@ -38,7 +38,6 @@ function ocultarTip() { tip.hidden = true; }
 
 // ---- Mapas 2D ------------------------------------------------------------
 const NOMBRE_METRICA = { rel: "potencia relativa", abs: "potencia absoluta" };
-const RESOLUCION = 132;
 const mapas = bandas.map(function (b) {
   const figura = document.createElement("figure");
   figura.className = "mapa-banda";
@@ -71,46 +70,6 @@ function moverSobre(mapa, ev) {
   mostrarTip(ev.clientX, ev.clientY, texto);
 }
 
-// Respaldo sin WebGL: círculo con nariz y orejas y el calor interpolado en el plano.
-function dibujarBaseCirculo(ctx, lado, puntos, min, max) {
-  const vacia = hexARgb(css("--cabeza-vacia"));
-  const R = lado * 0.34;
-  const cx = lado / 2, cy = lado * 0.54;
-  const fuera = document.createElement("canvas");
-  fuera.width = fuera.height = RESOLUCION;
-  const fctx = fuera.getContext("2d");
-  const img = fctx.createImageData(RESOLUCION, RESOLUCION);
-  for (let iy = 0; iy < RESOLUCION; iy++) {
-    for (let ix = 0; ix < RESOLUCION; ix++) {
-      const x = ((ix + 0.5) / RESOLUCION) * 2 - 1, y = 1 - ((iy + 0.5) / RESOLUCION) * 2;
-      const rr = Math.hypot(x, y);
-      const k = (iy * RESOLUCION + ix) * 4;
-      if (rr > 1) { img.data[k + 3] = 0; continue; }
-      const theta = rr * geo.borde_2d, s = Math.sin(theta);
-      const u = rr === 0 ? [0, 0, 1] : [s * x / rr, s * y / rr, Math.cos(theta)];
-      const est = puntos.length ? estimar(u, puntos) : { v: null, ang: Infinity };
-      let col = vacia;
-      if (est.v !== null) {
-        const o = opacidad(est.ang);
-        const c = colorDeValor(est.v, min, max);
-        col = [vacia[0] + (c[0] - vacia[0]) * o, vacia[1] + (c[1] - vacia[1]) * o, vacia[2] + (c[2] - vacia[2]) * o];
-      }
-      img.data[k] = col[0]; img.data[k + 1] = col[1]; img.data[k + 2] = col[2]; img.data[k + 3] = 255;
-    }
-  }
-  fctx.putImageData(img, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(fuera, cx - R, cy - R, 2 * R, 2 * R);
-  ctx.strokeStyle = css("--texto-suave"); ctx.lineWidth = 2; ctx.lineJoin = "round";
-  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx - R * 0.17, cy - R * 0.985); ctx.lineTo(cx, cy - R * 1.2); ctx.lineTo(cx + R * 0.17, cy - R * 0.985); ctx.stroke();
-  [-1, 1].forEach(function (lado2) {
-    ctx.beginPath(); ctx.ellipse(cx + lado2 * (R + 5), cy, 5, R * 0.2, 0, 0, 2 * Math.PI); ctx.stroke();
-  });
-  return function (e) { return [cx + e.p2[0] * R, cy - e.p2[1] * R]; };
-}
-
 let api2D = null;   // se rellena cuando cargan las mallas 3D
 
 function dibujarMapa(mapa) {
@@ -136,7 +95,7 @@ function dibujarMapa(mapa) {
     ctx.drawImage(fuera, 0, 0, lado, lado);
     proyectar = function (e) { const f = aFraccion(e); return [f[0] * lado, f[1] * lado]; };
   } else {
-    proyectar = dibujarBaseCirculo(ctx, lado, puntos, min, max);
+    proyectar = dibujarCirculo2D(ctx, lado, puntos, min, max);
   }
 
   // Sensores.

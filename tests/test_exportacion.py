@@ -59,9 +59,12 @@ def test_columnas_estables():
         "rel_AF3_delta", "rel_AF3_theta", "rel_AF3_alfa", "rel_AF3_beta",
         "logabs_AF3_delta", "logabs_AF3_theta", "logabs_AF3_alfa", "logabs_AF3_beta"]
     assert nombres[165:167] == ["version_eeg_library", "fecha_analisis"]
-    # 8 + 9 + 4 + 4 zonas × 8 + 14 electrodos × 8 + 2, y al final los modelos (4 + 4 + 7)
-    assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 + 15 == 182
-    assert nombres[167:] == [
+    # 8 + 9 + 4 + 4 zonas × 8 + 14 electrodos × 8 + 2, los modelos (4 + 4 + 7) y, al final,
+    # fatiga aguda (4): añadirlas al final no movió ninguna columna anterior.
+    assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 + 15 + 4 == 186
+    assert nombres[182:] == ["fatiga_aguda_rho", "fatiga_aguda_p_primer_tercio",
+                             "fatiga_aguda_p_ultimo_tercio", "fatiga_aguda_final_mayor"]
+    assert nombres[167:182] == [
         "c1_oa_oc_logistica_clase", "c1_oa_oc_logistica_p_OA", "c1_oa_oc_logistica_p_OC",
         "c1_oa_oc_logistica_condicion_estimada",
         "c2_reposo_tarea_logistica_clase", "c2_reposo_tarea_logistica_p_reposo",
@@ -76,7 +79,8 @@ def test_nombres_validos_para_spss_y_sin_fatiga():
     assert len(set(nombres)) == len(nombres)
     for n in nombres:
         assert re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", n) and len(n) <= 64, n
-        assert "fatiga" not in n.lower() and not n.startswith("indice_")
+        # Solo las columnas de la pestaña Fatiga aguda llevan la palabra (decisión del autor).
+        assert ("fatiga" not in n.lower() or n.startswith("fatiga_aguda_")) and not n.startswith("indice_")
     assert all(c.descripcion and c.unidad and c.seccion for c in columnas())
 
 
@@ -126,8 +130,8 @@ def test_valores_del_fixture():
     assert f["referencia"] == "car_condicional" and f["car_aplicada"] == "1"
     assert (f["banda_min_hz"], f["banda_max_hz"], f["notch_hz"]) == ("1", "30", "50")
     assert f["ica_n_componentes_eliminadas"] == "0" and f["ica_componentes_eliminadas"] == ""
-    assert f["version_eeg_library"] == "0.14.0"
-    assert f["fecha_analisis"] == "2026-10-15T18:19:22"
+    assert f["version_eeg_library"] == "0.15.0"
+    assert f["fecha_analisis"] == "2026-11-01T19:41:01"
 
 
 def test_las_potencias_coinciden_con_el_json():
@@ -206,7 +210,11 @@ def test_texto_que_excel_tomaria_por_formula(nombre):
 
 
 def test_sin_fatiga_en_el_csv():
-    assert "fatiga" not in csv_de([grabacion_con(FIXTURE)]).decode("utf-8").lower()
+    """Fuera de los nombres de las columnas `fatiga_aguda_*`, el CSV no menciona la fatiga."""
+    cabecera, filas = csv_de([grabacion_con(FIXTURE)]).decode("utf-8").split("\r\n", 1)
+    assert "fatiga" not in filas.lower()
+    assert all(c.startswith("fatiga_aguda_") for c in cabecera.lstrip("\ufeff").split(";")
+               if "fatiga" in c.lower())
 
 
 def test_formato_configurable(settings):

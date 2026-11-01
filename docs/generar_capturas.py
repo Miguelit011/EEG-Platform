@@ -1,8 +1,9 @@
 """
 Genera las capturas de pantalla de la guía de uso y de la memoria (`docs/capturas/`).
 
-Usa **solo datos anónimos**: el JSON de ejemplo de la librería (`tests/fixtures/`) y variantes
-suyas, con nombres de archivo inventados. Nunca lee EDF ni resultados reales, porque las
+Usa **solo datos anónimos**: los JSON de ejemplo de la librería (`tests/fixtures/`: uno de ojos
+abiertos y, para la pestaña Fatiga aguda, uno de PASAT) y variantes suyas, con nombres de archivo
+inventados. Nunca lee EDF ni resultados reales, porque las
 capturas se guardan en el repositorio y los participantes son menores de edad.
 
 Cómo funciona: crea una carpeta de datos temporal, la rellena con grabaciones de demostración,
@@ -60,6 +61,9 @@ def preparar_datos(datos):
     from eeg_library.preprocesado.quality import CANALES_EPOC
     from grabaciones.models import Grabacion, Lote
     from tests.auxiliar import FIXTURE, variante
+    import json
+    pasat = json.loads((RAIZ / "tests" / "fixtures" / "analisis_grabacion_pasat.json")
+                       .read_text(encoding="utf-8"))
 
     lote = Lote.objects.create()
     E = Grabacion.Estado
@@ -85,6 +89,8 @@ def preparar_datos(datos):
                          variante(CANALES_EPOC[7:]), duracion_s=181.0, archivo="demo/d.edf").pk
     ids["sin"] = crear("registro_sin_condicion.edf", "", E.PROCESADA, variante(["P8"]),
                        duracion_s=95.0, sfreq=128.0, remuestreada=True, archivo="demo/e.edf").pk
+    ids["pasat"] = crear("participante05_PASAT.edf", "PASAT", E.PROCESADA, pasat,
+                         duracion_s=pasat["metadatos"]["duracion_s"], archivo="demo/i.edf").pk
     crear("participante03_MSIT.edf", "MSIT", E.EN_COLA, archivo="demo/f.edf")
     crear("participante03_PVTB.edf", "PVTB", E.PROCESANDO, archivo="demo/g.edf")
     crear("participante04_OA.edf", "OA", E.ERROR, archivo="demo/h.edf",
@@ -107,9 +113,11 @@ def marcar_procesador(activo):
 # Capturas
 # ---------------------------------------------------------------------------
 
-def capturar(navegador, url, destino, alto=4800):
+def capturar(navegador, url, destino, alto=4800, quieto=False):
+    # `quieto`: sin movimiento (el cerebro no gira solo), para que la vista sea siempre la misma.
+    extra = ["--force-prefers-reduced-motion"] if quieto else []
     subprocess.run(
-        [str(navegador), "--headless", "--hide-scrollbars",
+        [str(navegador), "--headless", "--hide-scrollbars", *extra,
          # WebGL por software: el visor 3D y los mapas del cerebro necesitan un contexto WebGL.
          "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist",
          f"--window-size={ANCHO},{alto}", "--virtual-time-budget=9000",
@@ -189,8 +197,8 @@ def main():
 
         tmp = datos / "tmp.png"
 
-        def pagina(ruta_url, nombre):
-            capturar(navegador, base + ruta_url + "?tema=claro", tmp)
+        def pagina(ruta_url, nombre, consulta="", quieto=False):
+            capturar(navegador, base + ruta_url + "?tema=claro" + consulta, tmp, quieto=quieto)
             imagen = recortar_pagina(tmp)
             imagen.save(SALIDA / nombre)
             return imagen, tarjetas(imagen)
@@ -221,6 +229,12 @@ def main():
         guardar_recorte(imagen, t, len(t) - 1, len(t) - 1, "modelos_condicion_estimada.png")
         os.remove(SALIDA / "modelos_sin_condicion.png")
         imagen, t = pagina("/modelos/resumen/", "modelos_resumen.png")
+
+        # Pantalla 5: fatiga aguda, con la grabación avanzada para que se vea el cambio
+        imagen, t = pagina(f"/grabaciones/{ids['pasat']}/fatiga-aguda/", "pantalla_5_fatiga_aguda.png",
+                           consulta="&momento=0.93", quieto=True)
+        guardar_desde_arriba(imagen, t, 0, "fatiga_aguda_veredicto.png")
+        guardar_recorte(imagen, t, 1, 1, "fatiga_aguda_cerebro.png")
     finally:
         if servidor:
             servidor.terminate()

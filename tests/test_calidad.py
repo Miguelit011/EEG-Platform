@@ -17,7 +17,7 @@ from eeg_library.preprocesado.referencing import aplicar_car
 from grabaciones import calidad
 from grabaciones.calidad import POSICIONES, nivel_de_fiabilidad, resumen_calidad
 from grabaciones.models import Grabacion, Lote
-from tests.auxiliar import FIXTURE, grabacion_con, mapa, variante
+from tests.auxiliar import FIXTURE, grabacion_con, mapa, sin_enlace_fatiga_aguda, variante
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
 
@@ -243,7 +243,7 @@ def test_sin_recursos_externos_ni_fatiga(client):
         g = grabacion_con(resultado)
         html = client.get(reverse("grabaciones:calidad", args=[g.pk])).content.decode()
         assert not re.search(r'(src|href)\s*=\s*["\'](https?:)?//', html, re.I)
-        assert "fatiga" not in html.lower()
+        assert "fatiga" not in sin_enlace_fatiga_aguda(html).lower()
 
 
 # ---------------------------------------------------------------------------

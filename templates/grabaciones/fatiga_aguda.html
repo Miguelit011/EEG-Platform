@@ -87,7 +87,9 @@
           <label><input type="radio" name="fa-metrica" value="rel">Valor en cada momento</label>
         </div>
       </fieldset>
-      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se muestra en el cerebro"></div>
+      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se muestra en el cerebro">
+        {% for b in fa.visor.bandas %}<button type="button" data-banda="{{ b.clave }}" aria-pressed="{% if b.clave == fa.visor.banda_inicial %}true{% else %}false{% endif %}">{{ b.nombre }} <small>{{ b.rango }}</small></button>{% endfor %}
+      </div>
     </div>
   </div>
 
@@ -97,7 +99,7 @@
       <p class="fa-reloj" id="fa-reloj" aria-hidden="true">0:00</p>
     </div>
     <div class="herramientas-3d" id="herramientas-3d" role="toolbar" aria-label="Opciones del cerebro 3D"></div>
-    <p class="fa-escala-titulo" id="fa-escala-titulo"></p>
+    <p class="fa-escala-titulo" id="fa-escala-titulo">Cambio de la potencia relativa respecto a la media del primer tercio, en puntos porcentuales: morado, baja; verde, sube</p>
     <div class="escala-mapa" id="escala-3d"></div>
   </div>
 

@@ -775,3 +775,6 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 .fa-tercios { position: relative; height: 1.2rem; margin-top: 0.35rem; font-size: 0.8rem; color: var(--texto-suave); }
 .fa-tercios span { position: absolute; top: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fa-tercios span:nth-child(1), .fa-tercios span:nth-child(3) { color: var(--texto); font-weight: 600; }
+.fa-escena > canvas { display: block; width: 100%; height: 100%; }
+.fa-sin-webgl { inset: auto auto 0.75rem 1rem; display: block; padding: 0; margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
+.fa-escena-marco .escala-mapa { min-height: 1.25rem; }

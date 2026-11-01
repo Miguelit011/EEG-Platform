@@ -60,6 +60,15 @@ def _bandas(resultado):
             for b in BANDAS]
 
 
+def para_csv(grabacion):
+    """Lo que exporta el CSV: la salida de la librería sin suavizar, o None si no se aplica."""
+    condicion = (grabacion.condicion or "").strip().upper()
+    if grabacion.estado != "procesada" or not grabacion.resultado or condicion not in CONDICIONES:
+        return None
+    p = puntuar(grabacion.resultado, condicion)
+    return p if p["disponible"] else None
+
+
 def resumen_fatiga_aguda(grabacion):
     """
     Datos de la pestaña para una grabación.
@@ -150,6 +159,5 @@ def resumen_fatiga_aguda(grabacion):
             "tercios_s": [ultima / 3, 2 * ultima / 3],
             "fotogramas": fotogramas,
             "cambios": cambios,
-            "pesos": p["pesos"],
         },
     }

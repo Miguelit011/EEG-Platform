@@ -13,7 +13,7 @@ Generado con `manage.py documentar_csv`; no se edita a mano. Un test comprueba q
 - Los electrodos descartados no tienen valor de potencia: se calculó con señal que no pasó por CAR ni ICA y no es comparable.
 - Bandas: `delta` (1–4 Hz), `theta` (4–8 Hz), `alfa` (8–13 Hz), `beta` (13–30 Hz). Zonas: `frontal`, `frontocentral`, `temporal`, `posterior`.
 
-Total: 182 columnas.
+Total: 186 columnas.
 
 ## Identificación
 
@@ -231,3 +231,12 @@ Total: 182 columnas.
 | `c3_tareas_logistica_p_MSIT` | Cuál de las 5 tareas: probabilidad de la clase MSIT | proporción 0–1 |
 | `c3_tareas_logistica_p_PVSAT` | Cuál de las 5 tareas: probabilidad de la clase PVSAT | proporción 0–1 |
 | `c3_tareas_logistica_condicion_estimada` | Cuál de las 5 tareas: 1 si se aplicó porque la condición de la grabación no se conocía y se estimó; 0 si se conocía (vacía si el modelo no se aplica) | 1/0 |
+
+## Fatiga aguda
+
+| Columna | Significado | Unidad |
+|---|---|---|
+| `fatiga_aguda_rho` | Tendencia a lo largo de la grabación: correlación de Spearman entre la puntuación de cada ventana y su momento (vacía si no es PASAT ni PVTB) | −1 a 1 |
+| `fatiga_aguda_p_primer_tercio` | Probabilidad de «último tercio» que el modelo da a la media del primer tercio | proporción 0–1 |
+| `fatiga_aguda_p_ultimo_tercio` | Probabilidad de «último tercio» que el modelo da a la media del último tercio | proporción 0–1 |
+| `fatiga_aguda_final_mayor` | 1 si el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |

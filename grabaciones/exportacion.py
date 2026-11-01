@@ -21,7 +21,7 @@ from eeg_library.preprocesado.quality import CANALES_EPOC
 from eeg_library.procesado.bands import BANDAS_DEFECTO
 from eeg_library.procesado.matrix import REGIONES
 
-from grabaciones import modelos
+from grabaciones import fatiga_aguda, modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
 
@@ -176,6 +176,26 @@ def _celdas(grabacion=None):
                   f"{titulo}: 1 si se aplicó porque la condición de la grabación no se conocía "
                   f"y se estimó; 0 si se conocía (vacía si el modelo no se aplica)", "1/0",
                   _booleano(t["origen"] in ("estimada", "estimadora")) if activo else "")
+
+    # Fatiga aguda (solo PASAT y PVTB). Son los valores de la librería, sin el suavizado de la
+    # pantalla: la ρ y el veredicto de tercios son los mismos cálculos que la cifra del test.
+    fa = "Fatiga aguda"
+    p = fatiga_aguda.para_csv(g) if g is not None else None
+    tercios = p["tercios"] if p else {}
+    yield col("fatiga_aguda_rho", fa,
+              "Tendencia a lo largo de la grabación: correlación de Spearman entre la puntuación "
+              "de cada ventana y su momento (vacía si no es PASAT ni PVTB)", "−1 a 1",
+              _numero(p["rho"], DECIMALES_REL) if p else "")
+    yield col("fatiga_aguda_p_primer_tercio", fa,
+              "Probabilidad de «último tercio» que el modelo da a la media del primer tercio",
+              "proporción 0–1", _numero(tercios.get("p_primero"), DECIMALES_REL))
+    yield col("fatiga_aguda_p_ultimo_tercio", fa,
+              "Probabilidad de «último tercio» que el modelo da a la media del último tercio",
+              "proporción 0–1", _numero(tercios.get("p_ultimo"), DECIMALES_REL))
+    yield col("fatiga_aguda_final_mayor", fa,
+              "1 si el último tercio se parece más al final de la tarea que el primero; 0 si no "
+              "(vacía si empatan o no se aplica)", "1/0",
+              _booleano(tercios["final_mayor"]) if p and tercios["final_mayor"] is not None else "")
 
 
 def columnas():

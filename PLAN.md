@@ -14,7 +14,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [x] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [x] |
 | 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
-| 10 (A) | Fatiga aguda con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [ ] |
+| 10 (A) | Fatiga aguda con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [x] |
 | 11 (B) | Fatiga aguda con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [ ] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
@@ -234,7 +234,13 @@ Sale de la línea `EEG-Library/analisis/fatiga_aguda/`, ya cerrada. Las cifras s
 
 Nota: la Fase 10 que se implementó el 2026-10-28 (gráfica de líneas por bloques y tabla de tercios en Análisis) se descartó entera sin llegar a commitearse. Esta Fase 10 la sustituye con otro enfoque: pestaña propia, un modelo con su cifra en test y una visualización animada.
 
-## Fase 10 (A) — Fatiga aguda con la logística
+## Fase 10 (A) — Fatiga aguda con la logística — **hecha** (2026-11-01)
+
+Resultado:
+- **EEG-Library 0.15.0:** `por_ventana` en `analizar_grabacion`, modelos `fa_pasat_logistica` y `fa_pvtb_logistica` y `puntuar_fatiga_aguda`. **Paridad exacta** con el análisis en 20 grabaciones de `train` y `val` (diferencia máxima en la puntuación 1,4·10⁻¹⁴; 20/20 veredictos iguales). Ejemplo anónimo `analisis_grabacion_pasat.json`.
+- **EEG-Platform:** pestaña «Fatiga aguda» con veredicto y cifra en test, cerebro 3D animado (60 fps) con cinta de tiempo, respaldo 2D sin WebGL, 4 columnas `fatiga_aguda_*` al final del CSV, guía, capturas y 288 tests.
+- **Desviación aprobada en el piloto:** el cerebro muestra por defecto el **cambio desde el principio** (diferencia con la media del primer tercio, paleta divergente morado–verde) y, como opción, el valor en cada momento. Con el valor, las diferencias entre electrodos tapaban el cambio con el tiempo y la animación apenas se movía.
+- Decisiones en `docs/DECISIONES.md` («Fatiga aguda»).
 **Objetivo:** que, al abrir una grabación PASAT o PVTB, el investigador vea sin hacer nada cómo cambia el EEG a lo largo de la tarea, según el modelo validado, en una pantalla vistosa para la defensa.
 
 Incluye, en EEG-Library (contrato 0.15.0):
@@ -247,7 +253,7 @@ Incluye, en EEG-Platform:
 - **Cerebro animado:** el visor 3D actual muestra la beta relativa por electrodo en cada tramo de la grabación (media móvil de varias ventanas) y avanza con un botón de reproducir y pausar. Se elige la beta porque es la firma confirmada en PVTB (H3). Escala fija en toda la grabación, para que el cambio se vea.
 - **Cinta de tiempo** bajo el cerebro: cada franja se colorea según la puntuación suavizada del modelo, de «se parece al principio» a «se parece al final». Al pinchar o arrastrar en la cinta, el cerebro salta a ese instante.
 - **Veredicto en una frase:** si el último tercio puntúa más que el primero, con la cifra del test de esa tarea (acierto pareado, IC y azar sobre la escala de 0 a 1 que ya usan los modelos).
-- **«Qué mira el modelo»:** mapa de cabeza con los pesos de la logística por banda, rotulado como descriptivo.
+- **«Qué mira el modelo»:** mapa de cabeza con los pesos de la logística por banda, rotulado como descriptivo. *(Quitado al cerrar la fase por decisión del autor: demasiados datos. También se probó y se quitó «Qué ha cambiado en esta grabación»; ver `docs/DECISIONES.md`.)*
 - **Aviso fijo:** mide el cambio con el tiempo en tarea, no el nivel de fatiga de la persona; una ventana suelta no es fiable; parte del cambio puede deberse al asentamiento del casco (también aparece en reposo), y el orden del protocolo es fijo.
 - Accesibilidad y respaldo: la animación se controla con teclado, respeta `prefers-reduced-motion` y, sin WebGL, usa los mapas 2D. Sin librerías nuevas ni CDN.
 - CSV: columnas por grabación con la ρ y el veredicto principio/final (nombres fijados en el plan detallado), documentadas con `documentar_csv`.

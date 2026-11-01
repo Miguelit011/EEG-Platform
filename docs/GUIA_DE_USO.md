@@ -13,6 +13,10 @@ los resultados en CSV para analizarlos en Excel o SPSS.
 > la fatiga percibida. Los modelos de IA que incluye solo clasifican **la condición de la
 > grabación** (por ejemplo, reposo con ojos abiertos o cerrados, o cuál de cinco tareas) y
 > siempre se muestran junto a lo bien o mal que funcionan.
+>
+> La pestaña **Fatiga aguda** es la única que usa esa palabra, porque es el nombre de la línea de
+> investigación de la que sale: enseña **cómo cambia el EEG a lo largo de una tarea larga**
+> (PASAT o PVTB), no el nivel de fatiga de la persona (sección 7).
 
 ## 1. Poner en marcha la plataforma
 
@@ -52,11 +56,11 @@ frecuencia de muestreo, si le faltan alguno de los 14 electrodos del Emotiv o si
 
 ## Moverse por la plataforma
 
-La barra de arriba tiene cuatro pestañas: **Grabaciones** (la lista), y **Calidad**, **Análisis** y
-**Modelos**, que son tres vistas de **una misma grabación**. Para que la barra baste para
-navegar:
+La barra de arriba tiene cinco pestañas: **Grabaciones** (la lista), y **Calidad**, **Análisis**,
+**Modelos** y **Fatiga aguda**, que son cuatro vistas de **una misma grabación**. Para que la barra
+baste para navegar:
 
-- Las tres pestañas están **siempre activas** y llevan a la **grabación activa**: la que estabas
+- Las cuatro pestañas están **siempre activas** y llevan a la **grabación activa**: la que estabas
   viendo o, si no has abierto ninguna, la última procesada.
 - Dentro de una de esas pestañas, una barra bajo el menú muestra la grabación activa. Pulsa su
   nombre para abrir un **selector** con todas las grabaciones procesadas, agrupadas por lote y con
@@ -209,7 +213,43 @@ c3, con un acierto de 0,49 sobre un azar de 0,20, acierta la tarea a menudo pero
 la mitad de los casos. Y parte del acierto de todos puede deberse a la **duración** de la
 grabación o al **orden** de las tareas en el protocolo, no solo a la actividad cerebral.
 
-## 7. Descargar los resultados en CSV
+## 7. Fatiga aguda
+
+La pestaña **Fatiga aguda** enseña **cómo cambia el EEG a lo largo de una tarea larga**. Solo
+funciona con grabaciones **PASAT** y **PVTB**: el estudio confirmó en personas que no había visto
+antes que, en esas dos tareas, el EEG cambia de forma ordenada con el tiempo y que ese cambio no lo
+explican el movimiento ni el contacto de los electrodos. Con otra condición (o sin condición), la
+pestaña lo explica; si la condición está mal, se corrige en la lista.
+
+No hay que hacer nada: al abrir una grabación PASAT o PVTB procesada aparece todo.
+
+![Resultado de la grabación y fiabilidad del modelo](capturas/fatiga_aguda_veredicto.png)
+
+**Arriba, el resultado en una frase.** El modelo de esa tarea compara la media del **primer
+tercio** de la grabación con la del **último** y dice si el final se parece más al final de la
+tarea que el principio. A la derecha, lo fiable que es: en el test independiente de 28 personas
+acertó en el **74 %** de las grabaciones PASAT y en el **84 %** de las PVTB (azar: 50 %).
+
+![El cerebro a lo largo de la grabación](capturas/fatiga_aguda_cerebro.png)
+
+**En el centro, la grabación reproducida.** Con **Reproducir**, la grabación entera pasa en unos
+20 segundos (0,5× y 2× la hacen más lenta o más rápida):
+
+- El **cerebro** muestra, para la banda elegida (por defecto, **beta**), cuánto **sube (verde)** o
+  **baja (morado)** la potencia de cada zona respecto al primer tercio. Con **Valor en cada
+  momento** se ve el porcentaje de la potencia en esa banda.
+- La **cinta** de debajo colorea cada momento según a qué parte de la tarea se parece: **azul**, al
+  principio; **naranja**, al final. Se puede pinchar o arrastrar para ir a un momento, y con el
+  teclado, las flechas avanzan o retroceden y la barra espaciadora reproduce o pausa.
+- Las dos van **suavizadas** sobre unos 30 s: un trozo de 4 s suelto apenas dice nada.
+
+**Cómo no interpretarla.** Mide el **cambio con el tiempo en tarea**, no el nivel de fatiga de la
+persona ni lo cansada que dice estar. Parte del cambio puede deberse a que el casco se asienta (en
+reposo también aparece algo), y el orden de las tareas del protocolo es siempre el mismo. Si una
+grabación se procesó con una versión anterior de la plataforma, la pestaña pide **volver a
+procesarla**.
+
+## 8. Descargar los resultados en CSV
 
 - **De un lote:** botón **CSV del lote** (con la flecha de descarga) en su cabecera (solo incluye las grabaciones
   ya procesadas).
@@ -222,19 +262,21 @@ columna: [`COLUMNAS_CSV.md`](COLUMNAS_CSV.md). Algunas claves:
 - Una **celda vacía** significa «sin dato» (electrodo descartado, zona sin electrodos válidos…),
   nunca un cero.
 - La potencia **relativa** va de 0 a 1 (no en %); la **absoluta**, en log<sub>10</sub> de V².
-- Las columnas de los modelos están al final (`c1_oa_oc_logistica_clase`, sus probabilidades…).
+- Las columnas de los modelos están al final (`c1_oa_oc_logistica_clase`, sus probabilidades…),
+  y detrás las cuatro de fatiga aguda (`fatiga_aguda_rho`, `fatiga_aguda_final_mayor`…), que solo
+  se rellenan en grabaciones PASAT y PVTB.
 
 **En SPSS:** importa el archivo como datos de texto (*Archivo → Importar datos*; los menús varían
 según la versión) y marca el separador `;` y la coma como decimal. Si en tu equipo SPSS usa otra configuración regional, el formato internacional
 (separador `,` y decimal `.`) se cambia en `config/settings.py` (`CSV_SEPARADOR`, `CSV_DECIMAL`).
 
-## 8. Añadir un modelo nuevo
+## 9. Añadir un modelo nuevo
 
 Un modelo nuevo se añade con **dos archivos y una línea de configuración**, sin tocar el código:
 [`AÑADIR_UN_MODELO.md`](AÑADIR_UN_MODELO.md) lo explica paso a paso y el comando
 `manage.py comprobar_modelos` revisa que esté bien.
 
-## 9. Problemas frecuentes
+## 10. Problemas frecuentes
 
 | Qué pasa | Qué hacer |
 |---|---|
@@ -247,7 +289,7 @@ Un modelo nuevo se añade con **dos archivos y una línea de configuración**, s
 | `instalar.bat` dice que la carpeta está demasiado anidada | Mueve la carpeta TFG a una ruta corta, como `C:\TFG` (Windows limita las rutas a 260 caracteres) |
 | No sale nada tras abrir `iniciar.bat` | Espera unos segundos; si no, abre `http://127.0.0.1:8000/` a mano |
 
-## 10. Privacidad
+## 11. Privacidad
 
 Los EDF y los resultados son de **participantes menores de edad**. Se guardan en la carpeta
 `EEG-Platform-datos`, **fuera del repositorio**, y no se envían a ningún servicio externo. Puedes eliminar de la plataforma cualquier grabación o lote (se borra también la copia

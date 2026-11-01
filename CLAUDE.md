@@ -12,10 +12,12 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 3. Por grabación: calidad de la señal (mapa de electrodos y electrodos descartados con su motivo).
 4. Por grabación: análisis espectral (potencia delta/theta/alfa/beta, por electrodo y por zona) con un visor de cabeza y cerebro reales en 3D y cuatro mapas 2D por banda. El color entre sensores es una interpolación orientativa y no localiza fuentes.
 5. Resultados de modelos de IA **enchufables**. Hoy son c1 (ojos abiertos/cerrados), c2 (reposo/tarea) y c3 (cuál de las 5 tareas); mañana, los que añadan otros investigadores.
-6. Descargar resultados en CSV (una grabación o el lote completo).
+6. Pestaña **Fatiga aguda** (Fase 10), solo para PASAT y PVTB: cómo cambia el EEG a lo largo de la tarea según la logística de la línea `fatiga_aguda` de EEG-Library (veredicto de tercios con su cifra en test, cerebro 3D animado, cinta de tiempo y pesos del modelo).
+7. Descargar resultados en CSV (una grabación o el lote completo).
 
 ## Qué NO es
 - **No detecta ni mide fatiga.** Ningún texto, nombre de variable ni gráfica debe sugerirlo. Los resultados del TFG demuestran que el EEG no predice el VAS.
+  - **Única excepción** (decisión del autor, 2026-11-01): la pestaña **Fatiga aguda**, su enlace en la barra y las columnas `fatiga_aguda_*` del CSV, porque es el nombre de la línea de investigación. Siempre dice lo que se confirmó: el **cambio del EEG con el tiempo en tarea**, no el nivel de fatiga de la persona. Los tests (`sin_enlace_fatiga_aguda`) vigilan que la palabra no aparezca en ningún otro sitio.
 - No reimplementa procesamiento de señal: todo cálculo sale de EEG-Library. La web llama, guarda y muestra.
 
 ## Principios

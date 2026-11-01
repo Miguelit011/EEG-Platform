@@ -61,6 +61,20 @@ def sin_bloque_de_modelos(html):
     return re.sub(r'<section class="bloque-modelos" id="modelos".*?</section>', "", html, flags=re.S)
 
 
+ENLACE_FATIGA_AGUDA = re.compile(r'<li><a href="[^"]*"\s*(aria-current="page")?\s*>Fatiga aguda</a></li>')
+
+
+def sin_enlace_fatiga_aguda(html):
+    """
+    La página sin el enlace «Fatiga aguda» de la barra de navegación. Es la única excepción a
+    la regla de no mencionar la fatiga fuera de la pestaña Fatiga aguda y del bloque de modelos
+    (decisión del autor, 2026-11-01; ver PLAN.md, Fase 10).
+    """
+    limpia, n = ENLACE_FATIGA_AGUDA.subn("", html)
+    assert n <= 1, "el enlace de la barra aparece más de una vez"
+    return limpia
+
+
 def mapa(html):
     """El primer mapa SVG de la cabeza de la página."""
     return re.search(r'<svg class="mapa-cabeza".*?</svg>', html, re.S).group(0)
