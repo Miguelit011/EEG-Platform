@@ -14,6 +14,8 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [x] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [x] |
 | 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
+| 10 (A) | Fatiga aguda con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [ ] |
+| 11 (B) | Fatiga aguda con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [ ] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -211,6 +213,80 @@ Resultado: dirección «visor de neuroimagen» (tema oscuro y claro, IBM Plex), 
 Nota: la Fase 5 decidió «un círculo por electrodo, sin interpolación». La Fase 9 la sustituye por una interpolación suave **rotulada como tal**, manteniendo el valor medido de cada electrodo visible y los descartados sin dato; se registrará en `DECISIONES.md`.
 
 **Ampliación (2026-10-18): portada.** La web abre en `/` con una portada visual y la lista de grabaciones pasa a `/grabaciones/`. Escena 3D (cabeza translúcida, cerebro, 14 sensores y pulsos), cabeza con la rejilla de Análisis, fondo de neuronas homogéneo a la izquierda con efecto al pasar el ratón, título, frase y un botón a Grabaciones; respaldo sin 3D y tema claro propio. Decisiones en `docs/DECISIONES.md`. Respaldo WebP (claro y oscuro) hecho. `/critique` (23/32) y `/polish` de Impeccable hechos sobre la portada (ver `docs/DECISIONES.md`).
+
+---
+
+## Fatiga aguda: lo que ya sabemos (para las Fases 10 y 11)
+
+Sale de la línea `EEG-Library/analisis/fatiga_aguda/`, ya cerrada. Las cifras son de su evaluación en `test` (28 personas), no del desarrollo.
+
+- **Qué se confirmó:** en PASAT y PVTB, el EEG cambia de forma ordenada a lo largo de la tarea en personas no vistas (H2), y ese cambio no lo explican el movimiento ni el contacto (H4). **No se confirmó** que el cambio supere al del reposo con ojos abiertos durante el mismo tiempo (H1). Lo que se mide es el **cambio con el tiempo en tarea**, no el nivel de fatiga de la persona.
+- **Logística** (paso 6, `06_test/`): `rel` + `LogisticRegression(C=0.01)`, una por condición, entrenada con `train` + `val` (146 personas) para distinguir el primer tercio de la grabación del último. Entrada por ventana: `log10(pot_rel)` de 14 canales × 4 bandas, centrada por grabación y con los canales excluidos a 0. Modelos en `EEG-Data\processed\fatiga_aguda_test_20261027-190547\modelos\` (se usan `completa_PASAT.joblib` y `completa_PVTB.joblib`).
+  - Acierto pareado de tercios (si el último tercio puntúa más que el primero en la misma grabación), grabación completa: **PASAT 0,735 [0,657–0,816]**, 102 grabaciones; **PVTB 0,835 [0,757–0,909]**, 103 grabaciones. Azar: 0,5.
+  - ρ media por grabación (puntuación de cada ventana frente a su instante): PASAT +0,162, PVTB +0,180.
+- **EEGNet** (paso 4 de `deep_learning/`): EEGNet-8,2 con máscara de canales (2 097 parámetros), un modelo conjunto para PASAT + PVTB, 3 semillas promediadas, entrenada con `train` + `val`. Entrada: ventanas crudas de 4 s remuestreadas a 128 Hz, z-score por grabación y canal, canales excluidos a 0 y mapa de máscara: `(2, 14, 512)`. Pesos `s0.pt`, `s1.pt` y `s2.pt` en `EEG-Data\processed\fatiga_aguda_dl_test_20261031-224217\modelos\`, con sus SHA-256 en `configuracion_dl.json`.
+  - ρ PASAT + PVTB +0,160 [+0,130–0,190]; acierto pareado de tercios 0,737 [0,683–0,787].
+  - Frente a la logística: Δρ −0,011 [−0,047–+0,028], **no se distinguen**.
+- **Una ventana suelta dice poco** (AUC por ventana ≈ 0,58). Lo fiable es la tendencia de la grabación entera.
+- **Control:** en reposo con ojos abiertos también hay algo de cambio con el tiempo (ρ +0,104 en `test`; acierto pareado 0,670), probablemente por el asentamiento del casco.
+- Cifras y fuentes: `06_test/resultados_test.json` y `deep_learning/04_test_eegnet/resultados_test.json`. Las fichas las copian de ahí, y un test lo comprueba (como en la Fase 7).
+- **Excepción a «No detecta ni mide fatiga»** (decisión del autor, 2026-11-01): en esta función sí se habla de **«fatiga aguda»**, porque es el nombre de la línea de investigación y del efecto del tiempo en tarea que estudia. El subtítulo dice siempre lo que se confirmó: «cambio del EEG a lo largo de la tarea». La regla general sigue en pie para c1–c3 y para el VAS.
+
+Nota: la Fase 10 que se implementó el 2026-10-28 (gráfica de líneas por bloques y tabla de tercios en Análisis) se descartó entera sin llegar a commitearse. Esta Fase 10 la sustituye con otro enfoque: pestaña propia, un modelo con su cifra en test y una visualización animada.
+
+## Fase 10 (A) — Fatiga aguda con la logística
+**Objetivo:** que, al abrir una grabación PASAT o PVTB, el investigador vea sin hacer nada cómo cambia el EEG a lo largo de la tarea, según el modelo validado, en una pantalla vistosa para la defensa.
+
+Incluye, en EEG-Library (contrato 0.15.0):
+- `analizar_grabacion` guarda también, **por ventana**, su instante y la potencia relativa de los 14 canales × 4 bandas. Es un bloque pequeño del JSON (≈ 50–100 KB en las grabaciones más largas). Sin ventanas crudas.
+- Los modelos `completa_PASAT` y `completa_PVTB` se empaquetan en la librería con su ficha: qué hacen, condición, parámetros válidos, versión de scikit-learn, SHA-256 de origen, resultado en test (acierto pareado con IC, azar, personas y grabaciones, ρ) y avisos.
+- Una función de la librería, al estilo de `predecir`, que recibe el bloque por ventana y devuelve la puntuación de cada ventana, la ρ de la grabación y el veredicto principio/final. Centra por grabación y anula los canales excluidos, igual que el análisis, y responde «no disponible» si los parámetros no son los del entrenamiento o hay menos de 10 ventanas. La web no calcula nada.
+
+Incluye, en EEG-Platform:
+- **Pestaña «Fatiga aguda»** por grabación, junto a Calidad, Análisis y Modelos. Se muestra con condición PASAT o PVTB. Con otra condición o sin condición, explica a qué grabaciones se aplica y cómo indicarla en la lista. No se estima la condición con c3 (en test acierta 0,488).
+- **Cerebro animado:** el visor 3D actual muestra la beta relativa por electrodo en cada tramo de la grabación (media móvil de varias ventanas) y avanza con un botón de reproducir y pausar. Se elige la beta porque es la firma confirmada en PVTB (H3). Escala fija en toda la grabación, para que el cambio se vea.
+- **Cinta de tiempo** bajo el cerebro: cada franja se colorea según la puntuación suavizada del modelo, de «se parece al principio» a «se parece al final». Al pinchar o arrastrar en la cinta, el cerebro salta a ese instante.
+- **Veredicto en una frase:** si el último tercio puntúa más que el primero, con la cifra del test de esa tarea (acierto pareado, IC y azar sobre la escala de 0 a 1 que ya usan los modelos).
+- **«Qué mira el modelo»:** mapa de cabeza con los pesos de la logística por banda, rotulado como descriptivo.
+- **Aviso fijo:** mide el cambio con el tiempo en tarea, no el nivel de fatiga de la persona; una ventana suelta no es fiable; parte del cambio puede deberse al asentamiento del casco (también aparece en reposo), y el orden del protocolo es fijo.
+- Accesibilidad y respaldo: la animación se controla con teclado, respeta `prefers-reduced-motion` y, sin WebGL, usa los mapas 2D. Sin librerías nuevas ni CDN.
+- CSV: columnas por grabación con la ρ y el veredicto principio/final (nombres fijados en el plan detallado), documentadas con `documentar_csv`.
+- Las grabaciones procesadas antes de la fase no tienen el bloque por ventana: la pestaña lo dice y ofrece reprocesar.
+- Documentación: `GUIA_DE_USO.md`, `DECISIONES.md`, capturas y la excepción sobre «fatiga» en `CLAUDE.md`.
+
+Aceptación:
+- **Paridad con el análisis:** en grabaciones de `train` y `val` (nunca de `test`), las puntuaciones por ventana que calcula la librería desde el EDF coinciden con las de `06_test/evaluacion_test.py` con los mismos `.joblib` (diferencia < 10⁻⁶), y la ρ por grabación también.
+- Las cifras de las fichas coinciden con `06_test/resultados_test.json` (test que se omite si no está `EEG-Data`).
+- Con parámetros distintos a los del estudio, con menos de 10 ventanas o con otra condición, no se muestran puntuaciones.
+- Ningún texto fuera de la pestaña de fatiga aguda menciona la fatiga, salvo los avisos que ya existían.
+- La animación es fluida en el portátil de pruebas, y la pestaña funciona en tema claro y oscuro y sin WebGL.
+- Los tests pasan, la app arranca y los tiempos de procesado no empeoran de forma apreciable.
+
+Orden de trabajo (con parada del usuario en los pasos 1, 2 y 3):
+1. Plan detallado (formato del bloque por ventana, suavizado, nombres de columnas y textos). **Parar.**
+2. EEG-Library: bloque por ventana, modelos empaquetados y paridad. **Parar** con las cifras de la paridad.
+3. Piloto de la pestaña con capturas (cerebro, cinta y veredicto). **Parar y esperar visto bueno.**
+4. Resto de la pantalla, CSV, documentación, `/audit` y `/polish`, tests y propuesta de mensaje de commit.
+
+## Fase 11 (B) — Fatiga aguda con EEGNet
+**Objetivo:** añadir EEGNet como segundo modelo en la misma pestaña, para enseñar que un modelo clásico y uno de deep learning ven lo mismo. **Es prescindible:** si la paridad no sale, la fase se para y la Fase 10 queda intacta.
+
+Incluye:
+- **Exportación a ONNX** de los tres pesos (`s0`–`s2`), una sola vez, con el entorno `C:\venvs\eeg-dl`, comprobando antes sus SHA-256 con `configuracion_dl.json`. El script de exportación vive en la línea de análisis. La web y la librería solo usan `onnxruntime`, que ya es dependencia: no se instala PyTorch.
+- **EEG-Library:** preparación de la entrada tal como en el entrenamiento (remuestreo a 128 Hz con `resample_poly(x, 1, 2)`, z-score por grabación y canal, canales excluidos a 0 y mapa de máscara) y puntuación con las tres semillas promediadas. Se hace **durante el procesado**, porque las ventanas crudas no se guardan; como el modelo es conjunto para PASAT y PVTB, cambiar la condición no obliga a reprocesar. Ficha con su resultado en test y la comparación con la logística.
+- **EEG-Platform:** segunda cinta bajo la de la logística, alineada en el tiempo; una frase sobre cuánto coinciden en esa grabación, y el resultado en test de los dos con el veredicto «no se distinguen». Columnas en el CSV.
+
+Aceptación:
+- **ONNX = PyTorch:** con el mismo tensor de ventanas de `train`, las puntuaciones coinciden (diferencia < 10⁻⁵).
+- **Preparación = análisis:** en grabaciones de `train` y `val` (nunca de `test`), el tensor y las puntuaciones que calcula la librería desde el EDF coinciden con los de `deep_learning/04_test_eegnet/` (`comun_dl.py`).
+- Las cifras de la ficha coinciden con `deep_learning/04_test_eegnet/resultados_test.json`.
+- El procesado de una grabación no se alarga de forma apreciable (≈ 1 ms por ventana y semilla, medido en el desarrollo).
+- Los tests pasan y la app arranca.
+
+Orden de trabajo (con parada del usuario en los pasos 1 y 2):
+1. Plan detallado. **Parar.**
+2. Exportación y las dos paridades. **Parar** con las cifras. Si no salen, se documenta y se cierra la fase aquí.
+3. Integración en la pestaña, CSV, documentación, tests y propuesta de mensaje de commit.
 
 ---
 
