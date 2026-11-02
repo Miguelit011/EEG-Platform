@@ -243,9 +243,10 @@ Debajo de cada frase, su fiabilidad en el test con el intervalo y el nivel de az
 **En el centro, la grabación reproducida.** Con **Reproducir**, la grabación entera pasa en unos
 20 segundos (0,5× y 2× la hacen más lenta o más rápida):
 
-- El **cerebro** muestra, para la banda elegida (por defecto, **beta**), cuánto **sube (verde)** o
-  **baja (morado)** la potencia de cada zona respecto al primer tercio. Con **Valor en cada
-  momento** se ve el porcentaje de la potencia en esa banda.
+- **Cuatro mapas**, uno por banda (delta, theta, alfa y beta), con el cerebro visto desde arriba,
+  muestran cuánto **sube (verde)** o **baja (morado)** la potencia de cada zona respecto al primer
+  tercio. Con **Valor en cada momento** se ve el porcentaje de la potencia en cada banda. Cada mapa
+  tiene su propia escala, fija en toda la grabación: los colores no se comparan entre bandas.
 - La **cinta** de debajo colorea cada momento según a qué parte de la tarea se parece: **azul**, al
   principio; **naranja**, al final. Tiene dos pistas: la de arriba es la de la **regresión
   logística** y la de abajo, la de la **red neuronal EEGNet**. Se puede pinchar o arrastrar para ir a un momento, y con el

@@ -353,8 +353,9 @@ a.boton svg { width: 18px; height: 18px; }
 .ayuda-3d { color: var(--texto-suave); font-size: 0.85rem; margin: 0.6rem 0 0; }
 
 .mapas-2d { min-height: 30rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-.mapa-banda { margin: 0; padding: 0.6rem; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie-2); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
-.mapa-banda:hover { border-color: var(--borde-fuerte); }
+.mapa-banda { margin: 0; padding: 0.6rem; border: 1px solid var(--borde); border-radius: 12px; background: var(--superficie-2); transition: border-color 0.15s, box-shadow 0.15s; }
+.mapa-banda.pulsable { cursor: pointer; }
+.mapa-banda.pulsable:hover { border-color: var(--borde-fuerte); }
 .mapa-banda.activa { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
 .mapa-banda figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; font-weight: 650; }
 .mapa-banda figcaption small { font-family: var(--fuente-datos); font-weight: 400; color: var(--texto-suave); font-size: 0.78rem; }
@@ -734,10 +735,13 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
 .fa-frase-no .ico { color: var(--texto-suave); }
 
 .fa-visor .visor-cab { gap: 0.9rem 1.5rem; }
-.fa-visor .pestanas-banda { margin: 0; }
-.fa-escena-marco { padding: 1.25rem 1.5rem 0.5rem; }
-.fa-escena { aspect-ratio: 16 / 9; max-height: 560px; }
-.fa-reloj { position: absolute; top: 0.9rem; right: 1.1rem; margin: 0; font-family: var(--fuente-datos); font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.6rem); font-weight: 600; line-height: 1; color: var(--texto); opacity: 0.85; pointer-events: none; font-variant-numeric: tabular-nums; }
+.fa-mapas-marco { padding: 1.25rem 1.5rem 0.75rem; }
+.fa-mapas-cab { display: flex; align-items: flex-end; justify-content: space-between; gap: 0.5rem 1.5rem; margin-bottom: 0.75rem; }
+.fa-escala-titulo { margin: 0; max-width: none; font-size: 0.85rem; color: var(--texto-suave); }
+.fa-reloj { flex: none; margin: 0; font-family: var(--fuente-datos); font-size: clamp(1.5rem, 1.2rem + 1vw, 2.1rem); font-weight: 600; line-height: 1; color: var(--texto); font-variant-numeric: tabular-nums; }
+/* Las cuatro bandas en una fila; en pantallas estrechas, dos y dos para que se sigan leyendo. */
+.fa-mapas { min-height: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
+.fa-sin-webgl { margin: 0.5rem 0 0; }
 
 .fa-reproductor { padding: 0.5rem 1.5rem 1.25rem; }
 .fa-mandos { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-bottom: 0.9rem; }
@@ -781,17 +785,13 @@ a.boton.peligro-suave:hover { border-color: var(--alerta); color: var(--alerta);
   .fa-veredicto { grid-template-columns: minmax(0, 1fr); }
   .fa-apartado:first-of-type { padding-right: 0; }
   .fa-apartado + .fa-apartado { padding: 1.5rem 0 0; border-left: 0; border-top: 1px solid var(--borde); }
-  .fa-escena { aspect-ratio: 1 / 0.9; }
+  .fa-mapas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .fa-escena-marco, .fa-reproductor { padding-left: 1rem; padding-right: 1rem; }
+  .fa-mapas-marco, .fa-reproductor { padding-left: 1rem; padding-right: 1rem; }
   .fa-rotulos { font-size: 0.75rem; max-width: 6.5rem; }
   .fa-velocidad { margin-left: 0; }
 }
-.fa-escala-titulo { margin: 0.9rem 0 0.25rem; font-size: 0.85rem; color: var(--texto-suave); }
 .fa-tercios { position: relative; height: 1.2rem; margin-top: 0.35rem; font-size: 0.8rem; color: var(--texto-suave); }
 .fa-tercios span { position: absolute; top: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fa-tercios span:nth-child(1), .fa-tercios span:nth-child(3) { color: var(--texto); font-weight: 600; }
-.fa-escena > canvas { display: block; width: 100%; height: 100%; }
-.fa-sin-webgl { inset: auto auto 0.75rem 1rem; display: block; padding: 0; margin: 0; font-size: 0.85rem; color: var(--texto-suave); }
-.fa-escena-marco .escala-mapa { min-height: 1.25rem; }

@@ -123,9 +123,67 @@ function aplicar(geometria, colores) {
   geometria.attributes.color.needsUpdate = true;
 }
 
+// Las dos mallas, cargadas una sola vez por página.
+let mallas = null;
+function cargarMallas() {
+  if (!mallas) {
+    const raiz = document.getElementById("visor");
+    mallas = Promise.all([cargarMalla(raiz.dataset.mallaCabeza), cargarMalla(raiz.dataset.mallaCerebro)]);
+  }
+  return mallas;
+}
+
+// ---- Mapas 2D: el cerebro real visto desde arriba, renderizado aparte del visor 3D -----------------
+// Lo usan los cuatro mapas de Análisis y los de la pestaña Fatiga aguda, que no tiene cerebro 3D.
+// Devuelve `{ dibujar(destino, banda) }`; falla si el navegador no tiene WebGL.
+export async function iniciarVistaSuperior() {
+  const [cabeza, cerebro] = await cargarMallas();
+  const r2d = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  const escena2d = new THREE.Scene();
+  const mitad = 1.25;
+  const camara2d = new THREE.OrthographicCamera(-mitad, mitad, mitad, -mitad, 0.1, 50);
+  const objetivo = new THREE.Vector3();
+  cabeza.geometria.boundingBox.getCenter(objetivo);
+  const centroVista = new THREE.Vector3(0, objetivo.y, 0);
+  camara2d.position.set(centroVista.x, centroVista.y, 10);
+  camara2d.up.set(0, 1, 0);
+  camara2d.lookAt(centroVista.x, centroVista.y, 0);
+  const geometria2d = new THREE.BufferGeometry();
+  geometria2d.setAttribute("position", cerebro.geometria.attributes.position);
+  geometria2d.setAttribute("normal", cerebro.geometria.attributes.normal);
+  geometria2d.setIndex(cerebro.geometria.index);
+  geometria2d.setAttribute("color", new THREE.BufferAttribute(new Float32Array(cerebro.n * 3), 3));
+  const cerebro2d = new THREE.Mesh(geometria2d, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0 }));
+  const sombra2d = new THREE.Mesh(cabeza.geometria, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.13, depthTest: false, depthWrite: false }));
+  sombra2d.renderOrder = -1;
+  escena2d.add(sombra2d, cerebro2d);
+  escena2d.add(new THREE.HemisphereLight(0xffffff, 0x8a96a8, 1.7));
+  const foco2d = new THREE.DirectionalLight(0xffffff, 1.8);
+  foco2d.position.set(0.3, 0.5, 1);
+  escena2d.add(foco2d);
+
+  return {
+    // Dibuja la banda en `destino` (canvas 2D). Devuelve cómo pasar un electrodo a fracciones (0-1) de ese lienzo.
+    dibujar: function (destino, banda) {
+      const lado = destino.width;
+      if (r2d.domElement.width !== lado) r2d.setSize(lado, lado, false);
+      aplicar(geometria2d, coloresDe(cerebro, banda));
+      sombra2d.material.color.set(css("--texto-suave"));
+      r2d.render(escena2d, camara2d);
+      const ctx = destino.getContext("2d");
+      ctx.clearRect(0, 0, lado, lado);
+      ctx.drawImage(r2d.domElement, 0, 0);
+      return function (e) {
+        const p = geo.canales[e.canal].pos;
+        return [(p[0] - centroVista.x) / (2 * mitad) + 0.5, 0.5 - (p[1] - centroVista.y) / (2 * mitad)];
+      };
+    },
+  };
+}
+
+// Visor 3D de la pestaña Análisis. Devuelve la vista superior para sus mapas 2D.
 export async function iniciar3D(ayudas) {
-  const raiz = document.getElementById("visor");
-  const [cabeza, cerebro] = await Promise.all([cargarMalla(raiz.dataset.mallaCabeza), cargarMalla(raiz.dataset.mallaCerebro)]);
+  const [cabeza, cerebro] = await cargarMallas();
 
   const escena = document.getElementById("escena-3d");
   const capaEtiquetas = document.getElementById("etiquetas-3d");
@@ -363,53 +421,12 @@ export async function iniciar3D(ayudas) {
     c.fillStyle = css("--texto-suave"); c.font = "16px " + css("--fuente");
     const nombre = bandas.find(function (x) { return x.clave === estado.banda; }).nombre;
     c.fillText("Interpolación orientativa sobre 14 sensores, no localiza fuentes · plantilla fsaverage · " + nombre + " · " +
-               ({ rel: "potencia relativa (%)", abs: "potencia absoluta (log10 V²)", cambio: "cambio de la potencia relativa desde el primer tercio (pp)" }[estado.metrica]), 12, lienzo.height + 28);
+               ({ rel: "potencia relativa (%)", abs: "potencia absoluta (log10 V²)" }[estado.metrica]), 12, lienzo.height + 28);
     const a = document.createElement("a");
     a.download = "cerebro-" + estado.banda + "-" + estado.metrica + ".png";
     a.href = lado.toDataURL("image/png");
     a.click();
   });
-
-  // ---- Mapas 2D: el cerebro real visto desde arriba, renderizado aparte ----------------------------------------
-  const r2d = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-  const escena2d = new THREE.Scene();
-  const mitad = 1.25;
-  const camara2d = new THREE.OrthographicCamera(-mitad, mitad, mitad, -mitad, 0.1, 50);
-  const centroVista = new THREE.Vector3(0, objetivo.y, 0);
-  camara2d.position.set(centroVista.x, centroVista.y, 10);
-  camara2d.up.set(0, 1, 0);
-  camara2d.lookAt(centroVista.x, centroVista.y, 0);
-  const geometria2d = new THREE.BufferGeometry();
-  geometria2d.setAttribute("position", cerebro.geometria.attributes.position);
-  geometria2d.setAttribute("normal", cerebro.geometria.attributes.normal);
-  geometria2d.setIndex(cerebro.geometria.index);
-  geometria2d.setAttribute("color", new THREE.BufferAttribute(new Float32Array(cerebro.n * 3), 3));
-  const cerebro2d = new THREE.Mesh(geometria2d, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0 }));
-  const sombra2d = new THREE.Mesh(cabeza.geometria, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.13, depthTest: false, depthWrite: false }));
-  sombra2d.renderOrder = -1;
-  escena2d.add(sombra2d, cerebro2d);
-  escena2d.add(new THREE.HemisphereLight(0xffffff, 0x8a96a8, 1.7));
-  const foco2d = new THREE.DirectionalLight(0xffffff, 1.8);
-  foco2d.position.set(0.3, 0.5, 1);
-  escena2d.add(foco2d);
-
-  const api = {
-    // Dibuja la banda en `destino` (canvas 2D). Devuelve cómo pasar un electrodo a fracciones (0-1) de ese lienzo.
-    dibujar: function (destino, banda) {
-      const lado = destino.width;
-      if (r2d.domElement.width !== lado) r2d.setSize(lado, lado, false);
-      aplicar(geometria2d, coloresDe(cerebro, banda));
-      sombra2d.material.color.set(css("--texto-suave"));
-      r2d.render(escena2d, camara2d);
-      const ctx = destino.getContext("2d");
-      ctx.clearRect(0, 0, lado, lado);
-      ctx.drawImage(r2d.domElement, 0, 0);
-      return function (e) {
-        const p = geo.canales[e.canal].pos;
-        return [(p[0] - centroVista.x) / (2 * mitad) + 0.5, 0.5 - (p[1] - centroVista.y) / (2 * mitad)];
-      };
-    },
-  };
 
   suscribir(pintar);
   document.addEventListener("tema:cambio", pintar);
@@ -417,5 +434,5 @@ export async function iniciar3D(ayudas) {
   ajustar();
   pintar();
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) ponerGiro(true);
-  return api;
+  return iniciarVistaSuperior();
 }

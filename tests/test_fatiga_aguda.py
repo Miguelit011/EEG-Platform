@@ -54,7 +54,8 @@ def test_pasat_y_pvtb_muestran_la_pestana_completa(client, condicion):
     html = pagina(client, grabacion(condicion=condicion))
     assert 'id="datos-fatiga"' in html and 'id="datos-visor"' in html
     assert 'id="fa-cinta"' in html and 'id="fa-play"' in html
-    assert 'id="escena-3d"' in html
+    # Cuatro mapas 2D (los rellena el JS) y ningún cerebro 3D ni botones de banda.
+    assert 'id="mapas-2d"' in html and 'id="escena-3d"' not in html and 'id="pestanas-banda"' not in html
     assert "no el nivel de fatiga de la persona" in html          # el aviso fijo
 
 
@@ -148,7 +149,7 @@ def test_datos_de_la_animacion():
     for banda, por_canal in datos["cambios"].items():
         for canal, serie in por_canal.items():
             assert len(serie) == n == len(datos["fotogramas"][banda][canal])
-    assert visor["banda_inicial"] == "beta" and visor["metrica_inicial"] == "cambio"
+    assert visor["metrica_inicial"] == "cambio"
     lo, hi = visor["rango_cambio"]["beta"]
     assert lo == -hi and hi > 0
     lo, hi = visor["rango_fijo"]["beta"]

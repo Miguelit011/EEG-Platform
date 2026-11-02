@@ -1,12 +1,10 @@
-// Pestaña «Fatiga aguda»: reproduce la grabación en el cerebro 3D y en una cinta de tiempo.
+// Pestaña «Fatiga aguda»: reproduce la grabación en cuatro mapas del cerebro (uno por banda, vista
+// desde arriba) y en una cinta de tiempo.
 // No calcula nada del modelo: la puntuación de cada ventana, la potencia relativa (ya suavizada)
 // y la escala vienen del servidor, que las saca de EEG-Library. Aquí solo se interpola entre dos
 // ventanas seguidas para que el movimiento sea continuo.
-import {
-  bandas, electrodos, estado, cambiar, suscribir, css, hexARgb, rango, valor, puntosBanda,
-  colorDeValor, fmt, decimales, degradadoCss, dibujarCirculo2D,
-} from "./visor-comun.js";
-import { iniciar3D } from "./visor3d.js";
+import { bandas, electrodos, estado, cambiar, suscribir, css, hexARgb } from "./visor-comun.js";
+import { crearMapas } from "./mapas2d.js";
 
 const datos = JSON.parse(document.getElementById("datos-fatiga").textContent);
 const instantes = datos.instante_s;
@@ -17,28 +15,15 @@ const DURACION_1X_MS = 20000;   // a 1× la grabación entera se recorre en unos
 const botonPlay = document.getElementById("fa-play");
 const textoPlay = document.getElementById("fa-play-texto");
 const tiempo = document.getElementById("fa-tiempo");
-let reloj = document.getElementById("fa-reloj");
+const reloj = document.getElementById("fa-reloj");
 const cinta = document.getElementById("fa-cinta");
 const cabezal = document.getElementById("fa-cabezal");
-const pestanas = document.getElementById("pestanas-banda");
 
-// ---- Pestañas de banda (vienen en el HTML, para que la página no salte al cargar) -----------
-pestanas.querySelectorAll("button").forEach(function (boton) {
-  boton.addEventListener("click", function () { cambiar({ banda: boton.dataset.banda }); });
-});
-function marcarPestana() {
-  pestanas.querySelectorAll("button").forEach(function (b) {
-    b.setAttribute("aria-pressed", b.dataset.banda === estado.banda ? "true" : "false");
-  });
-}
-suscribir(marcarPestana);
-marcarPestana();
-
-// ---- Qué muestra el cerebro: cambio desde el principio o valor en cada momento ----------------
+// ---- Qué muestran los mapas: cambio desde el principio o valor en cada momento ----------------
 const tituloEscala = document.getElementById("fa-escala-titulo");
 const TITULOS = {
-  cambio: "Cambio de la potencia relativa respecto a la media del primer tercio, en puntos porcentuales: morado, baja; verde, sube",
-  rel: "Potencia relativa de la banda elegida (% de la potencia total), con la misma escala en toda la grabación",
+  cambio: "Cambio de la potencia relativa respecto al primer tercio, en puntos porcentuales: morado, baja; verde, sube",
+  rel: "Potencia relativa de cada banda, en % de la potencia total",
 };
 document.querySelectorAll('input[name="fa-metrica"]').forEach(function (r) {
   r.checked = r.value === estado.metrica;
@@ -48,7 +33,7 @@ function rotularEscala() { tituloEscala.textContent = TITULOS[estado.metrica] ||
 suscribir(rotularEscala);
 rotularEscala();
 
-// ---- Tooltip (lo usa el cerebro 3D) ---------------------------------------------------------
+// ---- Tooltip de los mapas -------------------------------------------------------------------
 const tip = document.createElement("div");
 tip.className = "tip";
 tip.hidden = true;
@@ -209,48 +194,14 @@ cinta.addEventListener("keydown", function (ev) {
   aplicar(destino);
 });
 
-// ---- Respaldo sin WebGL: el mismo mapa en 2D, visto desde arriba ----------------------------
-function iniciar2D() {
-  const escena = document.getElementById("escena-3d");
-  escena.innerHTML = '<canvas role="img"></canvas><p class="fa-reloj" id="fa-reloj" aria-hidden="true"></p>' +
-    '<p class="sin-webgl fa-sin-webgl">Sin 3D en este navegador: se muestra la cabeza vista desde arriba.</p>';
-  reloj = document.getElementById("fa-reloj");
-  const lienzo2d = escena.querySelector("canvas");
-  const escala = document.getElementById("escala-3d");
-  function pintar2D() {
-    const alto = escena.clientHeight, ancho = escena.clientWidth;
-    const lado = Math.min(alto, ancho);
-    if (!lado) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    lienzo2d.width = Math.round(ancho * dpr); lienzo2d.height = Math.round(alto * dpr);
-    const ctx = lienzo2d.getContext("2d");
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, ancho, alto);
-    ctx.translate((ancho - lado) / 2, 0);
-    const b = estado.banda;
-    const [min, max] = rango(b);
-    const proyectar = dibujarCirculo2D(ctx, lado, puntosBanda(b), min, max);
-    ctx.font = "600 11px " + css("--fuente-datos");
-    ctx.textAlign = "center";
-    electrodos.forEach(function (e) {
-      const [x, y] = proyectar(e), v = valor(e, b);
-      if (v === null) { ctx.strokeStyle = css("--descartado"); ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.stroke(); }
-      else {
-        ctx.fillStyle = "rgb(" + colorDeValor(v, min, max).map(Math.round).join(",") + ")";
-        ctx.strokeStyle = css("--texto"); ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
-      }
-      ctx.lineWidth = 3; ctx.strokeStyle = css("--fondo"); ctx.strokeText(e.canal, x, y - 11);
-      ctx.fillStyle = css("--texto"); ctx.fillText(e.canal, x, y - 11);
-    });
-    escala.innerHTML = "<span>" + fmt(min, decimales()) + '</span><div class="barra-escala"></div><span>' + fmt(max, decimales()) + "</span>";
-    escala.querySelector(".barra-escala").style.background = degradadoCss();
-    lienzo2d.setAttribute("aria-label", "Cabeza vista desde arriba con el mapa de la banda " + b + " en el momento elegido de la grabación.");
-  }
-  suscribir(pintar2D);
-  document.addEventListener("tema:cambio", pintar2D);
-  new ResizeObserver(pintar2D).observe(escena);
-}
+// ---- Mapas 2D: las cuatro bandas a la vez, cada una con su escala fija en toda la grabación ----
+const mapas = crearMapas(document.getElementById("mapas-2d"), ayudas);
+let vista = null, listo = false;   // no se dibuja hasta saber si hay cerebro real (WebGL) o círculo
+function redibujar() { if (listo) mapas.dibujar(vista); }
+suscribir(redibujar);
+document.addEventListener("tema:cambio", redibujar);
+let pendiente = null;
+window.addEventListener("resize", function () { clearTimeout(pendiente); pendiente = setTimeout(redibujar, 120); });
 
 // ---- Arranque -------------------------------------------------------------------------------
 // `?momento=0.9` abre la grabación en ese punto (de 0 a 1): sirve para las capturas de la guía y
@@ -258,8 +209,13 @@ function iniciar2D() {
 const pedido = parseFloat(new URLSearchParams(window.location.search).get("momento"));
 const inicial = isFinite(pedido) ? Math.min(1, Math.max(0, pedido)) * (n - 1) : 0;
 dibujarCinta();
-iniciar3D(ayudas).then(function () { aplicar(inicial); }).catch(function (error) {
-  console.warn("Cerebro 3D no disponible:", error);
-  iniciar2D();
+import("./visor3d.js").then(function (m) { return m.iniciarVistaSuperior(); }).then(function (v) {
+  vista = v;
+}).catch(function (error) {
+  console.warn("Mapas sobre el cerebro no disponibles:", error);
+  document.getElementById("fa-sin-webgl").hidden = false;
+}).finally(function () {
+  listo = true;
+  document.querySelectorAll("#mapas-2d .cargando").forEach(function (el) { el.classList.remove("cargando"); });
   aplicar(inicial);
 });

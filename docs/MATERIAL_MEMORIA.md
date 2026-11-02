@@ -120,8 +120,8 @@ encabeza el bloque. Un resumen aparte tabula las predicciones de todas las graba
 Cómo cambia el EEG a lo largo de la tarea según la regresión logística de la línea de fatiga
 aguda de EEG-Library, evaluada una vez en el test independiente: una frase con el veredicto de
 la grabación (¿el último tercio se parece más al final de la tarea que el primero?) junto a la
-fiabilidad del modelo (acierto 0,735 en PASAT y 0,835 en PVTB, azar 0,5); el cerebro 3D animado,
-que muestra cuánto sube o baja la potencia de cada zona respecto al principio; una cinta de tiempo
+fiabilidad del modelo (acierto 0,735 en PASAT y 0,835 en PVTB, azar 0,5); cuatro mapas animados del
+cerebro, uno por banda, que muestran cuánto sube o baja la potencia de cada zona respecto al principio; una cinta de tiempo
 que colorea cada momento según a qué parte de la tarea se parece, con una segunda pista de la red
 neuronal EEGNet (exportada a ONNX), que en el test no se distingue de la logística. Mide el cambio con el tiempo en tarea, no el nivel de fatiga, y lo dice siempre.
 

@@ -88,20 +88,20 @@
           <label><input type="radio" name="fa-metrica" value="rel">Valor en cada momento</label>
         </div>
       </fieldset>
-      <div class="pestanas-banda" id="pestanas-banda" role="group" aria-label="Banda que se muestra en el cerebro">
-        {% for b in fa.visor.bandas %}<button type="button" data-banda="{{ b.clave }}" aria-pressed="{% if b.clave == fa.visor.banda_inicial %}true{% else %}false{% endif %}">{{ b.nombre }} <small>{{ b.rango }}</small></button>{% endfor %}
-      </div>
     </div>
   </div>
 
-  <div class="fa-escena-marco">
-    <div class="escena-3d fa-escena" id="escena-3d">
-      <div class="etiquetas-3d" id="etiquetas-3d" aria-hidden="true"></div>
+  <div class="fa-mapas-marco">
+    <div class="fa-mapas-cab">
+      <p class="fa-escala-titulo" id="fa-escala-titulo">Cambio de la potencia relativa respecto al primer tercio, en puntos porcentuales: morado, baja; verde, sube</p>
       <p class="fa-reloj" id="fa-reloj" aria-hidden="true">0:00</p>
     </div>
-    <div class="herramientas-3d" id="herramientas-3d" role="toolbar" aria-label="Opciones del cerebro 3D"></div>
-    <p class="fa-escala-titulo" id="fa-escala-titulo">Cambio de la potencia relativa respecto a la media del primer tercio, en puntos porcentuales: morado, baja; verde, sube</p>
-    <div class="escala-mapa" id="escala-3d"></div>
+    <div class="mapas-2d fa-mapas" id="mapas-2d"></div>
+    <ul class="sensores-leyenda" aria-label="Leyenda de sensores">
+      <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="var(--acento)" stroke="var(--texto)" stroke-width="1.5"/></svg>Sensor válido, con su valor</li>
+      <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.5" fill="none" stroke="var(--descartado)" stroke-width="1.5"/><path d="M6.4 6.4l5.2 5.2M11.6 6.4l-5.2 5.2" stroke="var(--descartado)" stroke-width="1.5" stroke-linecap="round"/></svg>Sensor descartado, sin dato</li>
+    </ul>
+    <p class="nota fa-sin-webgl" id="fa-sin-webgl" hidden>Sin WebGL en este navegador: los mapas usan una cabeza esquemática en lugar del cerebro.</p>
   </div>
 
   <div class="fa-reproductor" id="fa-reproductor">
@@ -144,7 +144,7 @@
 
   <p class="orientativo" role="note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>
-    <span><strong>Cómo se lee.</strong> El cerebro muestra, para la banda elegida, cuánto ha subido o bajado la potencia relativa de cada zona respecto al primer tercio (o, si se elige, su valor en cada momento), con la escala fija en toda la grabación. La cinta colorea cada momento según a qué parte de la tarea se parece{% if fa.eegnet.disponible %}: arriba, según la regresión logística; abajo, según la red neuronal EEGNet{% else %}, según la regresión logística{% endif %}. Las dos van suavizadas sobre unos 30 s, porque un trozo de 4 s suelto apenas dice nada. Los colores entre sensores son una interpolación orientativa sobre una plantilla de cerebro (fsaverage): no localizan la actividad.</span>
+    <span><strong>Cómo se lee.</strong> Cada mapa es el cerebro visto desde arriba, con la nariz hacia arriba, y muestra una banda: cuánto ha subido o bajado la potencia relativa de cada zona respecto al primer tercio (o, si se elige, su valor en cada momento). Cada banda tiene su propia escala, fija en toda la grabación, así que los colores no se comparan entre mapas: los números de debajo de cada uno dan los extremos. La cinta colorea cada momento según a qué parte de la tarea se parece{% if fa.eegnet.disponible %}: arriba, según la regresión logística; abajo, según la red neuronal EEGNet{% else %}, según la regresión logística{% endif %}. Las dos van suavizadas sobre unos 30 s, porque un trozo de 4 s suelto apenas dice nada. Los colores entre sensores son una interpolación orientativa sobre una plantilla de cerebro (fsaverage): no localizan la actividad. Al pasar el ratón por un sensor se ve su valor.</span>
   </p>
   {{ fa.visor|json_script:"datos-visor" }}
   {{ fa.fatiga|json_script:"datos-fatiga" }}

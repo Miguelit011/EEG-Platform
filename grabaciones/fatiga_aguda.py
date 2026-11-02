@@ -5,7 +5,7 @@ Todo lo que se calcula sale de EEG-Library (`puntuar_fatiga_aguda` y la ficha de
 la puntuación de cada ventana, la ρ, el veredicto de tercios y los pesos. Aquí solo se
 prepara para pintar:
 
-- **Suavizado de presentación.** La cinta y el cerebro animado usan una media móvil centrada
+- **Suavizado de presentación.** La cinta y los mapas animados usan una media móvil centrada
   de `VENTANAS_SUAVIZADO` ventanas (≈ 30 s), truncada en los extremos. Una ventana suelta de
   4 s apenas dice nada (AUC ≈ 0,58), y sin suavizar la animación solo enseñaría ruido. El
   veredicto y la ρ no se suavizan: son los de la librería, los mismos cálculos que dieron
@@ -32,7 +32,6 @@ from grabaciones.geometria import geometria_visor
 from grabaciones.modelos import _ficha_para_pantalla, resultado_test_para_pantalla
 
 VENTANAS_SUAVIZADO = 15    # ventanas cada 2 s: ≈ 30 s
-BANDA_INICIAL = "beta"     # la firma confirmada en PVTB (H3 de la línea)
 
 AVISO_FIJO = (
     "Mide el cambio del EEG con el tiempo en tarea, no el nivel de fatiga de la persona. "
@@ -162,7 +161,7 @@ def resumen_fatiga_aguda(grabacion):
                    "cambio": {b: cambios[b][c][0] for b in BANDAS},
                    "log_abs": {b: None for b in BANDAS}} for c in canales]
     visor = {"geometria": geometria_visor(), "bandas": _bandas(resultado),
-             "banda_inicial": BANDA_INICIAL, "electrodos": electrodos, "rango_fijo": rangos,
+             "electrodos": electrodos, "rango_fijo": rangos,
              "rango_cambio": rangos_cambio, "metrica_inicial": "cambio"}
 
     final = p["tercios"]["final_mayor"]
