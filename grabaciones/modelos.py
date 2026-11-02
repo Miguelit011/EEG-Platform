@@ -25,6 +25,13 @@ AVISO_FIJO = (
     "actividad cerebral."
 )
 
+# Nombre de la métrica en pantalla cuando el de la ficha es demasiado técnico. Las que no
+# están aquí se muestran como vienen, con espacios en vez de guiones bajos.
+NOMBRE_METRICA = {
+    # Proporción de grabaciones en que el último tercio puntúa más que el primero.
+    "acierto_pareado_tercios": "acierto al distinguir el final de la tarea del principio",
+}
+
 _cache = {}   # (ficha, firma de los archivos) -> Modelo ya cargado
 
 
@@ -108,7 +115,7 @@ def resultado_test_para_pantalla(test):
         return None
     lo, hi = test["ic95"]
     return {
-        "metrica": test["metrica"].replace("_", " "),
+        "metrica": NOMBRE_METRICA.get(test["metrica"], test["metrica"].replace("_", " ")),
         "valor": _numero(test["valor"]), "ic": f"{_numero(lo)}–{_numero(hi)}",
         "azar": _numero(test["azar"], 2), "n_personas": test.get("n_personas"),
         "n_grabaciones": test.get("n_grabaciones"), "fuente": test.get("fuente", ""),

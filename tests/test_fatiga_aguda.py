@@ -232,6 +232,9 @@ def test_eegnet_apartado_propio_y_segunda_cinta(client):
     assert html.count(fa["veredicto"]) == 2
     assert "PASAT y PVTB juntas" in html                         # su cifra del test no es por tarea
     assert "no se distinguen" in html                            # comparación con la logística, en Detalles
+    # La métrica de los dos apartados, con nombre legible y no el técnico de la ficha.
+    assert html.count("acierto al distinguir el final de la tarea del principio") == 2
+    assert "acierto pareado" not in html
 
 
 def test_eegnet_conclusion_contraria():
