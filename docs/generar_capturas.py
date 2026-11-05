@@ -2,7 +2,7 @@
 Genera las capturas de pantalla de la guía de uso y de la memoria (`docs/capturas/`).
 
 Usa **solo datos anónimos**: los JSON de ejemplo de la librería (`tests/fixtures/`: uno de ojos
-abiertos y, para la pestaña Fatiga aguda, uno de PASAT) y variantes suyas, con nombres de archivo
+abiertos y, para la pestaña Tiempo en tarea, uno de PASAT) y variantes suyas, con nombres de archivo
 inventados. Nunca lee EDF ni resultados reales, porque las
 capturas se guardan en el repositorio y los participantes son menores de edad.
 
@@ -230,11 +230,11 @@ def main():
         os.remove(SALIDA / "modelos_sin_condicion.png")
         imagen, t = pagina("/modelos/resumen/", "modelos_resumen.png")
 
-        # Pantalla 5: fatiga aguda, con la grabación avanzada para que se vea el cambio
-        imagen, t = pagina(f"/grabaciones/{ids['pasat']}/fatiga-aguda/", "pantalla_5_fatiga_aguda.png",
+        # Pantalla 5: tiempo en tarea, con la grabación avanzada para que se vea el cambio
+        imagen, t = pagina(f"/grabaciones/{ids['pasat']}/tiempo-en-tarea/", "pantalla_5_tiempo_en_tarea.png",
                            consulta="&momento=0.93", quieto=True)
-        guardar_desde_arriba(imagen, t, 0, "fatiga_aguda_veredicto.png")
-        guardar_recorte(imagen, t, 1, 1, "fatiga_aguda_cerebro.png")
+        guardar_desde_arriba(imagen, t, 0, "tiempo_en_tarea_veredicto.png")
+        guardar_recorte(imagen, t, 1, 1, "tiempo_en_tarea_cerebro.png")
     finally:
         if servidor:
             servidor.terminate()

@@ -14,8 +14,8 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 7 | Modelos enchufables (c1, c2, c3) | EEG-Platform | [x] |
 | 8 | Cierre: arranque fácil, guía y material para la memoria | EEG-Platform | [x] |
 | 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
-| 10 (A) | Fatiga aguda con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [x] |
-| 11 (B) | Fatiga aguda con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [x] |
+| 10 (A) | Tiempo en tarea con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [x] |
+| 11 (B) | Tiempo en tarea con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [x] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -216,9 +216,9 @@ Nota: la Fase 5 decidió «un círculo por electrodo, sin interpolación». La F
 
 ---
 
-## Fatiga aguda: lo que ya sabemos (para las Fases 10 y 11)
+## Tiempo en tarea: lo que ya sabemos (para las Fases 10 y 11)
 
-Sale de la línea `EEG-Library/analisis/fatiga_aguda/`, ya cerrada. Las cifras son de su evaluación en `test` (28 personas), no del desarrollo.
+Sale de la línea `EEG-Library/analisis/tiempo_en_tarea/`, ya cerrada. Las cifras son de su evaluación en `test` (28 personas), no del desarrollo.
 
 - **Qué se confirmó:** en PASAT y PVTB, el EEG cambia de forma ordenada a lo largo de la tarea en personas no vistas (H2), y ese cambio no lo explican el movimiento ni el contacto (H4). **No se confirmó** que el cambio supere al del reposo con ojos abiertos durante el mismo tiempo (H1). Lo que se mide es el **cambio con el tiempo en tarea**, no el nivel de fatiga de la persona.
 - **Logística** (paso 6, `06_test/`): `rel` + `LogisticRegression(C=0.01)`, una por condición, entrenada con `train` + `val` (146 personas) para distinguir el primer tercio de la grabación del último. Entrada por ventana: `log10(pot_rel)` de 14 canales × 4 bandas, centrada por grabación y con los canales excluidos a 0. Modelos en `EEG-Data\processed\fatiga_aguda_test_20261027-190547\modelos\` (se usan `completa_PASAT.joblib` y `completa_PVTB.joblib`).
@@ -230,17 +230,17 @@ Sale de la línea `EEG-Library/analisis/fatiga_aguda/`, ya cerrada. Las cifras s
 - **Una ventana suelta dice poco** (AUC por ventana ≈ 0,58). Lo fiable es la tendencia de la grabación entera.
 - **Control:** en reposo con ojos abiertos también hay algo de cambio con el tiempo (ρ +0,104 en `test`; acierto pareado 0,670), probablemente por el asentamiento del casco.
 - Cifras y fuentes: `06_test/resultados_test.json` y `deep_learning/04_test_eegnet/resultados_test.json`. Las fichas las copian de ahí, y un test lo comprueba (como en la Fase 7).
-- **Excepción a «No detecta ni mide fatiga»** (decisión del autor, 2026-11-01): en esta función sí se habla de **«fatiga aguda»**, porque es el nombre de la línea de investigación y del efecto del tiempo en tarea que estudia. El subtítulo dice siempre lo que se confirmó: «cambio del EEG a lo largo de la tarea». La regla general sigue en pie para c1–c3 y para el VAS.
+- **Nombre** (2026-11-05, sustituye a la excepción del 2026-11-01): la función se llama **«Tiempo en tarea»** y no «Fatiga aguda». Tras la revisión de los tutores, la línea de EEG-Library pasó a llamarse así, porque lo confirmado es el cambio del EEG con el tiempo en la tarea, no que se deba a la fatiga. Con eso desaparece la única excepción a «No detecta ni mide fatiga»: la palabra ya no está en la barra, la pestaña ni el CSV, solo en los avisos que dicen que no se mide. El subtítulo dice siempre lo que se confirmó: «cambio del EEG a lo largo de la tarea».
 
 Nota: la Fase 10 que se implementó el 2026-10-28 (gráfica de líneas por bloques y tabla de tercios en Análisis) se descartó entera sin llegar a commitearse. Esta Fase 10 la sustituye con otro enfoque: pestaña propia, un modelo con su cifra en test y una visualización animada.
 
-## Fase 10 (A) — Fatiga aguda con la logística — **hecha** (2026-11-01)
+## Fase 10 (A) — Tiempo en tarea con la logística — **hecha** (2026-11-01)
 
 Resultado:
-- **EEG-Library 0.15.0:** `por_ventana` en `analizar_grabacion`, modelos `fa_pasat_logistica` y `fa_pvtb_logistica` y `puntuar_fatiga_aguda`. **Paridad exacta** con el análisis en 20 grabaciones de `train` y `val` (diferencia máxima en la puntuación 1,4·10⁻¹⁴; 20/20 veredictos iguales). Ejemplo anónimo `analisis_grabacion_pasat.json`.
-- **EEG-Platform:** pestaña «Fatiga aguda» con veredicto y cifra en test, cerebro 3D animado (60 fps) con cinta de tiempo, respaldo 2D sin WebGL, 4 columnas `fatiga_aguda_*` al final del CSV, guía, capturas y 288 tests.
+- **EEG-Library 0.15.0:** `por_ventana` en `analizar_grabacion`, modelos `tt_pasat_logistica` y `tt_pvtb_logistica` y `puntuar_tiempo_en_tarea`. **Paridad exacta** con el análisis en 20 grabaciones de `train` y `val` (diferencia máxima en la puntuación 1,4·10⁻¹⁴; 20/20 veredictos iguales). Ejemplo anónimo `analisis_grabacion_pasat.json`.
+- **EEG-Platform:** pestaña «Tiempo en tarea» con veredicto y cifra en test, cerebro 3D animado (60 fps) con cinta de tiempo, respaldo 2D sin WebGL, 4 columnas `tiempo_en_tarea_*` al final del CSV, guía, capturas y 288 tests.
 - **Desviación aprobada en el piloto:** el cerebro muestra por defecto el **cambio desde el principio** (diferencia con la media del primer tercio, paleta divergente morado–verde) y, como opción, el valor en cada momento. Con el valor, las diferencias entre electrodos tapaban el cambio con el tiempo y la animación apenas se movía.
-- Decisiones en `docs/DECISIONES.md` («Fatiga aguda»).
+- Decisiones en `docs/DECISIONES.md` («Tiempo en tarea»).
 **Objetivo:** que, al abrir una grabación PASAT o PVTB, el investigador vea sin hacer nada cómo cambia el EEG a lo largo de la tarea, según el modelo validado, en una pantalla vistosa para la defensa.
 
 Incluye, en EEG-Library (contrato 0.15.0):
@@ -249,7 +249,7 @@ Incluye, en EEG-Library (contrato 0.15.0):
 - Una función de la librería, al estilo de `predecir`, que recibe el bloque por ventana y devuelve la puntuación de cada ventana, la ρ de la grabación y el veredicto principio/final. Centra por grabación y anula los canales excluidos, igual que el análisis, y responde «no disponible» si los parámetros no son los del entrenamiento o hay menos de 10 ventanas. La web no calcula nada.
 
 Incluye, en EEG-Platform:
-- **Pestaña «Fatiga aguda»** por grabación, junto a Calidad, Análisis y Modelos. Se muestra con condición PASAT o PVTB. Con otra condición o sin condición, explica a qué grabaciones se aplica y cómo indicarla en la lista. No se estima la condición con c3 (en test acierta 0,488).
+- **Pestaña «Tiempo en tarea»** por grabación, junto a Calidad, Análisis y Modelos. Se muestra con condición PASAT o PVTB. Con otra condición o sin condición, explica a qué grabaciones se aplica y cómo indicarla en la lista. No se estima la condición con c3 (en test acierta 0,488).
 - **Cerebro animado:** el visor 3D actual muestra la beta relativa por electrodo en cada tramo de la grabación (media móvil de varias ventanas) y avanza con un botón de reproducir y pausar. Se elige la beta porque es la firma confirmada en PVTB (H3). Escala fija en toda la grabación, para que el cambio se vea.
 - **Cinta de tiempo** bajo el cerebro: cada franja se colorea según la puntuación suavizada del modelo, de «se parece al principio» a «se parece al final». Al pinchar o arrastrar en la cinta, el cerebro salta a ese instante.
 - **Veredicto en una frase:** si el último tercio puntúa más que el primero, con la cifra del test de esa tarea (acierto pareado, IC y azar sobre la escala de 0 a 1 que ya usan los modelos).
@@ -258,13 +258,13 @@ Incluye, en EEG-Platform:
 - Accesibilidad y respaldo: la animación se controla con teclado, respeta `prefers-reduced-motion` y, sin WebGL, usa los mapas 2D. Sin librerías nuevas ni CDN.
 - CSV: columnas por grabación con la ρ y el veredicto principio/final (nombres fijados en el plan detallado), documentadas con `documentar_csv`.
 - Las grabaciones procesadas antes de la fase no tienen el bloque por ventana: la pestaña lo dice y ofrece reprocesar.
-- Documentación: `GUIA_DE_USO.md`, `DECISIONES.md`, capturas y la excepción sobre «fatiga» en `CLAUDE.md`.
+- Documentación: `GUIA_DE_USO.md`, `DECISIONES.md`, capturas y la excepción sobre «fatiga» en `CLAUDE.md` (retirada el 2026-11-05 al renombrar la función a «Tiempo en tarea»).
 
 Aceptación:
 - **Paridad con el análisis:** en grabaciones de `train` y `val` (nunca de `test`), las puntuaciones por ventana que calcula la librería desde el EDF coinciden con las de `06_test/evaluacion_test.py` con los mismos `.joblib` (diferencia < 10⁻⁶), y la ρ por grabación también.
 - Las cifras de las fichas coinciden con `06_test/resultados_test.json` (test que se omite si no está `EEG-Data`).
 - Con parámetros distintos a los del estudio, con menos de 10 ventanas o con otra condición, no se muestran puntuaciones.
-- Ningún texto fuera de la pestaña de fatiga aguda menciona la fatiga, salvo los avisos que ya existían.
+- Ningún texto fuera de la pestaña de tiempo en tarea menciona la fatiga, salvo los avisos que ya existían.
 - La animación es fluida en el portátil de pruebas, y la pestaña funciona en tema claro y oscuro y sin WebGL.
 - Los tests pasan, la app arranca y los tiempos de procesado no empeoran de forma apreciable.
 
@@ -274,12 +274,12 @@ Orden de trabajo (con parada del usuario en los pasos 1, 2 y 3):
 3. Piloto de la pestaña con capturas (cerebro, cinta y veredicto). **Parar y esperar visto bueno.**
 4. Resto de la pantalla, CSV, documentación, `/audit` y `/polish`, tests y propuesta de mensaje de commit.
 
-## Fase 11 (B) — Fatiga aguda con EEGNet — **hecha** (2026-11-01)
+## Fase 11 (B) — Tiempo en tarea con EEGNet — **hecha** (2026-11-01)
 
 Resultado:
-- **Exportación** (`EEG-Library/analisis/fatiga_aguda/deep_learning/05_onnx/`): ONNX = PyTorch con una diferencia máxima de 2,2·10⁻⁶ en 1 757 ventanas de `train`. `onnx`, `onnxscript` y `onnxruntime` solo en `C:\venvs\eeg-dl` (visto bueno del autor).
-- **EEG-Library 0.16.0:** `modelado/fatiga_aguda_eegnet.py`; `analizar_grabacion` guarda `por_ventana["eegnet"]` (media de las tres semillas; +0,13 s por grabación típica). **Paridad exacta** con el análisis en 20 grabaciones de `train` y `val`: entrada de la red y puntuación idénticas (diferencia 0).
-- **EEG-Platform:** segunda pista «Red neuronal (EEGNet)» en la cinta, con el mismo cabezal; su propio apartado de resultado al lado del de la logística (frase y escala de fiabilidad: acierto 0,737 en PASAT y PVTB juntas; al principio fue una frase de acuerdo bajo el veredicto, cambiada el 2026-11-02 a petición del autor); ρ y «no se distinguen» de la logística en «Detalles»; 2 columnas `fatiga_aguda_eegnet_*` al final del CSV; grabaciones sin EEGNet siguen con la logística y un aviso. Decisión del autor: segunda cinta (no selector ni solo frase).
+- **Exportación** (`EEG-Library/analisis/tiempo_en_tarea/deep_learning/05_onnx/`): ONNX = PyTorch con una diferencia máxima de 2,2·10⁻⁶ en 1 757 ventanas de `train`. `onnx`, `onnxscript` y `onnxruntime` solo en `C:\venvs\eeg-dl` (visto bueno del autor).
+- **EEG-Library 0.16.0:** `modelado/tiempo_en_tarea_eegnet.py`; `analizar_grabacion` guarda `por_ventana["eegnet"]` (media de las tres semillas; +0,13 s por grabación típica). **Paridad exacta** con el análisis en 20 grabaciones de `train` y `val`: entrada de la red y puntuación idénticas (diferencia 0).
+- **EEG-Platform:** segunda pista «Red neuronal (EEGNet)» en la cinta, con el mismo cabezal; su propio apartado de resultado al lado del de la logística (frase y escala de fiabilidad: acierto 0,737 en PASAT y PVTB juntas; al principio fue una frase de acuerdo bajo el veredicto, cambiada el 2026-11-02 a petición del autor); ρ y «no se distinguen» de la logística en «Detalles»; 2 columnas `tiempo_en_tarea_eegnet_*` al final del CSV; grabaciones sin EEGNet siguen con la logística y un aviso. Decisión del autor: segunda cinta (no selector ni solo frase).
 - Declarado en la ficha y en la pantalla: el test evaluó cada semilla por separado; la plataforma combina las tres.
 **Objetivo:** añadir EEGNet como segundo modelo en la misma pestaña, para enseñar que un modelo clásico y uno de deep learning ven lo mismo. **Es prescindible:** si la paridad no sale, la fase se para y la Fase 10 queda intacta.
 

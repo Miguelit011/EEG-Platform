@@ -197,6 +197,9 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 
 ## Fatiga aguda (Fase 10, 2026-11-01)
 
+> **Sustituida en parte el 2026-11-05:** la función se llama ahora «Tiempo en tarea» (ver la
+> última sección). Lo que sigue conserva los nombres de entonces.
+
 - **Una pestaña propia, no un bloque en Análisis ni en Modelos.** Análisis queda solo con lo espectral y Modelos con los clasificadores de condición. La Fase 10 descartada el 2026-10-28 (gráfica de líneas y tabla de tercios dentro de Análisis) no se reutilizó.
 - **«Fatiga aguda» en la barra, la pestaña y el CSV** (decisión del autor): es el nombre de la línea. La frase de la cabecera y el aviso fijo dicen lo que se confirmó (el cambio con el tiempo en tarea, no el nivel de fatiga), y `sin_enlace_fatiga_aguda` en los tests impide que la palabra aparezca en ningún otro sitio.
 - **Modelo: la logística del paso 6 de la línea**, la versión de grabación completa, una por tarea. Es la mejor en test (ρ 0,171 frente a 0,160 de EEGNet, sin diferencia demostrable) y no añade dependencias. EEGNet queda para la Fase 11.
@@ -212,7 +215,7 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 - **Grabaciones antiguas:** las procesadas con la librería 0.14.0 no tienen `por_ventana`; la pestaña lo dice y ofrece volver a procesarlas.
 - **Capturas:** con el ejemplo anónimo PASAT de la librería, elegido para que se vea el cambio (está declarado en `generar_ejemplo.py`); `?momento=0.93` abre la grabación avanzada y `--force-prefers-reduced-motion` fija la vista del cerebro.
 
-## Fatiga aguda con EEGNet (Fase 11, 2026-11-01)
+## Fatiga aguda con EEGNet (Fase 11, 2026-11-01; hoy «Tiempo en tarea»)
 
 - **Segunda pista en la misma cinta** (decisión del autor, frente a un selector de modelo o solo una frase): las dos cintas, una sobre otra y con un solo cabezal, enseñan de un vistazo que los dos modelos ven lo mismo, que es el resultado del test («no se distinguen»). Sus cifras van en «Detalles», para no cargar la pantalla.
 - **ONNX, no PyTorch, en la librería y la web.** Los tres modelos finales se exportaron una vez con el entorno `C:\venvs\eeg-dl` (paso 5 de la sublínea de deep learning); `onnxruntime` ya era dependencia (ICLabel). Paridad: ONNX = PyTorch (2,2·10⁻⁶) y librería = análisis (diferencia 0).
@@ -222,3 +225,10 @@ Decisiones relevantes de cada fase, con su porqué. Las más recientes, abajo.
 - **Cada pista se normaliza por su propio máximo**, porque las puntuaciones de los dos modelos no están en la misma escala; el color dice hacia dónde se inclina cada uno, no cuánto más que el otro.
 - **Un apartado de resultado por modelo** (2026-11-02, a petición del autor; sustituye a la frase «llega a la misma conclusión» bajo el veredicto de la logística): la tarjeta de arriba tiene dos apartados iguales, uno al lado del otro, cada uno con su frase y su escala de fiabilidad en test; el cerebro y la cinta siguen siendo una sola vista. Con los dos veredictos a la vista, la frase de acuerdo sobraba. La cifra de EEGNet es de PASAT y PVTB juntas (el análisis no la dio por tarea) y el apartado lo dice, para que no parezca calculada igual que la de la logística, que es la de la tarea de la grabación.
 - **Cuatro mapas 2D en una fila en lugar del cerebro 3D** (2026-11-02, decisión del autor): con las cuatro bandas a la vez se ve qué banda cambia sin ir pulsando una a una, y la vista desde arriba enseña todas las zonas sin girar nada. Desaparecen los botones de banda (y la «banda inicial: beta») y la barra del 3D. Cada mapa tiene su escala, fija en toda la grabación, porque el cambio de una banda es mucho menor que el de otra y con una escala común se perdería. En pantallas de menos de 900 px van dos y dos. El dibujo de los mapas se sacó de `visor.js` a `mapas2d.js` y la vista desde arriba de `iniciar3D` a `iniciarVistaSuperior` (`visor3d.js`), para que Análisis y Fatiga aguda usen el mismo código.
+
+## Renombrado a «Tiempo en tarea» (2026-11-05)
+
+- **«Fatiga aguda» pasa a «Tiempo en tarea»** en la barra, la pestaña, la URL (`/tiempo-en-tarea/`), el código (`grabaciones/tiempo_en_tarea.py`, `static/js/tiempo_en_tarea.js`, clases `tt-*`), las columnas del CSV (`tiempo_en_tarea_*`) y la guía. Motivo: tras la revisión de los tutores, la línea de EEG-Library se renombró igual (contrato 0.17.0), porque lo confirmado en test es un cambio del EEG con el tiempo en la tarea y no permite atribuirlo a la fatiga.
+- **Desaparece la excepción a «No detecta ni mide fatiga»** (2026-11-01). La palabra solo queda en los avisos que dicen que no se mide (bloque de modelos y pestaña Tiempo en tarea), y los tests lo comprueban en todas las páginas y en todo el CSV, cabecera incluida.
+- **Columnas del CSV renombradas sin compatibilidad con las antiguas** (decisión del autor): los CSV exportados antes llevan `fatiga_aguda_*`; los valores son los mismos.
+- **Sin migración de datos:** los resultados guardados no llevan el nombre (solo `por_ventana`), así que las grabaciones ya procesadas siguen sirviendo.

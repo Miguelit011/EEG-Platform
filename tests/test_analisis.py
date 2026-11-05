@@ -16,7 +16,7 @@ from grabaciones.analisis_espectral import (
     ESCALA, color_de_escala, color_de_texto, resumen_analisis)
 from grabaciones.models import Grabacion
 from tests.auxiliar import (FIXTURE, grabacion_con, mapa, mapas, sin_bloque_de_modelos,
-                            sin_enlace_fatiga_aguda, variante)
+                            variante)
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
 
@@ -251,7 +251,7 @@ def test_el_visor_avisa_de_que_es_orientativo(client):
     html = client.get(url(grabacion_con(FIXTURE))).content.decode()
     assert "Interpolación orientativa" in html
     assert "no se puede localizar la actividad dentro del cerebro" in html
-    assert "fatiga" not in sin_enlace_fatiga_aguda(html.split('id="modelos"')[0]).lower()
+    assert "fatiga" not in html.split('id="modelos"')[0].lower()
 
 
 def test_mapas_con_valores_y_descartados(client):
@@ -331,7 +331,7 @@ def test_sin_recursos_externos_ni_fatiga(client):
     for resultado in (FIXTURE, variante(), variante(CANALES_EPOC[5:], car=False)):
         html = client.get(url(grabacion_con(resultado))).content.decode()
         assert not re.search(r'(src|href)\s*=\s*["\'](https?:)?//', html, re.I)
-        assert "fatiga" not in sin_enlace_fatiga_aguda(sin_bloque_de_modelos(html)).lower()
+        assert "fatiga" not in sin_bloque_de_modelos(html).lower()
 
 
 def test_grabacion_procesada_de_verdad(client, tmp_path):

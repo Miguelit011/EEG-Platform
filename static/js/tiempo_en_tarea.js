@@ -1,4 +1,4 @@
-// Pestaña «Fatiga aguda»: reproduce la grabación en cuatro mapas del cerebro (uno por banda, vista
+// Pestaña «Tiempo en tarea»: reproduce la grabación en cuatro mapas del cerebro (uno por banda, vista
 // desde arriba) y en una cinta de tiempo.
 // No calcula nada del modelo: la puntuación de cada ventana, la potencia relativa (ya suavizada)
 // y la escala vienen del servidor, que las saca de EEG-Library. Aquí solo se interpola entre dos
@@ -6,26 +6,26 @@
 import { bandas, electrodos, estado, cambiar, suscribir, css, hexARgb } from "./visor-comun.js";
 import { crearMapas } from "./mapas2d.js";
 
-const datos = JSON.parse(document.getElementById("datos-fatiga").textContent);
+const datos = JSON.parse(document.getElementById("datos-tiempo-en-tarea").textContent);
 const instantes = datos.instante_s;
 const n = instantes.length;
 const paso = n > 1 ? instantes[1] - instantes[0] : 2;
 const DURACION_1X_MS = 20000;   // a 1× la grabación entera se recorre en unos 20 s, dure lo que dure
 
-const botonPlay = document.getElementById("fa-play");
-const textoPlay = document.getElementById("fa-play-texto");
-const tiempo = document.getElementById("fa-tiempo");
-const reloj = document.getElementById("fa-reloj");
-const cinta = document.getElementById("fa-cinta");
-const cabezal = document.getElementById("fa-cabezal");
+const botonPlay = document.getElementById("tt-play");
+const textoPlay = document.getElementById("tt-play-texto");
+const tiempo = document.getElementById("tt-tiempo");
+const reloj = document.getElementById("tt-reloj");
+const cinta = document.getElementById("tt-cinta");
+const cabezal = document.getElementById("tt-cabezal");
 
 // ---- Qué muestran los mapas: cambio desde el principio o valor en cada momento ----------------
-const tituloEscala = document.getElementById("fa-escala-titulo");
+const tituloEscala = document.getElementById("tt-escala-titulo");
 const TITULOS = {
   cambio: "Cambio de la potencia relativa respecto al primer tercio, en puntos porcentuales: morado, baja; verde, sube",
   rel: "Potencia relativa de cada banda, en % de la potencia total",
 };
-document.querySelectorAll('input[name="fa-metrica"]').forEach(function (r) {
+document.querySelectorAll('input[name="tt-metrica"]').forEach(function (r) {
   r.checked = r.value === estado.metrica;
   r.addEventListener("change", function () { cambiar({ metrica: r.value }); });
 });
@@ -109,10 +109,10 @@ function bucle(ahora) {
 }
 botonPlay.addEventListener("click", function () { ponerReproduccion(!reproduciendo); });
 
-document.querySelectorAll(".fa-velocidad button").forEach(function (b) {
+document.querySelectorAll(".tt-velocidad button").forEach(function (b) {
   b.addEventListener("click", function () {
     velocidad = parseFloat(b.dataset.velocidad);
-    document.querySelectorAll(".fa-velocidad button").forEach(function (x) {
+    document.querySelectorAll(".tt-velocidad button").forEach(function (x) {
       x.setAttribute("aria-pressed", x === b ? "true" : "false");
     });
   });
@@ -153,13 +153,13 @@ function dibujarPista(lienzo, serie) {
 }
 
 function dibujarCinta() {
-  cinta.querySelectorAll("canvas.fa-pista").forEach(function (lienzo) {
+  cinta.querySelectorAll("canvas.tt-pista").forEach(function (lienzo) {
     const serie = datos[lienzo.dataset.serie];
     if (serie) dibujarPista(lienzo, serie);
   });
   // Rótulos de los tercios, debajo de la cinta y alineados con las líneas.
   const marcas = [0].concat(datos.tercios_s.map(function (t) { return (t + 2) / datos.duracion_s; }), [1]);
-  document.querySelectorAll("#fa-tercios span").forEach(function (el, k) {
+  document.querySelectorAll("#tt-tercios span").forEach(function (el, k) {
     el.style.left = (100 * marcas[k]) + "%";
     el.style.width = (100 * (marcas[k + 1] - marcas[k])) + "%";
   });
@@ -213,7 +213,7 @@ import("./visor3d.js").then(function (m) { return m.iniciarVistaSuperior(); }).t
   vista = v;
 }).catch(function (error) {
   console.warn("Mapas sobre el cerebro no disponibles:", error);
-  document.getElementById("fa-sin-webgl").hidden = false;
+  document.getElementById("tt-sin-webgl").hidden = false;
 }).finally(function () {
   listo = true;
   document.querySelectorAll("#mapas-2d .cargando").forEach(function (el) { el.classList.remove("cargando"); });

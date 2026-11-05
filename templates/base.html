@@ -46,8 +46,8 @@
                {% if pantalla == 'analisis' %}aria-current="page"{% endif %}>Análisis</a></li>
         <li><a href="{{ nav_url_modelos|default:'/modelos/' }}"
                {% if pantalla == 'modelos' %}aria-current="page"{% endif %}>Modelos</a></li>
-        <li><a href="{{ nav_url_fatiga_aguda|default:'/fatiga-aguda/' }}"
-               {% if pantalla == 'fatiga_aguda' %}aria-current="page"{% endif %}>Fatiga aguda</a></li>
+        <li><a href="{{ nav_url_tiempo_en_tarea|default:'/tiempo-en-tarea/' }}"
+               {% if pantalla == 'tiempo_en_tarea' %}aria-current="page"{% endif %}>Tiempo en tarea</a></li>
       </ul>
     </nav>
     <button type="button" class="tema-boton" id="tema-boton" aria-label="Cambiar entre tema claro y oscuro" title="Cambiar tema">

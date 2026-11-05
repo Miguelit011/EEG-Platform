@@ -134,7 +134,7 @@ function cargarMallas() {
 }
 
 // ---- Mapas 2D: el cerebro real visto desde arriba, renderizado aparte del visor 3D -----------------
-// Lo usan los cuatro mapas de Análisis y los de la pestaña Fatiga aguda, que no tiene cerebro 3D.
+// Lo usan los cuatro mapas de Análisis y los de la pestaña Tiempo en tarea, que no tiene cerebro 3D.
 // Devuelve `{ dibujar(destino, banda) }`; falla si el navegador no tiene WebGL.
 export async function iniciarVistaSuperior() {
   const [cabeza, cerebro] = await cargarMallas();

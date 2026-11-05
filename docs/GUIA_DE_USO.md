@@ -14,9 +14,10 @@ los resultados en CSV para analizarlos en Excel o SPSS.
 > grabación** (por ejemplo, reposo con ojos abiertos o cerrados, o cuál de cinco tareas) y
 > siempre se muestran junto a lo bien o mal que funcionan.
 >
-> La pestaña **Fatiga aguda** es la única que usa esa palabra, porque es el nombre de la línea de
-> investigación de la que sale: enseña **cómo cambia el EEG a lo largo de una tarea larga**
-> (PASAT o PVTB), no el nivel de fatiga de la persona (sección 7).
+> La pestaña **Tiempo en tarea** enseña **cómo cambia el EEG a lo largo de una tarea larga**
+> (PASAT o PVTB). Ese cambio puede deberse a muchas cosas (cansancio, habituación a la tarea,
+> pérdida de atención o el asentamiento del casco): no mide el nivel de fatiga de la persona
+> (sección 7).
 
 ## 1. Poner en marcha la plataforma
 
@@ -57,7 +58,7 @@ frecuencia de muestreo, si le faltan alguno de los 14 electrodos del Emotiv o si
 ## Moverse por la plataforma
 
 La barra de arriba tiene cinco pestañas: **Grabaciones** (la lista), y **Calidad**, **Análisis**,
-**Modelos** y **Fatiga aguda**, que son cuatro vistas de **una misma grabación**. Para que la barra
+**Modelos** y **Tiempo en tarea**, que son cuatro vistas de **una misma grabación**. Para que la barra
 baste para navegar:
 
 - Las cuatro pestañas están **siempre activas** y llevan a la **grabación activa**: la que estabas
@@ -213,9 +214,9 @@ c3, con un acierto de 0,49 sobre un azar de 0,20, acierta la tarea a menudo pero
 la mitad de los casos. Y parte del acierto de todos puede deberse a la **duración** de la
 grabación o al **orden** de las tareas en el protocolo, no solo a la actividad cerebral.
 
-## 7. Fatiga aguda
+## 7. Tiempo en tarea
 
-La pestaña **Fatiga aguda** enseña **cómo cambia el EEG a lo largo de una tarea larga**. Solo
+La pestaña **Tiempo en tarea** enseña **cómo cambia el EEG a lo largo de una tarea larga**. Solo
 funciona con grabaciones **PASAT** y **PVTB**: el estudio confirmó en personas que no había visto
 antes que, en esas dos tareas, el EEG cambia de forma ordenada con el tiempo y que ese cambio no lo
 explican el movimiento ni el contacto de los electrodos. Con otra condición (o sin condición), la
@@ -223,7 +224,7 @@ pestaña lo explica; si la condición está mal, se corrige en la lista.
 
 No hay que hacer nada: al abrir una grabación PASAT o PVTB procesada aparece todo.
 
-![Resultado de cada modelo y su fiabilidad](capturas/fatiga_aguda_veredicto.png)
+![Resultado de cada modelo y su fiabilidad](capturas/tiempo_en_tarea_veredicto.png)
 
 **Arriba, el resultado de cada modelo, uno al lado del otro.** Los dos comparan la media del
 **primer tercio** de la grabación con la del **último** y dicen, en una frase, si el final se
@@ -238,7 +239,7 @@ parece más al final de la tarea que el principio:
 
 Debajo de cada frase, su fiabilidad en el test con el intervalo y el nivel de azar.
 
-![El cerebro a lo largo de la grabación](capturas/fatiga_aguda_cerebro.png)
+![El cerebro a lo largo de la grabación](capturas/tiempo_en_tarea_cerebro.png)
 
 **En el centro, la grabación reproducida.** Con **Reproducir**, la grabación entera pasa en unos
 20 segundos (0,5× y 2× la hacen más lenta o más rápida):
@@ -274,8 +275,8 @@ columna: [`COLUMNAS_CSV.md`](COLUMNAS_CSV.md). Algunas claves:
   nunca un cero.
 - La potencia **relativa** va de 0 a 1 (no en %); la **absoluta**, en log<sub>10</sub> de V².
 - Las columnas de los modelos están al final (`c1_oa_oc_logistica_clase`, sus probabilidades…),
-  y detrás las seis de fatiga aguda (`fatiga_aguda_rho`, `fatiga_aguda_final_mayor`… y las dos de
-  EEGNet, `fatiga_aguda_eegnet_*`), que solo se rellenan en grabaciones PASAT y PVTB.
+  y detrás las seis de tiempo en tarea (`tiempo_en_tarea_rho`, `tiempo_en_tarea_final_mayor`… y las dos de
+  EEGNet, `tiempo_en_tarea_eegnet_*`), que solo se rellenan en grabaciones PASAT y PVTB.
 
 **En SPSS:** importa el archivo como datos de texto (*Archivo → Importar datos*; los menús varían
 según la versión) y marca el separador `;` y la coma como decimal. Si en tu equipo SPSS usa otra configuración regional, el formato internacional

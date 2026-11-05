@@ -1,5 +1,5 @@
 // Los cuatro mapas 2D de una grabación (uno por banda, vista desde arriba). Los usan la pestaña
-// Análisis y la pestaña Fatiga aguda. Con `vista` (de visor3d.js) se dibuja el cerebro real; sin
+// Análisis y la pestaña Tiempo en tarea. Con `vista` (de visor3d.js) se dibuja el cerebro real; sin
 // ella (sin WebGL), el círculo de respaldo de visor-comun.js. No calcula nada: pinta lo que hay en
 // `estado` y en los electrodos.
 import {

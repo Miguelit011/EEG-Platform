@@ -10,7 +10,7 @@ export const bandas = datos.bandas;
 export const ESCALA = ["#1b0c41", "#4a0c6b", "#781c6d", "#a52c60", "#cf4446",
                        "#ed6925", "#fb9b06", "#f7d13d", "#fcffa4"];
 const ESCALA_RGB = ESCALA.map(hexARgb);
-// Escala divergente (PRGn) para «cambio desde el principio» en la pestaña Fatiga aguda: morado =
+// Escala divergente (PRGn) para «cambio desde el principio» en la pestaña Tiempo en tarea: morado =
 // baja, verde = sube. Distinta de la cinta de tiempo (azul/naranja) para no mezclar significados.
 export const DIVERGENTE = ["#762a83", "#9970ab", "#c2a5cf", "#e7d4e8", "#f7f7f7",
                            "#d9f0d3", "#a6dba0", "#5aae61", "#1b7837"];
@@ -20,7 +20,7 @@ const DIVERGENTE_RGB = DIVERGENTE.map(hexARgb);
 // superficie se muestra apagada (ver `opacidad`), no inventada.
 export const SIGMA = 0.8;
 
-// `fotograma` solo cambia en la pestaña Fatiga aguda, al reproducir la grabación.
+// `fotograma` solo cambia en la pestaña Tiempo en tarea, al reproducir la grabación.
 export const estado = { metrica: datos.metrica_inicial || "rel", escala: "banda", banda: datos.banda_inicial, fotograma: 0 };
 const oyentes = new Set();
 export function suscribir(fn) { oyentes.add(fn); }
@@ -70,7 +70,7 @@ export function validos(banda) {
 }
 
 // Rango de color: de esa banda, o común a las cuatro. Si la página trae `rango_fijo` (la pestaña
-// Fatiga aguda, que anima la grabación), se usa ese, el mismo en todos los momentos.
+// Tiempo en tarea, que anima la grabación), se usa ese, el mismo en todos los momentos.
 export function rango(banda) {
   const lista = estado.escala === "comun" ? bandas.map(function (b) { return b.clave; }) : [banda];
   if (estado.metrica === "cambio" && datos.rango_cambio) {
@@ -136,7 +136,7 @@ export function degradadoCss() {
 }
 
 // Respaldo sin WebGL: círculo con nariz y orejas y el calor interpolado en el plano. Lo usan los
-// mapas 2D de Análisis y el cerebro de la pestaña Fatiga aguda. Devuelve cómo pasar un electrodo
+// mapas 2D de Análisis y el cerebro de la pestaña Tiempo en tarea. Devuelve cómo pasar un electrodo
 // a coordenadas del lienzo.
 const RESOLUCION = 132;
 export function dibujarCirculo2D(ctx, lado, puntos, min, max) {

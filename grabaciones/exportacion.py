@@ -21,7 +21,7 @@ from eeg_library.preprocesado.quality import CANALES_EPOC
 from eeg_library.procesado.bands import BANDAS_DEFECTO
 from eeg_library.procesado.matrix import REGIONES
 
-from grabaciones import fatiga_aguda, modelos
+from grabaciones import modelos, tiempo_en_tarea
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
 
@@ -177,31 +177,31 @@ def _celdas(grabacion=None):
                   f"y se estimó; 0 si se conocía (vacía si el modelo no se aplica)", "1/0",
                   _booleano(t["origen"] in ("estimada", "estimadora")) if activo else "")
 
-    # Fatiga aguda (solo PASAT y PVTB). Son los valores de la librería, sin el suavizado de la
+    # Tiempo en tarea (solo PASAT y PVTB). Son los valores de la librería, sin el suavizado de la
     # pantalla: la ρ y el veredicto de tercios son los mismos cálculos que la cifra del test.
-    fa = "Fatiga aguda"
-    p = fatiga_aguda.para_csv(g) if g is not None else None
+    tt = "Tiempo en tarea"
+    p = tiempo_en_tarea.para_csv(g) if g is not None else None
     tercios = p["tercios"] if p else {}
-    yield col("fatiga_aguda_rho", fa,
+    yield col("tiempo_en_tarea_rho", tt,
               "Tendencia a lo largo de la grabación: correlación de Spearman entre la puntuación "
               "de cada ventana y su momento (vacía si no es PASAT ni PVTB)", "−1 a 1",
               _numero(p["rho"], DECIMALES_REL) if p else "")
-    yield col("fatiga_aguda_p_primer_tercio", fa,
+    yield col("tiempo_en_tarea_p_primer_tercio", tt,
               "Probabilidad de «último tercio» que el modelo da a la media del primer tercio",
               "proporción 0–1", _numero(tercios.get("p_primero"), DECIMALES_REL))
-    yield col("fatiga_aguda_p_ultimo_tercio", fa,
+    yield col("tiempo_en_tarea_p_ultimo_tercio", tt,
               "Probabilidad de «último tercio» que el modelo da a la media del último tercio",
               "proporción 0–1", _numero(tercios.get("p_ultimo"), DECIMALES_REL))
-    yield col("fatiga_aguda_final_mayor", fa,
+    yield col("tiempo_en_tarea_final_mayor", tt,
               "1 si el último tercio se parece más al final de la tarea que el primero; 0 si no "
               "(vacía si empatan o no se aplica)", "1/0",
               _booleano(tercios["final_mayor"]) if p and tercios["final_mayor"] is not None else "")
-    e = fatiga_aguda.para_csv(g, modelo="eegnet") if g is not None else None
-    yield col("fatiga_aguda_eegnet_rho", fa,
-              "Lo mismo que fatiga_aguda_rho, con la red neuronal EEGNet (vacía si no es PASAT ni "
+    e = tiempo_en_tarea.para_csv(g, modelo="eegnet") if g is not None else None
+    yield col("tiempo_en_tarea_eegnet_rho", tt,
+              "Lo mismo que tiempo_en_tarea_rho, con la red neuronal EEGNet (vacía si no es PASAT ni "
               "PVTB, o si la grabación se procesó antes de que la plataforma incluyera EEGNet)",
               "−1 a 1", _numero(e["rho"], DECIMALES_REL) if e else "")
-    yield col("fatiga_aguda_eegnet_final_mayor", fa,
+    yield col("tiempo_en_tarea_eegnet_final_mayor", tt,
               "1 si, según EEGNet, el último tercio se parece más al final de la tarea que el "
               "primero; 0 si no (vacía si empatan o no se aplica)", "1/0",
               _booleano(e["tercios"]["final_mayor"]) if e and e["tercios"]["final_mayor"] is not None else "")

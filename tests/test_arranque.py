@@ -5,7 +5,6 @@ import re
 from django.conf import settings
 from django.urls import reverse
 
-from tests.auxiliar import sin_enlace_fatiga_aguda
 from tests.conftest import USA_LA_WEB
 
 pytestmark = USA_LA_WEB
@@ -47,7 +46,7 @@ def test_plantillas_sin_recursos_externos():
 
 
 def test_ningun_texto_menciona_fatiga(client):
-    assert "fatiga" not in sin_enlace_fatiga_aguda(client.get("/").content.decode()).lower()
+    assert "fatiga" not in client.get("/").content.decode().lower()
 
 
 
@@ -72,7 +71,7 @@ def test_portada_en_la_raiz(client):
     assert respuesta.status_code == 200 and "inicio.html" in [t.name for t in respuesta.templates]
     assert 'id="escena"' in html and 'models/electrodos.json' in html
     assert 'href="/grabaciones/"' in html
-    assert "fatiga" not in sin_enlace_fatiga_aguda(html).lower()
+    assert "fatiga" not in html.lower()
 
 
 def test_portada_respaldo_webp_claro_y_oscuro(client):

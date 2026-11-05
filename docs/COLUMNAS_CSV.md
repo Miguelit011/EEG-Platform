@@ -232,13 +232,13 @@ Total: 188 columnas.
 | `c3_tareas_logistica_p_PVSAT` | Cuál de las 5 tareas: probabilidad de la clase PVSAT | proporción 0–1 |
 | `c3_tareas_logistica_condicion_estimada` | Cuál de las 5 tareas: 1 si se aplicó porque la condición de la grabación no se conocía y se estimó; 0 si se conocía (vacía si el modelo no se aplica) | 1/0 |
 
-## Fatiga aguda
+## Tiempo en tarea
 
 | Columna | Significado | Unidad |
 |---|---|---|
-| `fatiga_aguda_rho` | Tendencia a lo largo de la grabación: correlación de Spearman entre la puntuación de cada ventana y su momento (vacía si no es PASAT ni PVTB) | −1 a 1 |
-| `fatiga_aguda_p_primer_tercio` | Probabilidad de «último tercio» que el modelo da a la media del primer tercio | proporción 0–1 |
-| `fatiga_aguda_p_ultimo_tercio` | Probabilidad de «último tercio» que el modelo da a la media del último tercio | proporción 0–1 |
-| `fatiga_aguda_final_mayor` | 1 si el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |
-| `fatiga_aguda_eegnet_rho` | Lo mismo que fatiga_aguda_rho, con la red neuronal EEGNet (vacía si no es PASAT ni PVTB, o si la grabación se procesó antes de que la plataforma incluyera EEGNet) | −1 a 1 |
-| `fatiga_aguda_eegnet_final_mayor` | 1 si, según EEGNet, el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |
+| `tiempo_en_tarea_rho` | Tendencia a lo largo de la grabación: correlación de Spearman entre la puntuación de cada ventana y su momento (vacía si no es PASAT ni PVTB) | −1 a 1 |
+| `tiempo_en_tarea_p_primer_tercio` | Probabilidad de «último tercio» que el modelo da a la media del primer tercio | proporción 0–1 |
+| `tiempo_en_tarea_p_ultimo_tercio` | Probabilidad de «último tercio» que el modelo da a la media del último tercio | proporción 0–1 |
+| `tiempo_en_tarea_final_mayor` | 1 si el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |
+| `tiempo_en_tarea_eegnet_rho` | Lo mismo que tiempo_en_tarea_rho, con la red neuronal EEGNet (vacía si no es PASAT ni PVTB, o si la grabación se procesó antes de que la plataforma incluyera EEGNet) | −1 a 1 |
+| `tiempo_en_tarea_eegnet_final_mayor` | 1 si, según EEGNet, el último tercio se parece más al final de la tarea que el primero; 0 si no (vacía si empatan o no se aplica) | 1/0 |

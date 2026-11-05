@@ -27,7 +27,7 @@ from eeg_library.procesado.parametros import PARAMETROS_ESTUDIO
 from grabaciones import modelos
 from grabaciones.exportacion import columnas, csv_de
 from grabaciones.models import Grabacion
-from tests.auxiliar import (FIXTURE, grabacion_con, sin_bloque_de_modelos, sin_enlace_fatiga_aguda,
+from tests.auxiliar import (FIXTURE, grabacion_con, sin_bloque_de_modelos,
                             variante)
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
@@ -215,9 +215,9 @@ def test_la_palabra_fatiga_solo_aparece_en_el_bloque_de_modelos(client):
         g.save()
         html = client.get(reverse("grabaciones:modelos_grabacion", args=[g.pk])).content.decode()
         assert "fatiga" in html.lower()                      # el aviso fijo, dentro del bloque
-        assert "fatiga" not in sin_enlace_fatiga_aguda(sin_bloque_de_modelos(html)).lower()
+        assert "fatiga" not in sin_bloque_de_modelos(html).lower()
     for url in ("/grabaciones/", reverse("grabaciones:calidad", args=[g.pk])):
-        assert "fatiga" not in sin_enlace_fatiga_aguda(client.get(url).content.decode()).lower()
+        assert "fatiga" not in client.get(url).content.decode().lower()
 
 
 def test_insignias_de_condicion_estimada(client):
@@ -292,7 +292,7 @@ def test_un_modelo_nuevo_aparece_en_la_pantalla_y_en_el_csv(client, settings):
     assert "exactitud balanceada 0,700" in html and "0,600–0,800" in html
 
     nombres = [c.nombre for c in columnas()]
-    # Las del modelo nuevo van tras las de los demás modelos y antes de las 6 de fatiga aguda.
+    # Las del modelo nuevo van tras las de los demás modelos y antes de las 6 de tiempo en tarea.
     assert nombres[-10:-6] == ["prueba_externo_clase", "prueba_externo_p_alta", "prueba_externo_p_baja",
                               "prueba_externo_condicion_estimada"]
     filas = list(csv.DictReader(io.StringIO(csv_de([g, otro]).decode("utf-8-sig")), delimiter=";"))
@@ -427,8 +427,8 @@ def test_csv_con_otros_parametros_deja_los_modelos_vacios():
 def test_las_columnas_de_modelos_estan_documentadas():
     texto = (DOCS / "COLUMNAS_CSV.md").read_text(encoding="utf-8")
     assert "## Modelos" in texto and f"`{C3}_p_PVSAT`" in texto
-    for c in columnas():   # solo las columnas de la pestaña Fatiga aguda llevan la palabra
-        assert "fatiga" not in c.nombre.lower() or c.nombre.startswith("fatiga_aguda_")
+    for c in columnas():
+        assert "fatiga" not in c.nombre.lower()
     cabecera, filas = csv_de([grabacion_con(FIXTURE)]).decode("utf-8").split("\r\n", 1)
     assert "fatiga" not in filas.lower()
 

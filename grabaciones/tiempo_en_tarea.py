@@ -1,7 +1,7 @@
 """
-Pestaña «Fatiga aguda»: cómo cambia el EEG a lo largo de una tarea PASAT o PVTB.
+Pestaña «Tiempo en tarea»: cómo cambia el EEG a lo largo de una tarea PASAT o PVTB.
 
-Todo lo que se calcula sale de EEG-Library (`puntuar_fatiga_aguda` y la ficha del modelo):
+Todo lo que se calcula sale de EEG-Library (`puntuar_tiempo_en_tarea` y la ficha del modelo):
 la puntuación de cada ventana, la ρ, el veredicto de tercios y los pesos. Aquí solo se
 prepara para pintar:
 
@@ -19,13 +19,13 @@ prepara para pintar:
 
 import numpy as np
 
-from eeg_library.modelado.fatiga_aguda import (
+from eeg_library.modelado.tiempo_en_tarea import (
     BANDAS,
     CONDICIONES,
-    leer_ficha_fatiga_aguda,
+    leer_ficha_tiempo_en_tarea,
     puntuar,
 )
-from eeg_library.modelado.fatiga_aguda_eegnet import leer_ficha_eegnet, puntuar_eegnet
+from eeg_library.modelado.tiempo_en_tarea_eegnet import leer_ficha_eegnet, puntuar_eegnet
 
 from grabaciones.analisis_espectral import NOMBRE_BANDA
 from grabaciones.geometria import geometria_visor
@@ -104,7 +104,7 @@ def _eegnet(resultado, condicion):
     }, np.round(cinta / escala, 4).tolist()
 
 
-def resumen_fatiga_aguda(grabacion):
+def resumen_tiempo_en_tarea(grabacion):
     """
     Datos de la pestaña para una grabación.
 
@@ -113,7 +113,7 @@ def resumen_fatiga_aguda(grabacion):
     - `sin_condicion` o `otra_condicion`: el modelo solo existe para PASAT y PVTB.
     - `no_disponible`: la librería no puede puntuarla (`motivo`); `reprocesar` dice si se
       arregla volviendo a procesar.
-    - `ok`: todo lo de la pantalla, con `visor` y `fatiga` listos para `json_script`.
+    - `ok`: todo lo de la pantalla, con `visor` y `serie` listos para `json_script`.
     """
     condicion = (grabacion.condicion or "").strip().upper()
     if grabacion.estado != "procesada" or not grabacion.resultado:
@@ -129,7 +129,7 @@ def resumen_fatiga_aguda(grabacion):
         return {"estado": "no_disponible", "motivo": p["motivo"],
                 "reprocesar": not resultado.get("por_ventana")}
 
-    ficha = leer_ficha_fatiga_aguda(condicion)
+    ficha = leer_ficha_tiempo_en_tarea(condicion)
     pv = resultado["por_ventana"]
     instantes = np.asarray(p["instante_s"])
     puntuacion = suavizar(p["puntuacion"])
@@ -183,7 +183,7 @@ def resumen_fatiga_aguda(grabacion):
         "n_ventanas": p["n_ventanas"],
         "eegnet": eegnet,
         "visor": visor,
-        "fatiga": {
+        "serie": {
             "instante_s": instantes.tolist(),
             "puntuacion": np.round(puntuacion / escala_cinta, 4).tolist(),
             "duracion_s": duracion,

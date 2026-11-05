@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from grabaciones import contexto, modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
-from grabaciones.fatiga_aguda import AVISO_FIJO as AVISO_FATIGA_AGUDA, resumen_fatiga_aguda
+from grabaciones.tiempo_en_tarea import AVISO_FIJO as AVISO_TIEMPO_EN_TAREA, resumen_tiempo_en_tarea
 from grabaciones.eliminacion import eliminar_grabaciones, procesandose
 from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
 from grabaciones.models import Grabacion, Lote, Procesador
@@ -81,12 +81,12 @@ def modelos_grabacion(request, pk):
     }), grabacion)
 
 
-def fatiga_aguda(request, pk):
-    """Pantalla 5: cómo cambia el EEG a lo largo de una tarea PASAT o PVTB (fatiga aguda)."""
+def tiempo_en_tarea(request, pk):
+    """Pantalla 5: cómo cambia el EEG a lo largo de una tarea PASAT o PVTB (tiempo en tarea)."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
-    return contexto.recordar(render(request, "grabaciones/fatiga_aguda.html", {
-        "pantalla": "fatiga_aguda", "grabacion": grabacion,
-        "fa": resumen_fatiga_aguda(grabacion), "aviso_fijo": AVISO_FATIGA_AGUDA,
+    return contexto.recordar(render(request, "grabaciones/tiempo_en_tarea.html", {
+        "pantalla": "tiempo_en_tarea", "grabacion": grabacion,
+        "tt": resumen_tiempo_en_tarea(grabacion), "aviso_fijo": AVISO_TIEMPO_EN_TAREA,
     }), grabacion)
 
 
@@ -103,7 +103,7 @@ def modelos_resumen(request):
 
 
 def atajo(request, seccion):
-    """`/calidad/`, `/analisis/`, `/modelos/` y `/fatiga-aguda/`: llevan a esa pantalla de la grabación activa."""
+    """`/calidad/`, `/analisis/`, `/modelos/` y `/tiempo-en-tarea/`: llevan a esa pantalla de la grabación activa."""
     pk = contexto.activa(request, contexto.procesadas())
     if pk is None:
         return render(request, "grabaciones/sin_grabacion.html", {"pantalla": seccion, "seccion": seccion})

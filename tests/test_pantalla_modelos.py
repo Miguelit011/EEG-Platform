@@ -14,7 +14,7 @@ from eeg_library.modelado.prediccion import leer_ficha
 
 from grabaciones import modelos
 from grabaciones.models import Grabacion, Lote
-from tests.auxiliar import FIXTURE, grabacion_con, sin_enlace_fatiga_aguda, variante
+from tests.auxiliar import FIXTURE, grabacion_con, variante
 from tests.conftest import USA_LA_WEB
 
 pytestmark = USA_LA_WEB
@@ -192,7 +192,7 @@ def test_las_cifras_de_la_escala_coinciden_con_la_ficha():
 def test_analisis_ya_no_lleva_el_bloque_de_modelos_pero_enlaza_a_su_pestana(client):
     g = procesada()
     html = pagina(client, reverse("grabaciones:analisis", args=[g.pk]))
-    assert 'id="modelos"' not in html and "fatiga" not in sin_enlace_fatiga_aguda(html).lower()
+    assert 'id="modelos"' not in html and "fatiga" not in html.lower()
     assert reverse("grabaciones:modelos_grabacion", args=[g.pk]) in html
 
 

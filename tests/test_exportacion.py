@@ -60,11 +60,11 @@ def test_columnas_estables():
         "logabs_AF3_delta", "logabs_AF3_theta", "logabs_AF3_alfa", "logabs_AF3_beta"]
     assert nombres[165:167] == ["version_eeg_library", "fecha_analisis"]
     # 8 + 9 + 4 + 4 zonas × 8 + 14 electrodos × 8 + 2, los modelos (4 + 4 + 7) y, al final,
-    # fatiga aguda (4 de la logística y 2 de EEGNet): añadirlas al final no movió ninguna columna.
+    # tiempo en tarea (4 de la logística y 2 de EEGNet): añadirlas al final no movió ninguna columna.
     assert len(nombres) == 8 + 9 + 4 + 4 * 8 + 14 * 8 + 2 + 15 + 6 == 188
-    assert nombres[182:] == ["fatiga_aguda_rho", "fatiga_aguda_p_primer_tercio",
-                             "fatiga_aguda_p_ultimo_tercio", "fatiga_aguda_final_mayor",
-                             "fatiga_aguda_eegnet_rho", "fatiga_aguda_eegnet_final_mayor"]
+    assert nombres[182:] == ["tiempo_en_tarea_rho", "tiempo_en_tarea_p_primer_tercio",
+                             "tiempo_en_tarea_p_ultimo_tercio", "tiempo_en_tarea_final_mayor",
+                             "tiempo_en_tarea_eegnet_rho", "tiempo_en_tarea_eegnet_final_mayor"]
     assert nombres[167:182] == [
         "c1_oa_oc_logistica_clase", "c1_oa_oc_logistica_p_OA", "c1_oa_oc_logistica_p_OC",
         "c1_oa_oc_logistica_condicion_estimada",
@@ -80,8 +80,7 @@ def test_nombres_validos_para_spss_y_sin_fatiga():
     assert len(set(nombres)) == len(nombres)
     for n in nombres:
         assert re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", n) and len(n) <= 64, n
-        # Solo las columnas de la pestaña Fatiga aguda llevan la palabra (decisión del autor).
-        assert ("fatiga" not in n.lower() or n.startswith("fatiga_aguda_")) and not n.startswith("indice_")
+        assert "fatiga" not in n.lower() and not n.startswith("indice_")
     assert all(c.descripcion and c.unidad and c.seccion for c in columnas())
 
 
@@ -211,11 +210,8 @@ def test_texto_que_excel_tomaria_por_formula(nombre):
 
 
 def test_sin_fatiga_en_el_csv():
-    """Fuera de los nombres de las columnas `fatiga_aguda_*`, el CSV no menciona la fatiga."""
-    cabecera, filas = csv_de([grabacion_con(FIXTURE)]).decode("utf-8").split("\r\n", 1)
-    assert "fatiga" not in filas.lower()
-    assert all(c.startswith("fatiga_aguda_") for c in cabecera.lstrip("\ufeff").split(";")
-               if "fatiga" in c.lower())
+    """El CSV no menciona la fatiga: ni en la cabecera ni en los valores."""
+    assert "fatiga" not in csv_de([grabacion_con(FIXTURE)]).decode("utf-8").lower()
 
 
 def test_formato_configurable(settings):

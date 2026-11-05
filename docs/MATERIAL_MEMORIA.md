@@ -113,12 +113,12 @@ clases, condiciones, parámetros válidos y limitaciones. Honestidad por diseño
 intervalo se ven siempre junto al resultado, y el aviso de que los modelos no miden fatiga
 encabeza el bloque. Un resumen aparte tabula las predicciones de todas las grabaciones.
 
-### Pantalla 5. Fatiga aguda (por grabación, solo PASAT y PVTB)
+### Pantalla 5. Tiempo en tarea (por grabación, solo PASAT y PVTB)
 
-![Pantalla Fatiga aguda](capturas/pantalla_5_fatiga_aguda.png)
+![Pantalla Tiempo en tarea](capturas/pantalla_5_tiempo_en_tarea.png)
 
-Cómo cambia el EEG a lo largo de la tarea según la regresión logística de la línea de fatiga
-aguda de EEG-Library, evaluada una vez en el test independiente: una frase con el veredicto de
+Cómo cambia el EEG a lo largo de la tarea según la regresión logística de la línea de tiempo en
+tarea de EEG-Library, evaluada una vez en el test independiente: una frase con el veredicto de
 la grabación (¿el último tercio se parece más al final de la tarea que el primero?) junto a la
 fiabilidad del modelo (acierto 0,735 en PASAT y 0,835 en PVTB, azar 0,5); cuatro mapas animados del
 cerebro, uno por banda, que muestran cuánto sube o baja la potencia de cada zona respecto al principio; una cinta de tiempo
@@ -127,7 +127,7 @@ neuronal EEGNet (exportada a ONNX), que en el test no se distingue de la logíst
 
 ### Navegación
 
-Calidad, Análisis, Modelos y Fatiga aguda son vistas de una grabación. Para que la barra de
+Calidad, Análisis, Modelos y Tiempo en tarea son vistas de una grabación. Para que la barra de
 navegación baste, las cuatro pestañas llevan a la **grabación activa** (la que se está viendo, la última abierta o la
 última procesada) y una barra con un selector y flechas de anterior y siguiente cambia de grabación
 sin salir de la pestaña.
@@ -147,7 +147,7 @@ sin salir de la pestaña.
 | Exportación a CSV | Columnas estables y documentadas, coincidencia valor a valor con el JSON, formato de Excel, protección contra fórmulas | 27 |
 | Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 15 |
 | Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 11 |
-| Fatiga aguda | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, EEGNet (su apartado de resultado, segunda cinta, grabaciones sin EEGNet), CSV y la excepción de la palabra «fatiga» | 25 |
+| Tiempo en tarea | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, EEGNet (su apartado de resultado, segunda cinta, grabaciones sin EEGNet), CSV y la excepción de la palabra «fatiga» | 25 |
 | **Total EEG-Platform** | | **291** |
 
 *(Recuento del 2026-11-01; algunas filas son de fases anteriores y no se han vuelto a contar una a
@@ -155,7 +155,7 @@ una.)*
 
 EEG-Library, la librería que usa, tiene **589 tests** automáticos (más 7 que necesitan el
 dataset real) y mantiene la paridad exacta de las 70 características con la matriz del estudio
-y la de los modelos de fatiga aguda con su análisis: logística (20 grabaciones, diferencia
+y la de los modelos de tiempo en tarea con su análisis: logística (20 grabaciones, diferencia
 máxima 1,4·10⁻¹⁴) y EEGNet (20 grabaciones, diferencia 0).
 
 Tipos de prueba: unitarias de funciones puras (por ejemplo, el resumen de calidad se prueba

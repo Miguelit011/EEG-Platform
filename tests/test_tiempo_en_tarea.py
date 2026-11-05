@@ -1,10 +1,10 @@
 """
-Pestaña «Fatiga aguda» (Fase 10): estados, datos de la pantalla, cifras del test, CSV y la
-excepción a la regla de no mencionar la fatiga.
+Pestaña «Tiempo en tarea» (Fase 10): estados, datos de la pantalla, cifras del test, CSV y la
+regla de no mencionar la fatiga (solo en el aviso que dice que no se mide).
 
 Usan el ejemplo PASAT de la librería (`tests/fixtures/analisis_grabacion_pasat.json`, una
 grabación de train con el bloque `por_ventana`), sin el dataset. La paridad de la librería con
-el análisis está en EEG-Library (`tests/datos/test_fatiga_aguda_datos.py`).
+el análisis está en EEG-Library (`tests/datos/test_tiempo_en_tarea_datos.py`).
 """
 
 import copy
@@ -17,19 +17,19 @@ from pathlib import Path
 import numpy as np
 import pytest
 from django.urls import reverse
-from eeg_library.modelado.fatiga_aguda import leer_ficha_fatiga_aguda, puntuar
+from eeg_library.modelado.tiempo_en_tarea import leer_ficha_tiempo_en_tarea, puntuar
 
 from grabaciones.exportacion import csv_de
-from grabaciones.fatiga_aguda import VENTANAS_SUAVIZADO, resumen_fatiga_aguda, suavizar
+from grabaciones.tiempo_en_tarea import VENTANAS_SUAVIZADO, resumen_tiempo_en_tarea, suavizar
 from grabaciones.models import Grabacion
-from tests.auxiliar import FIXTURE, grabacion_con, sin_enlace_fatiga_aguda
+from tests.auxiliar import FIXTURE, grabacion_con
 from tests.conftest import USA_LA_WEB
 
 pytestmark = USA_LA_WEB
 
 PASAT = json.loads((Path(__file__).parent / "fixtures" / "analisis_grabacion_pasat.json")
                    .read_text(encoding="utf-8"))
-RESULTADOS_TEST = (Path(__file__).resolve().parents[2] / "EEG-Library" / "analisis" / "fatiga_aguda"
+RESULTADOS_TEST = (Path(__file__).resolve().parents[2] / "EEG-Library" / "analisis" / "tiempo_en_tarea"
                    / "06_test" / "resultados_test.json")
 
 
@@ -42,7 +42,7 @@ def grabacion(resultado=PASAT, condicion="PASAT", estado="procesada"):
 
 
 def pagina(client, g):
-    return client.get(reverse("grabaciones:fatiga_aguda", args=[g.pk])).content.decode()
+    return client.get(reverse("grabaciones:tiempo_en_tarea", args=[g.pk])).content.decode()
 
 
 # ---------------------------------------------------------------------------
@@ -52,8 +52,8 @@ def pagina(client, g):
 @pytest.mark.parametrize("condicion", ["PASAT", "PVTB", "pasat"])
 def test_pasat_y_pvtb_muestran_la_pestana_completa(client, condicion):
     html = pagina(client, grabacion(condicion=condicion))
-    assert 'id="datos-fatiga"' in html and 'id="datos-visor"' in html
-    assert 'id="fa-cinta"' in html and 'id="fa-play"' in html
+    assert 'id="datos-tiempo-en-tarea"' in html and 'id="datos-visor"' in html
+    assert 'id="tt-cinta"' in html and 'id="tt-play"' in html
     # Cuatro mapas 2D (los rellena el JS) y ningún cerebro 3D ni botones de banda.
     assert 'id="mapas-2d"' in html and 'id="escena-3d"' not in html and 'id="pestanas-banda"' not in html
     assert "no el nivel de fatiga de la persona" in html          # el aviso fijo
@@ -62,14 +62,14 @@ def test_pasat_y_pvtb_muestran_la_pestana_completa(client, condicion):
 @pytest.mark.parametrize("condicion", ["OA", "STROOP", ""])
 def test_otras_condiciones_explican_a_que_se_aplica(client, condicion):
     html = pagina(client, grabacion(condicion=condicion))
-    assert 'id="datos-fatiga"' not in html
+    assert 'id="datos-tiempo-en-tarea"' not in html
     assert "solo existen para las tareas largas <strong>PASAT</strong> y <strong>PVTB</strong>" in html
     assert ("No se conoce la condición" in html) == (condicion == "")
 
 
 def test_sin_procesar(client):
     html = pagina(client, grabacion(resultado=None, estado="en_cola"))
-    assert "todavía no se ha procesado" in html and 'id="datos-fatiga"' not in html
+    assert "todavía no se ha procesado" in html and 'id="datos-tiempo-en-tarea"' not in html
 
 
 def test_procesada_antes_de_la_fase_ofrece_reprocesar(client):
@@ -86,18 +86,18 @@ def test_otros_parametros_no_disponible(client):
     r = copy.deepcopy(PASAT)
     r["parametros_aplicados"]["banda_hz"] = [3.0, 30.0]
     html = pagina(client, grabacion(resultado=r))
-    assert "solo es válido con los parámetros" in html and 'id="datos-fatiga"' not in html
+    assert "solo es válido con los parámetros" in html and 'id="datos-tiempo-en-tarea"' not in html
 
 
 def test_atajo_lleva_a_la_grabacion_activa(client):
     g = grabacion()
-    respuesta = client.get("/fatiga-aguda/")
+    respuesta = client.get("/tiempo-en-tarea/")
     assert respuesta.status_code == 302
-    assert respuesta.url == reverse("grabaciones:fatiga_aguda", args=[g.pk])
+    assert respuesta.url == reverse("grabaciones:tiempo_en_tarea", args=[g.pk])
 
 
 def test_atajo_sin_grabaciones(client):
-    html = client.get("/fatiga-aguda/").content.decode()
+    html = client.get("/tiempo-en-tarea/").content.decode()
     assert "cómo cambia el EEG a lo largo de una tarea PASAT o PVTB" in html
 
 
@@ -107,27 +107,27 @@ def test_atajo_sin_grabaciones(client):
 
 def test_veredicto_y_cifras_son_los_de_la_libreria_y_el_test():
     g = grabacion()
-    fa = resumen_fatiga_aguda(g)
+    tt = resumen_tiempo_en_tarea(g)
     p = puntuar(PASAT, "PASAT")
-    ficha = leer_ficha_fatiga_aguda("PASAT")
-    assert fa["estado"] == "ok" and fa["final_mayor"] is p["tercios"]["final_mayor"] is True
-    assert fa["veredicto"].startswith("El último tercio de esta grabación se parece más")
-    assert fa["rho"] == p["rho"]
-    assert fa["ficha"]["test"]["valor"] == f"{ficha['resultado_test']['valor']:.3f}".replace(".", ",")
-    assert fa["ficha"]["test"]["azar"] == "0,50"
-    assert fa["ficha"]["test"]["n_personas"] == 28
+    ficha = leer_ficha_tiempo_en_tarea("PASAT")
+    assert tt["estado"] == "ok" and tt["final_mayor"] is p["tercios"]["final_mayor"] is True
+    assert tt["veredicto"].startswith("El último tercio de esta grabación se parece más")
+    assert tt["rho"] == p["rho"]
+    assert tt["ficha"]["test"]["valor"] == f"{ficha['resultado_test']['valor']:.3f}".replace(".", ",")
+    assert tt["ficha"]["test"]["azar"] == "0,50"
+    assert tt["ficha"]["test"]["n_personas"] == 28
 
 
 @pytest.mark.skipif(not RESULTADOS_TEST.is_file(), reason="no está EEG-Library al lado")
 def test_la_ficha_de_la_pantalla_coincide_con_resultados_test():
     resultados = json.loads(RESULTADOS_TEST.read_text(encoding="utf-8"))
     for condicion, grabaciones in (("PASAT", 102), ("PVTB", 103)):
-        fa = resumen_fatiga_aguda(grabacion(condicion=condicion))
+        tt = resumen_tiempo_en_tarea(grabacion(condicion=condicion))
         t = resultados["descriptivos"][f"completa | {condicion} | tercios_pareado"]
         lo, hi = t["ic95"]
-        assert fa["ficha"]["test"]["valor"] == f"{t['valor']:.3f}".replace(".", ",")
-        assert fa["ficha"]["test"]["ic"] == f"{lo:.3f}–{hi:.3f}".replace(".", ",")
-        assert fa["ficha"]["test"]["n_grabaciones"] == grabaciones
+        assert tt["ficha"]["test"]["valor"] == f"{t['valor']:.3f}".replace(".", ",")
+        assert tt["ficha"]["test"]["ic"] == f"{lo:.3f}–{hi:.3f}".replace(".", ",")
+        assert tt["ficha"]["test"]["n_grabaciones"] == grabaciones
 
 
 def test_suavizado_es_media_movil_centrada():
@@ -140,8 +140,8 @@ def test_suavizado_es_media_movil_centrada():
 
 
 def test_datos_de_la_animacion():
-    fa = resumen_fatiga_aguda(grabacion())
-    datos, visor = fa["fatiga"], fa["visor"]
+    tt = resumen_tiempo_en_tarea(grabacion())
+    datos, visor = tt["serie"], tt["visor"]
     n = PASAT["metadatos"]["n_epocas"]
     assert len(datos["instante_s"]) == len(datos["puntuacion"]) == n
     assert max(abs(x) for x in datos["puntuacion"]) == pytest.approx(1.0)   # normalizada para la cinta
@@ -159,10 +159,10 @@ def test_datos_de_la_animacion():
 
 
 def test_el_cambio_parte_de_cero_en_el_primer_tercio():
-    fa = resumen_fatiga_aguda(grabacion())
-    instantes = np.array(fa["fatiga"]["instante_s"])
+    tt = resumen_tiempo_en_tarea(grabacion())
+    instantes = np.array(tt["serie"]["instante_s"])
     primero = instantes <= instantes[-1] / 3
-    for por_canal in fa["fatiga"]["cambios"].values():
+    for por_canal in tt["serie"]["cambios"].values():
         for serie in por_canal.values():
             assert abs(np.mean(np.array(serie)[primero])) < 0.01
 
@@ -175,22 +175,28 @@ def test_csv_lleva_los_valores_de_la_libreria():
     g, otra = grabacion(), grabacion(condicion="OA")
     filas = list(csv.DictReader(io.StringIO(csv_de([g, otra]).decode("utf-8-sig")), delimiter=";"))
     p = puntuar(PASAT, "PASAT")
-    assert float(filas[0]["fatiga_aguda_rho"].replace(",", ".")) == pytest.approx(p["rho"], abs=1e-6)
-    assert float(filas[0]["fatiga_aguda_p_ultimo_tercio"].replace(",", ".")) == pytest.approx(
+    assert float(filas[0]["tiempo_en_tarea_rho"].replace(",", ".")) == pytest.approx(p["rho"], abs=1e-6)
+    assert float(filas[0]["tiempo_en_tarea_p_ultimo_tercio"].replace(",", ".")) == pytest.approx(
         p["tercios"]["p_ultimo"], abs=1e-6)
-    assert filas[0]["fatiga_aguda_final_mayor"] == "1"
-    assert all(filas[1][c] == "" for c in filas[1] if c.startswith("fatiga_aguda_"))
+    assert filas[0]["tiempo_en_tarea_final_mayor"] == "1"
+    assert all(filas[1][c] == "" for c in filas[1] if c.startswith("tiempo_en_tarea_"))
 
 
 # ---------------------------------------------------------------------------
-# La palabra «fatiga»: en la barra y en esta pestaña, en ningún otro sitio nuevo
+# La palabra «fatiga»: solo en el aviso de esta pestaña, que dice que no se mide
 # ---------------------------------------------------------------------------
 
-def test_enlace_en_la_barra_y_unica_excepcion(client):
+def test_enlace_en_la_barra_sin_fatiga(client):
     g = grabacion()
     lista = client.get("/grabaciones/").content.decode()
-    assert reverse("grabaciones:fatiga_aguda", args=[g.pk]) in lista
-    assert "fatiga" not in sin_enlace_fatiga_aguda(lista).lower()
+    assert reverse("grabaciones:tiempo_en_tarea", args=[g.pk]) in lista
+    assert "fatiga" not in lista.lower()
+
+
+@pytest.mark.parametrize("condicion", ["PASAT", "PVTB", "OA"])
+def test_la_fatiga_solo_aparece_para_decir_que_no_se_mide(client, condicion):
+    html = pagina(client, grabacion(condicion=condicion)).lower()
+    assert "fatiga" not in html.replace("no el nivel de fatiga de la persona", "")
 
 
 def test_sin_recursos_externos(client):
@@ -200,12 +206,12 @@ def test_sin_recursos_externos(client):
 
 def test_pagina_marca_la_pestana_activa(client):
     html = pagina(client, grabacion())
-    assert re.search(r'aria-current="page"\s*>Fatiga aguda</a>', html)
+    assert re.search(r'aria-current="page"\s*>Tiempo en tarea</a>', html)
 
 
 def test_los_estados_no_dependen_de_un_objeto_raro():
     g = Grabacion(estado="procesada", condicion="PVTB", resultado=None)
-    assert resumen_fatiga_aguda(g) == {"estado": "sin_procesar"}
+    assert resumen_tiempo_en_tarea(g) == {"estado": "sin_procesar"}
 
 
 # ---------------------------------------------------------------------------
@@ -219,18 +225,18 @@ def sin_eegnet():
 
 
 def test_eegnet_apartado_propio_y_segunda_cinta(client):
-    from eeg_library.modelado.fatiga_aguda_eegnet import puntuar_eegnet
-    fa = resumen_fatiga_aguda(grabacion())
+    from eeg_library.modelado.tiempo_en_tarea_eegnet import puntuar_eegnet
+    tt = resumen_tiempo_en_tarea(grabacion())
     e = puntuar_eegnet(PASAT, "PASAT")
-    assert fa["eegnet"]["disponible"] and e["tercios"]["final_mayor"] is fa["eegnet"]["final_mayor"] is True
-    assert fa["eegnet"]["veredicto"] == fa["veredicto"]          # misma frase cuando coinciden
-    assert fa["eegnet"]["test"]["valor"] == "0,737" and fa["eegnet"]["test"]["ic"] == "0,683–0,787"
-    serie = fa["fatiga"]["puntuacion_eegnet"]
-    assert len(serie) == len(fa["fatiga"]["puntuacion"]) and max(abs(x) for x in serie) == pytest.approx(1.0)
+    assert tt["eegnet"]["disponible"] and e["tercios"]["final_mayor"] is tt["eegnet"]["final_mayor"] is True
+    assert tt["eegnet"]["veredicto"] == tt["veredicto"]          # misma frase cuando coinciden
+    assert tt["eegnet"]["test"]["valor"] == "0,737" and tt["eegnet"]["test"]["ic"] == "0,683–0,787"
+    serie = tt["serie"]["puntuacion_eegnet"]
+    assert len(serie) == len(tt["serie"]["puntuacion"]) and max(abs(x) for x in serie) == pytest.approx(1.0)
     html = pagina(client, grabacion())
-    assert html.count('class="fa-apartado"') == 2 and html.count('class="fa-fiabilidad"') == 2
-    assert html.count('class="fa-pista"') == 2 and "Red neuronal (EEGNet)" in html
-    assert html.count(fa["veredicto"]) == 2
+    assert html.count('class="tt-apartado"') == 2 and html.count('class="tt-fiabilidad"') == 2
+    assert html.count('class="tt-pista"') == 2 and "Red neuronal (EEGNet)" in html
+    assert html.count(tt["veredicto"]) == 2
     assert "PASAT y PVTB juntas" in html                         # su cifra del test no es por tarea
     assert "no se distinguen" in html                            # comparación con la logística, en Detalles
     # La métrica de los dos apartados, con nombre legible y no el técnico de la ficha.
@@ -241,27 +247,27 @@ def test_eegnet_apartado_propio_y_segunda_cinta(client):
 def test_eegnet_conclusion_contraria():
     r = copy.deepcopy(PASAT)
     r["por_ventana"]["eegnet"] = [-x for x in r["por_ventana"]["eegnet"]]   # invierte la tendencia
-    fa = resumen_fatiga_aguda(grabacion(resultado=r))
-    assert fa["final_mayor"] is True and fa["eegnet"]["final_mayor"] is False
-    assert fa["eegnet"]["veredicto"].startswith("En esta grabación no se aprecia el cambio")
+    tt = resumen_tiempo_en_tarea(grabacion(resultado=r))
+    assert tt["final_mayor"] is True and tt["eegnet"]["final_mayor"] is False
+    assert tt["eegnet"]["veredicto"].startswith("En esta grabación no se aprecia el cambio")
 
 
 def test_sin_eegnet_la_pestana_sigue_con_la_logistica(client):
     g = grabacion(resultado=sin_eegnet())
-    fa = resumen_fatiga_aguda(g)
-    assert fa["estado"] == "ok" and not fa["eegnet"]["disponible"]
-    assert fa["fatiga"]["puntuacion_eegnet"] is None
+    tt = resumen_tiempo_en_tarea(g)
+    assert tt["estado"] == "ok" and not tt["eegnet"]["disponible"]
+    assert tt["serie"]["puntuacion_eegnet"] is None
     html = pagina(client, g)
-    assert html.count('class="fa-pista"') == 1 and html.count('class="fa-fiabilidad"') == 1
-    assert html.count('class="fa-apartado"') == 2                # el apartado está, con el aviso
+    assert html.count('class="tt-pista"') == 1 and html.count('class="tt-fiabilidad"') == 1
+    assert html.count('class="tt-apartado"') == 2                # el apartado está, con el aviso
     assert "no está disponible para esta grabación" in html and "volver a procesarla" in html
 
 
 def test_csv_eegnet():
-    from eeg_library.modelado.fatiga_aguda_eegnet import puntuar_eegnet
+    from eeg_library.modelado.tiempo_en_tarea_eegnet import puntuar_eegnet
     g, vieja = grabacion(), grabacion(resultado=sin_eegnet())
     filas = list(csv.DictReader(io.StringIO(csv_de([g, vieja]).decode("utf-8-sig")), delimiter=";"))
     e = puntuar_eegnet(PASAT, "PASAT")
-    assert float(filas[0]["fatiga_aguda_eegnet_rho"].replace(",", ".")) == pytest.approx(e["rho"], abs=1e-6)
-    assert filas[0]["fatiga_aguda_eegnet_final_mayor"] == "1"
-    assert filas[1]["fatiga_aguda_eegnet_rho"] == "" and filas[1]["fatiga_aguda_rho"] != ""
+    assert float(filas[0]["tiempo_en_tarea_eegnet_rho"].replace(",", ".")) == pytest.approx(e["rho"], abs=1e-6)
+    assert filas[0]["tiempo_en_tarea_eegnet_final_mayor"] == "1"
+    assert filas[1]["tiempo_en_tarea_eegnet_rho"] == "" and filas[1]["tiempo_en_tarea_rho"] != ""
