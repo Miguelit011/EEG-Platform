@@ -101,6 +101,15 @@ def test_atajo_sin_grabaciones(client):
     assert "cómo cambia el EEG a lo largo de una tarea PASAT o PVTB" in html
 
 
+def test_las_direcciones_antiguas_redirigen(client):
+    g = grabacion()
+    atajo = client.get("/fatiga-aguda/")
+    assert atajo.status_code == 301 and atajo.url == reverse("grabaciones:atajo_tiempo_en_tarea")
+    pestana = client.get(f"/grabaciones/{g.pk}/fatiga-aguda/")
+    assert pestana.status_code == 301
+    assert pestana.url == reverse("grabaciones:tiempo_en_tarea", args=[g.pk])
+
+
 # ---------------------------------------------------------------------------
 # Datos de la pantalla
 # ---------------------------------------------------------------------------

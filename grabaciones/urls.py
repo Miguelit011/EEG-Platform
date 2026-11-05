@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from grabaciones import views
 
@@ -25,4 +26,9 @@ urlpatterns = [
     path("lotes/<int:pk>/eliminar/", views.eliminar_lote, name="eliminar_lote"),
     path("grabaciones/<int:pk>/encolar/", views.encolar, name="encolar"),
     path("lotes/<int:pk>/reintentar/", views.reintentar_lote, name="reintentar_lote"),
+    # Direcciones antiguas (antes del 2026-11-05 la pestaña se llamaba de otra forma).
+    path("fatiga-aguda/", RedirectView.as_view(pattern_name="grabaciones:atajo_tiempo_en_tarea",
+                                               permanent=True)),
+    path("grabaciones/<int:pk>/fatiga-aguda/", RedirectView.as_view(
+        pattern_name="grabaciones:tiempo_en_tarea", permanent=True)),
 ]
