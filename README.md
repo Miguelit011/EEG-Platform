@@ -2,10 +2,12 @@
 
 Aplicación web, de uso **local** en Windows, para que investigadores de Ciencias del Deporte
 procesen grabaciones EEG del casco **Emotiv EPOC X** (EDF, 14 canales) sin programar. Usa la
-librería [EEG-Library](../EEG-Library) para todo el cálculo; la web sube, guarda y muestra.
+librería [EEG-Library](https://github.com/Miguelit011/EEG-Library) para todo el cálculo; la web sube, guarda y muestra.
 
 Forma parte del Trabajo Fin de Grado de Miguel Ángel (Grado en Ingeniería Informática,
 Ingeniería del Software, UEx).
+
+![Pantalla de análisis espectral de una grabación](docs/capturas/pantalla_3_analisis.png)
 
 Qué hace:
 
@@ -14,14 +16,16 @@ Qué hace:
 3. Calidad de la señal por grabación: mapa de electrodos sobre el cerebro y motivo de cada descarte.
 4. Análisis espectral por grabación: potencia por banda y por zona, con una cabeza y un cerebro en 3D y cuatro mapas por banda (el color entre sensores es una interpolación orientativa, no localiza fuentes).
 5. Una pestaña **Modelos** con lo que predicen los modelos de IA enchufables (hoy, c1, c2 y c3 del estudio) para cada grabación, junto a su resultado en el test independiente, con el intervalo y el nivel de azar, y un resumen de todas las grabaciones.
+6. Una pestaña **Tiempo en tarea**, solo para PASAT y PVTB: cómo cambia el EEG a lo largo de la tarea según la regresión logística y la red EEGNet, con su veredicto en test y cuatro mapas del cerebro animados.
+7. Descargar los resultados en CSV (una grabación o el lote completo).
 
-Calidad, Análisis y Modelos son vistas de una misma grabación: la barra de navegación recuerda la última que abriste y un selector con flechas permite cambiar de grabación sin salir de la pestaña.
-6. Descargar los resultados en CSV (una grabación o el lote completo).
+Calidad, Análisis, Modelos y Tiempo en tarea son cuatro vistas de una misma grabación: la barra de navegación recuerda la última que abriste y un selector con flechas permite cambiar de grabación sin salir de la pestaña.
 
 > **No detecta ni mide fatiga.** Los modelos clasifican la condición de la grabación (por
 > ejemplo, reposo o tarea) y los resultados del TFG muestran que el EEG no predice la fatiga
-> percibida. Los resultados de los modelos se acompañan siempre de su acierto en un test
-> independiente y de sus limitaciones.
+> percibida. La pestaña Tiempo en tarea mide cómo cambia el EEG con el tiempo en la tarea, no
+> el nivel de fatiga de la persona. Los resultados de los modelos se acompañan siempre de su
+> acierto en un test independiente y de sus limitaciones.
 
 ## Antes de empezar
 
@@ -115,3 +119,7 @@ Nunca se suben a git ni a servicios externos, y la web no usa recursos de intern
 | [`docs/MATERIAL_MEMORIA.md`](docs/MATERIAL_MEMORIA.md) | Arquitectura, casos de uso, tests y capturas para la memoria |
 | [`docs/PRUEBA_LOTE_REAL.md`](docs/PRUEBA_LOTE_REAL.md) | Prueba completa con un lote de EDF reales |
 | [`PLAN.md`](PLAN.md) | Plan de desarrollo por fases |
+
+## Licencia
+
+MIT. Ver [`LICENSE`](LICENSE). Los recursos de terceros de `static/` (Chart.js, Three.js, fuentes IBM Plex y mallas de cabeza y cerebro) conservan su propia licencia, que acompaña a cada uno.
