@@ -19,3 +19,7 @@ __pycache__/
 archivos/
 datos/
 EEG-Platform-datos/
+
+# Archivos locales de la herramienta de diseño (impeccable)
+.impeccable/
+PRODUCT.md
