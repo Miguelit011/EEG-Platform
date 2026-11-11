@@ -145,17 +145,17 @@ Aceptación:
 - Los electrodos descartados aparecen marcados y no se colorean.
 - Hay leyenda con la escala.
 
-## Fase 6 — Exportación CSV — **hecha** (2026-10-16; pendiente: que Rosa/Ana lo confirmen en SPSS)
+## Fase 6 — Exportación CSV — **hecha** (2026-10-16)
 **Objetivo:** que los investigadores puedan hacer sus análisis en Excel o SPSS.
 
 Incluye:
 - CSV de una grabación y CSV del lote, ambos con una fila por grabación.
 - Columnas: archivo, condición, duración, electrodos descartados, potencia por electrodo × banda, potencia por zona × banda y, cuando existan, las predicciones de los modelos.
 - Ninguna columna lleva «fatiga» en el nombre. Las columnas internas `indice_fatiga_*` del modelo no se exportan con ese nombre.
-- Separador, decimal y codificación pensados para Excel en español. **Confirmar con Rosa/Ana antes de cerrar.**
+- Separador, decimal y codificación pensados para Excel en español.
 
 Aceptación:
-- El CSV se abre bien en Excel y en SPSS.
+- El CSV se abre bien en Excel.
 - Los nombres de columna son estables y están documentados.
 
 ## Fase 7 — Modelos enchufables — **hecha** (2026-10-16)
@@ -299,16 +299,3 @@ Orden de trabajo (con parada del usuario en los pasos 1 y 2):
 1. Plan detallado. **Parar.**
 2. Exportación y las dos paridades. **Parar** con las cifras. Si no salen, se documenta y se cierra la fase aquí.
 3. Integración en la pestaña, CSV, documentación, tests y propuesta de mensaje de commit.
-
----
-
-## Prompts
-
-**Fase 0** (desde la carpeta TFG, Opus, modo plan):
-> Lee EEG-Platform/CLAUDE.md, EEG-Platform/PLAN.md y EEG-Library/CLAUDE.md. Fase 0 de PLAN.md, en EEG-Library, con lo que recoge «Modelos: lo que ya sabemos». Antes de nada, comprueba que el entorno funciona (tests de EEG-Library, lectura de matriz_rf.parquet y carga de los .joblib). Propón un plan y espera mi confirmación.
-
-**Fases 1–8:**
-> Fase N de PLAN.md. Propón un plan y espera mi confirmación.
-
-**Al terminar cada fase:**
-> Comprueba los criterios de aceptación de la Fase N uno por uno, marca la fase en PLAN.md y actualiza EEG-Platform/docs/DECISIONES.md.

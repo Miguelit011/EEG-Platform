@@ -200,8 +200,6 @@ la defensa:
 ## 7. Limitaciones y trabajo futuro
 
 - Uso local en un solo equipo y Windows; sin cuentas de usuario, ni varias personas a la vez.
-- El formato CSV se ha comprobado con Excel; **falta que Rosa o Ana lo abran en SPSS** (la importación
-  depende de la configuración regional del equipo).
 - Los modelos solo se aplican con los parámetros de procesado de su entrenamiento, y el acierto de
   c3 (0,49 frente a un azar de 0,20) es modesto.
 - Un modelo nuevo debe usar las 70 características ya calculadas; con otras habría que ampliar la
