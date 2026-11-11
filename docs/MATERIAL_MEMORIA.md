@@ -145,13 +145,13 @@ sin salir de la pestaña.
 | Geometría del visor | Posición de los electrodos sobre la cabeza y el cerebro reales, coherente con el montaje de la librería; mallas y licencias | 4 |
 | Modelos enchufables | Qué modelos se muestran (condición conocida o estimada), parámetros distintos, cifras iguales a `resultados.json`, modelo de prueba que se añade con una línea, modelo roto | 34 |
 | Exportación a CSV | Columnas estables y documentadas, coincidencia valor a valor con el JSON, formato de Excel, protección contra fórmulas | 27 |
-| Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 15 |
-| Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 11 |
-| Tiempo en tarea | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, EEGNet (su apartado de resultado, segunda cinta, grabaciones sin EEGNet), CSV y la excepción de la palabra «fatiga» | 25 |
-| **Total EEG-Platform** | | **291** |
+| Eliminar grabaciones y lotes | Se borran el registro y la copia, nunca el EDF original; no se elimina lo que se está procesando; solo se borra con confirmación | 18 |
+| Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 18 |
+| Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 12 |
+| Tiempo en tarea | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, EEGNet (su apartado de resultado, segunda cinta, grabaciones sin EEGNet), CSV, las direcciones antiguas redirigen y «fatiga» solo aparece para decir que no se mide | 29 |
+| **Total EEG-Platform** | | **295** |
 
-*(Recuento del 2026-11-01; algunas filas son de fases anteriores y no se han vuelto a contar una a
-una.)*
+*(Recuento del 2026-11-12, archivo por archivo.)*
 
 EEG-Library, la librería que usa, tiene **589 tests** automáticos (más 7 que necesitan el
 dataset real) y mantiene la paridad exacta de las 70 características con la matriz del estudio
@@ -166,8 +166,10 @@ Además, la prueba completa con 100 EDF reales (`PRUEBA_LOTE_REAL.md`): **99 de 
 a unos **62 EDF por minuto** con 4 procesos, el único error aislado y explicado, el CSV abierto
 con Excel y las 198 pantallas sin fallo. Y la comprobación del criterio de aceptación: **desde una copia limpia** (sin `.venv`, sin `.env` y
 sin datos) y siguiendo el README, `instalar.bat` deja la plataforma lista en menos de un minuto,
-los 215 tests pasan, `iniciar.bat` arranca la web y el procesador, y la subida de EDF reales por
-HTTP, el procesado y la descarga del CSV funcionan.
+los 215 tests de entonces pasan, `iniciar.bat` arranca la web y el procesador, y la subida de EDF
+reales por HTTP, el procesado y la descarga del CSV funcionan. El 2026-11-11 se repitió la parte de
+los tests desde un `git clone` limpio (sin `.env` y con la carpeta de datos vacía): pasan los 295
+actuales. Esa segunda vez no se ejecutaron `instalar.bat` ni `iniciar.bat`.
 
 Recuento actualizado: `.venv\Scripts\python.exe -m pytest --collect-only -q`.
 
