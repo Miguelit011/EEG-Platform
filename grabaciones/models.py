@@ -1,3 +1,14 @@
+"""
+Modelo de datos: lotes, grabaciones y la señal de vida del procesador.
+
+- `Lote`: grabaciones subidas a la vez, con sus parámetros de procesado. Las opciones salen
+  de la librería (`eeg_library.procesado.parametros`); aquí solo se les pone etiqueta.
+- `Grabacion`: un EDF, su estado en la cola, su condición (metadato opcional) y el JSON que
+  devuelve `analizar_grabacion`, del que leen todas las pantallas y el CSV.
+- `Procesador`: una sola fila que `manage.py procesar` renueva cada pocos segundos, para que
+  la web avise si hay cola y nadie la procesa.
+"""
+
 from django.db import models
 
 from eeg_library.preprocesado.reader import TARGET_SFREQ
@@ -132,10 +143,12 @@ class Grabacion(models.Model):
 
     @property
     def reprocesable(self):
+        """Ya procesada: se puede volver a procesar (conserva el resultado hasta el nuevo)."""
         return self.estado == self.Estado.PROCESADA
 
     @property
     def duracion_texto(self):
+        """«2 min 07 s», o «—» si no se conoce la duración."""
         if self.duracion_s is None:
             return "—"
         minutos, segundos = divmod(round(self.duracion_s), 60)
@@ -150,6 +163,7 @@ class Grabacion(models.Model):
 
     @property
     def frecuencia_texto(self):
+        """Frecuencia de muestreo original y, si se remuestreó, a cuánto; «—» si no se conoce."""
         if self.sfreq_original_hz is None:
             return "—"
         if self.remuestreada:

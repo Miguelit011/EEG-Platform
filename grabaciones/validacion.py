@@ -30,6 +30,8 @@ class ErrorDeValidacion(Exception):
 
 @dataclass(frozen=True)
 class InfoEdf:
+    """Datos básicos de un EDF válido, leídos de su cabecera."""
+
     duracion_s: float
     sfreq_original_hz: float
     remuestreada: bool

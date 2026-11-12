@@ -156,9 +156,14 @@ CSV_CODIFICACION = "utf-8-sig"
 # libre (ver grabaciones/recursos.py), porque la plataforma se usará en
 # portátiles distintos. Con resultados idénticos, medido con 12 EDF reales:
 # 1 proceso → 37 s, 2 → 21 s, 4 → 14,5 s, 6 → 12,7 s.
-PROCESOS = int(os.environ.get("EEG_PLATFORM_PROCESOS") or 0) or None
+try:
+    PROCESOS = int(os.environ.get("EEG_PLATFORM_PROCESOS") or 0) or None
+except ValueError:
+    PROCESOS = -1   # no es un número: mismo aviso que un valor fuera de rango
 if PROCESOS is not None and PROCESOS < 1:
-    raise ImproperlyConfigured("EEG_PLATFORM_PROCESOS debe ser al menos 1.")
+    raise ImproperlyConfigured(
+        "EEG_PLATFORM_PROCESOS debe ser un número entero, al menos 1 "
+        f"(ahora vale «{os.environ.get('EEG_PLATFORM_PROCESOS')}»).")
 
 # Si el procesador no da señales en estos segundos, la lista avisa de que está parado.
 PROCESADOR_LATIDO_CADUCA_S = 15

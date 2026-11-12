@@ -122,10 +122,19 @@ def test_la_guia_dice_que_no_mide_fatiga():
 # Privacidad: nada de participantes en el repositorio
 # ---------------------------------------------------------------------------
 
-def test_las_capturas_se_generan_solo_con_datos_anonimos():
+def test_las_capturas_y_los_tests_usan_los_ejemplos_anonimos_de_la_libreria():
     script = texto("docs/generar_capturas.py")
     assert "EEG-Data" not in script and "EEG_DATA" not in script
     assert "tests.auxiliar" in script and "FIXTURE" in script
+    # Los JSON de `tests/fixtures/` son copias de los ejemplos anónimos de EEG-Library: si la
+    # librería está al lado (como pide el README), tienen que seguir siendo idénticos.
+    ejemplos = RAIZ.parent / "EEG-Library" / "docs" / "ejemplos"
+    for nombre in ("analisis_grabacion.json", "analisis_grabacion_pasat.json"):
+        copia = RAIZ / "tests" / "fixtures" / nombre
+        assert copia.is_file(), nombre
+        if (ejemplos / nombre).is_file():
+            assert copia.read_bytes() == (ejemplos / nombre).read_bytes(), \
+                f"tests/fixtures/{nombre} ya no es igual al ejemplo de EEG-Library"
 
 
 def test_ningun_codigo_de_participante_real_en_el_repositorio():

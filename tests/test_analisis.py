@@ -15,8 +15,7 @@ from eeg_library.procesado.matrix import REGIONES
 from grabaciones.analisis_espectral import (
     ESCALA, color_de_escala, color_de_texto, resumen_analisis)
 from grabaciones.models import Grabacion
-from tests.auxiliar import (FIXTURE, grabacion_con, mapa, mapas, sin_bloque_de_modelos,
-                            variante)
+from tests.auxiliar import FIXTURE, grabacion_con, mapas, sin_bloque_de_modelos, variante
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
 

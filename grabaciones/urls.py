@@ -1,3 +1,10 @@
+"""
+Direcciones de la plataforma.
+
+Cada grabación tiene cuatro vistas (calidad, análisis, modelos y tiempo en tarea) y cada una,
+además, un atajo sin número (`/calidad/`, …) que abre la grabación activa.
+"""
+
 from django.urls import path
 from django.views.generic import RedirectView
 

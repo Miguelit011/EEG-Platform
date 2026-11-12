@@ -1,3 +1,13 @@
+"""
+Vistas de la plataforma: la lista con la subida, las cuatro pantallas de cada grabación
+(calidad, análisis, modelos y tiempo en tarea), el resumen de modelos, la descarga en CSV y
+las acciones sobre grabaciones y lotes (condición, reintentar, eliminar).
+
+Las vistas no calculan nada: leen el JSON que guardó el procesador y lo preparan para la
+plantilla con los módulos de `grabaciones` (`calidad`, `analisis_espectral`, `modelos`,
+`tiempo_en_tarea`, `exportacion`). Las acciones que cambian datos solo aceptan POST.
+"""
+
 from django.contrib import messages
 from django.db.models import Prefetch
 from django.http import HttpResponse
@@ -5,16 +15,20 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+from eeg_library.procesado.matrix import ORDEN_PROTOCOLO
+
 from grabaciones import contexto, modelos
 from grabaciones.analisis_espectral import resumen_analisis
 from grabaciones.calidad import resumen_calidad
-from grabaciones.tiempo_en_tarea import AVISO_FIJO as AVISO_TIEMPO_EN_TAREA, resumen_tiempo_en_tarea
 from grabaciones.eliminacion import eliminar_grabaciones, procesandose
 from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
 from grabaciones.models import Grabacion, Lote, Procesador
 from grabaciones.subida import LoteForm, guardar_lote
+from grabaciones.tiempo_en_tarea import AVISO_FIJO as AVISO_TIEMPO_EN_TAREA, resumen_tiempo_en_tarea
 
-CONDICIONES_SUGERIDAS = ["OA", "OC", "STROOP", "PASAT", "PVTB", "MSIT", "PVSAT"]
+# Las condiciones del estudio, en el orden del protocolo, como sugerencias al editar la
+# condición de una grabación. Se puede escribir cualquier otra.
+CONDICIONES_SUGERIDAS = list(ORDEN_PROTOCOLO)
 
 
 def _contexto_lista():
@@ -54,7 +68,7 @@ def lista_parcial(request):
 def calidad(request, pk):
     """Pantalla 2: calidad de la señal de una grabación, a partir de su JSON guardado."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
-    resumen = resumen_calidad(grabacion.resultado) if grabacion.estado == "procesada" else None
+    resumen = resumen_calidad(grabacion.resultado) if grabacion.estado == Grabacion.Estado.PROCESADA else None
     return contexto.recordar(render(request, "grabaciones/calidad.html", {
         "pantalla": "calidad", "grabacion": grabacion, "resumen": resumen,
     }), grabacion)
@@ -63,7 +77,7 @@ def calidad(request, pk):
 def analisis(request, pk):
     """Pantalla 3: análisis espectral de una grabación, a partir de su JSON guardado."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
-    resumen = resumen_analisis(grabacion.resultado) if grabacion.estado == "procesada" else None
+    resumen = resumen_analisis(grabacion.resultado) if grabacion.estado == Grabacion.Estado.PROCESADA else None
     return contexto.recordar(render(request, "grabaciones/analisis.html", {
         "pantalla": "analisis", "grabacion": grabacion, "resumen": resumen,
     }), grabacion)
@@ -72,7 +86,7 @@ def analisis(request, pk):
 def modelos_grabacion(request, pk):
     """Pantalla 4: lo que predice cada modelo para una grabación, con su resultado en el test."""
     grabacion = get_object_or_404(Grabacion.objects.select_related("lote"), pk=pk)
-    procesada = grabacion.estado == "procesada"
+    procesada = grabacion.estado == Grabacion.Estado.PROCESADA
     aplicados = (modelos.aplicar(grabacion.resultado, grabacion.condicion)
                  if procesada and (grabacion.resultado or {}).get("caracteristicas") else None)
     return contexto.recordar(render(request, "grabaciones/modelos_grabacion.html", {

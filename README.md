@@ -118,6 +118,7 @@ Nunca se suben a git ni a servicios externos, y la web no usa recursos de intern
 | [`docs/DECISIONES.md`](docs/DECISIONES.md) | Decisiones de diseño y su porqué |
 | [`docs/MATERIAL_MEMORIA.md`](docs/MATERIAL_MEMORIA.md) | Arquitectura, casos de uso, tests y capturas para la memoria |
 | [`docs/PRUEBA_LOTE_REAL.md`](docs/PRUEBA_LOTE_REAL.md) | Prueba completa con un lote de EDF reales |
+| [`docs/diseno/`](docs/diseno/) | Críticas de diseño de la interfaz (registro de la Fase 9, generadas con una herramienta de revisión) |
 | [`PLAN.md`](PLAN.md) | Plan de desarrollo por fases |
 
 ## Licencia
