@@ -21,7 +21,7 @@ PERIODO_LATIDO_S = 2.0
 
 
 class ProcesadorYaEnMarcha(Exception):
-    pass
+    """Otro procesador ha dado señales hace poco: no se arrancan dos a la vez."""
 
 
 def recuperar_interrumpidas():
@@ -31,16 +31,19 @@ def recuperar_interrumpidas():
 
 
 def dar_senal(procesos):
+    """Registra (o renueva) el latido de este procesador y cuántos procesos usa."""
     Procesador.objects.update_or_create(
         pk=1, defaults={"pid": os.getpid(), "procesos": procesos,
                         "ultimo_latido": timezone.now()})
 
 
 def quitar_senal():
+    """Borra el latido al terminar, solo si es el de este proceso."""
     Procesador.objects.filter(pk=1, pid=os.getpid()).delete()
 
 
 def comprobar_que_no_hay_otro():
+    """Lanza `ProcesadorYaEnMarcha` si otro proceso ha dado señales hace poco."""
     otro = Procesador.activo()
     if otro is not None and otro.pid != os.getpid():
         raise ProcesadorYaEnMarcha(

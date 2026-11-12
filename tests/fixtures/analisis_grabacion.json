@@ -24,13 +24,13 @@
     "n_canales_buenos": 12,
     "n_epocas": 62,
     "versiones": {
-      "eeg_library": "0.16.0",
+      "eeg_library": "0.17.0",
       "python": "3.10.11",
       "mne": "1.12.1",
       "scikit_learn": "1.7.2",
       "numpy": "2.2.6"
     },
-    "fecha_analisis": "2026-11-01T21:52:47"
+    "fecha_analisis": "2026-11-05T01:17:16"
   },
   "parametros_aplicados": {
     "referencia": "car_condicional",

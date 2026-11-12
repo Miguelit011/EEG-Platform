@@ -9,8 +9,8 @@
 Django>=5.2,<5.3
 
 # Tests
-pytest
-pytest-django
+pytest==9.1.1
+pytest-django==4.14.0
 # Escritura de EDF sintéticos en los tests (como en EEG-Library).
 edfio==0.4.18
 

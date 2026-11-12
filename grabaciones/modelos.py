@@ -36,6 +36,7 @@ _cache = {}   # (ficha, firma de los archivos) -> Modelo ya cargado
 
 
 def limpiar_cache():
+    """Olvida los modelos ya cargados (los tests la usan para cambiar `settings.MODELOS`)."""
     _cache.clear()
 
 

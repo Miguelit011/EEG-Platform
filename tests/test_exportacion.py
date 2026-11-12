@@ -130,8 +130,8 @@ def test_valores_del_fixture():
     assert f["referencia"] == "car_condicional" and f["car_aplicada"] == "1"
     assert (f["banda_min_hz"], f["banda_max_hz"], f["notch_hz"]) == ("1", "30", "50")
     assert f["ica_n_componentes_eliminadas"] == "0" and f["ica_componentes_eliminadas"] == ""
-    assert f["version_eeg_library"] == "0.16.0"
-    assert f["fecha_analisis"] == "2026-11-01T21:52:47"
+    assert f["version_eeg_library"] == "0.17.0"
+    assert f["fecha_analisis"] == "2026-11-05T01:17:16"
 
 
 def test_las_potencias_coinciden_con_el_json():

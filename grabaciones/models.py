@@ -47,12 +47,14 @@ class Lote(models.Model):
 
     @property
     def resumen_parametros(self):
+        """Los parámetros del lote en una línea legible, para la lista."""
         referencia = dict(REFERENCIAS)[self.referencia]
         notch = "con notch 50 Hz" if self.notch else "sin notch"
         return f"{referencia} · {dict(BANDAS)[self.banda]} · {notch}"
 
     @property
     def con_parametros_del_estudio(self):
+        """Si se procesa como en el estudio: solo entonces aplican los modelos."""
         return self.parametros() == normalizar_parametros()
 
     @property
@@ -69,10 +71,12 @@ class Lote(models.Model):
 
     @property
     def hay_fallidas_reintentables(self):
+        """Si alguna grabación del lote falló al procesar y se puede reintentar."""
         return any(g.reintentable for g in self.grabaciones.all())
 
 
 def ruta_edf(grabacion, nombre):
+    """Dónde se guarda la copia del EDF, dentro de la carpeta de datos: una carpeta por lote."""
     return f"edf/lote_{grabacion.lote_id}/{nombre}"
 
 
