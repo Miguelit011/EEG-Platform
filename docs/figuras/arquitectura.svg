@@ -73,7 +73,7 @@
   <text x="686" y="422" class="peq">calidad, ICA, potencia, 70 características → JSON</text>
   <text x="668" y="448" class="txt">• predecir(modelo, características, …)</text>
   <text x="686" y="466" class="peq">clase y probabilidades, o «no disponible»</text>
-  <text x="668" y="492" class="txt">• Modelos c1, c2, c3 y sus fichas</text>
+  <text x="668" y="492" class="txt">• Modelos c1–c3 y de tiempo en tarea</text>
   <text x="668" y="518" class="txt">• Requisitos de un EDF (frecuencia, canales)</text>
   <text x="668" y="544" class="peq">La web no reimplementa procesado de señal</text>
 

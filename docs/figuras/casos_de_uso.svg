@@ -26,7 +26,7 @@
   <!-- Columna derecha -->
   <ellipse class="uc" cx="660" cy="105" rx="130" ry="36"/><text class="t" x="660" y="101">UC5 Ver la calidad</text><text class="t" x="660" y="119">de la señal</text>
   <ellipse class="uc" cx="660" cy="200" rx="130" ry="36"/><text class="t" x="660" y="196">UC6 Ver el análisis</text><text class="t" x="660" y="214">espectral y el mapa</text>
-  <ellipse class="uc" cx="660" cy="295" rx="130" ry="36"/><text class="t" x="660" y="291">UC7 Consultar las</text><text class="t" x="660" y="309">predicciones de los modelos</text>
+  <ellipse class="uc" cx="660" cy="295" rx="130" ry="36"/><text class="t" x="660" y="291">UC7 Consultar los modelos</text><text class="t" x="660" y="309">y el tiempo en tarea</text>
   <ellipse class="uc" cx="660" cy="390" rx="130" ry="36"/><text class="t" x="660" y="386">UC8 Descargar el CSV</text><text class="t" x="660" y="404">(grabación o lote)</text>
 
   <!-- Fila inferior -->

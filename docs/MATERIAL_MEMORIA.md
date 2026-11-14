@@ -18,8 +18,9 @@ Alcance deliberadamente acotado (principio de «lo más simple que funcione»): 
 solo equipo, sin login, sin Docker, sin base de datos de servidor, sin cola de mensajes externa y
 sin API REST ni aplicación de una sola página. Todo funciona sin internet.
 
-**No es** un detector de fatiga. Los resultados del TFG muestran que el EEG no predice la fatiga
-percibida, y la plataforma lo dice allí donde se muestran modelos.
+**No es** un detector de fatiga. Con los datos, las características y los modelos del TFG no se ha
+encontrado una relación predictiva robusta entre el EEG y la fatiga percibida, y la plataforma dice
+allí donde se muestran modelos que no la miden.
 
 ## 2. Arquitectura
 
@@ -73,7 +74,7 @@ Decisiones de arquitectura que conviene explicar:
 | UC4 Reintentar o reprocesar | Investigador | Repite las grabaciones que fallaron o reprocesa las que ya estaban hechas | Grabaciones |
 | UC5 Ver la calidad de la señal | Investigador | Mapa de electrodos, motivo de cada descarte y lo que aplicó el procesado | Calidad |
 | UC6 Ver el análisis espectral | Investigador | Potencia por banda, por zona y mapa de la cabeza por banda | Análisis |
-| UC7 Consultar las predicciones de los modelos | Investigador | Clase y probabilidades, comparadas con la condición, con el resultado de cada modelo en el test | Análisis |
+| UC7 Consultar los modelos y el tiempo en tarea | Investigador | Clase y probabilidades, comparadas con la condición, con el resultado de cada modelo en el test | Análisis |
 | UC8 Descargar el CSV | Investigador | Una grabación o el lote completo, listo para Excel | Grabaciones, Análisis |
 | UC9 Añadir un modelo | Autor de modelos | Añade un modelo con su ficha, su archivo y una línea de configuración | (configuración) |
 | UC10 Procesar en segundo plano | Procesador (sistema) | Procesa la cola sin bloquear la web, en paralelo y reanudable | — |
