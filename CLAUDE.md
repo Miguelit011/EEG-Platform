@@ -1,8 +1,8 @@
-# eeg-platform — contexto para Claude Code
+# EEG-Platform — instrucciones del proyecto
 
 ## Qué es
 Aplicación web Django, de uso **local**, para que investigadores de Ciencias del Deporte (sin conocimientos de programación) procesen grabaciones EEG del casco Emotiv EPOC X (EDF, 14 canales, 256 Hz) con la librería EEG-Library.
-Forma parte del TFG de Miguel Ángel (Grado en Ingeniería Informática, Ingeniería del Software, UEx) y se describe en la memoria y en la defensa.
+Forma parte de un TFG del Grado en Ingeniería Informática (UEx).
 
 El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `docs/DECISIONES.md`.
 
@@ -16,13 +16,13 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 7. Descargar resultados en CSV (una grabación o el lote completo).
 
 ## Qué NO es
-- **No detecta ni mide fatiga.** Ningún texto, nombre de variable ni gráfica debe sugerirlo. Los resultados del TFG demuestran que el EEG no predice el VAS.
-  - Solo aparece en avisos que dicen que **no** se mide: el del bloque de modelos y el de la pestaña **Tiempo en tarea** («no el nivel de fatiga de la persona»). La pestaña, su enlace y las columnas `tiempo_en_tarea_*` del CSV no la llevan: desde el 2026-11-05, tras la revisión de los tutores, la línea se llama «tiempo en tarea» y no «fatiga aguda», porque lo confirmado es el **cambio del EEG con el tiempo en la tarea**, no que se deba a la fatiga. Los tests lo vigilan en todas las páginas y en el CSV.
+- **No detecta ni mide fatiga.** Ningún texto, nombre de variable ni gráfica debe sugerirlo. Con estos datos, características y modelos no se ha encontrado una relación predictiva robusta entre el EEG y la VAS.
+  - La palabra «fatiga» solo aparece en los avisos que dicen que **no** se mide: el del bloque de modelos y el de la pestaña **Tiempo en tarea** («no el nivel de fatiga de la persona»). La pestaña, su enlace y las columnas `tiempo_en_tarea_*` del CSV no la llevan. Los tests lo vigilan en todas las páginas y en el CSV.
 - No reimplementa procesamiento de señal: todo cálculo sale de EEG-Library. La web llama, guarda y muestra.
 
 ## Principios
 - Lo más simple que funcione. Ante la duda, menos código y menos dependencias.
-- Fuera de alcance salvo petición expresa: login y usuarios, Docker, PostgreSQL, Celery o Redis, API REST, React u otra SPA, despliegue en servidor y otros cascos (BitBrain).
+- Fuera de alcance: login y usuarios, Docker, PostgreSQL, Celery o Redis, API REST, React u otra SPA, despliegue en servidor y otros cascos (BitBrain).
 - La condición de la grabación (OA, OC, STROOP…) es un **metadato opcional**. En este estudio va en el nombre del archivo; en otros estudios puede no existir y la plataforma debe funcionar igual.
 - Datos de participantes menores de edad: los EDF y los resultados viven en una carpeta configurable **fuera del repo**. Nunca van a git ni a servicios externos. No se usan CDN: el JS y el CSS se sirven desde `static/`, así la web funciona sin internet.
 - Honestidad en la interfaz: cada modelo muestra su resultado en el test independiente de 28 personas, con su intervalo y el nivel de azar, y sus limitaciones. Ese resultado sale de `resultados.json` del análisis confirmatorio, no de las cifras de validación cruzada de `MODELADO.md`.
@@ -36,10 +36,10 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 - EEG-Library instalada en modo editable (`pip install -e ../EEG-Library`).
 
 ## Forma de trabajar
-- Una fase de `PLAN.md` cada vez. Antes de escribir código, propón un plan breve y espera confirmación.
+- Se trabaja una fase de `PLAN.md` cada vez, con un plan breve aprobado antes de escribir código.
 - Una fase está terminada cuando sus criterios de aceptación se cumplen, los tests pasan y la app arranca.
 - Al cerrar una fase: marca su estado en `PLAN.md` y añade a `docs/DECISIONES.md` las decisiones relevantes, con su porqué en una o dos líneas.
-- No hagas commits: los hace Miguel Ángel. Al cerrar una fase, propón un mensaje de commit corto.
+- Los commits los hace el autor después de revisar los cambios.
 
 ## Dominio
 - Canales Emotiv: AF3, F7, F3, FC5, T7, P7, O1, O2, P8, T8, FC6, F4, F8, AF4.
