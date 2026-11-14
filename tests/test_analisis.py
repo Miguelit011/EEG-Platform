@@ -233,7 +233,7 @@ def test_visor_sin_cdn_y_con_respaldo_sin_js(client):
     html = client.get(url(grabacion_con(FIXTURE))).content.decode()
     assert '<script type="importmap">' in html and "/static/vendor/three/three.module.min.js" in html
     assert 'type="module" src="/static/js/visor.js"' in html
-    assert "http://" not in html and "https://" not in html.replace("https://claude.com", "")
+    assert "http://" not in html and "https://" not in html
     for ruta in ("models/cabeza.bin", "models/cerebro.bin", "models/electrodos.json", "models/LEEME.txt",
                  "models/LICENCIA-FreeSurfer.txt", "models/LICENCIA-MNE-BSD3.txt", "models/LICENCIA-nilearn-BSD3.txt",
                  "vendor/three/three.module.min.js", "vendor/three/controls/OrbitControls.js",
