@@ -234,7 +234,7 @@ def test_aviso_si_hay_cola_y_no_hay_procesador(client, bytes_edf):
     subir(client, [bytes_edf])
     html = client.get("/grabaciones/").content.decode()
     assert "el procesador no está en marcha" in html
-    assert "manage.py procesar" in html
+    assert "iniciar.bat" in html and "terminal" not in html
 
 
 def test_sin_aviso_si_el_procesador_da_senales(client, bytes_edf):
