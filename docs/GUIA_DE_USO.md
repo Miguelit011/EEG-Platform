@@ -231,7 +231,7 @@ No hay que hacer nada: al abrir una grabación PASAT o PVTB procesada aparece to
 parece más al final de la tarea que el principio:
 
 - **Regresión logística**, que usa la potencia de cada banda en cada zona. En el test
-  independiente de 28 personas acertó en el **74 %** de las grabaciones PASAT y en el **84 %** de
+  independiente de 28 personas acertó en el **74 %** de las grabaciones PASAT y en el **83 %** de
   las PVTB (azar: 50 %).
 - **Red neuronal (EEGNet)**, que analiza la señal directamente. Acertó en el **74 %** de las
   grabaciones PASAT y PVTB juntas (el test no dio la cifra por tarea). En el test no se distingue
