@@ -5,7 +5,7 @@
     {% else %}
       <p class="aviso aviso-alerta" role="alert">
         <svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>Hay grabaciones en cola pero el procesador no está en marcha, así que no avanzan.
-        Casi siempre es que se cerró su ventana: abre <code>iniciar.bat</code> otra vez, en la carpeta
+        Casi siempre es que se cerró su ventana: abre <code>{{ lanzador }}</code> otra vez, en la carpeta
         <code>EEG-Platform</code>, y continuará donde iba.
       </p>
     {% endif %}

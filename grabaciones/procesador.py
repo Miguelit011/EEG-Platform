@@ -5,8 +5,13 @@ Un único procesador (`manage.py procesar`) reparte las grabaciones en cola entr
 N procesos. Solo este proceso toca la base de datos; los hijos reciben una ruta
 y unos parámetros y devuelven el resultado (ver `analisis.py`). Con N = 1 o
 N > 1 el resultado de cada grabación es el mismo.
+
+Los hijos se crean con *spawn* en todos los sistemas: es lo único que hay en Windows,
+donde se validó, y evita el *fork* de Linux, que copiaría en cada hijo el estado de
+Django y la conexión abierta a SQLite.
 """
 
+import multiprocessing
 import os
 import time
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
@@ -83,6 +88,24 @@ def _guardar(grabacion, salida):
     _guardar_si_existe(grabacion, ["resultado", "n_canales_buenos", "estado", "mensaje_error"])
 
 
+def ejecutor_spawn(max_workers):
+    """Grupo de procesos de análisis, con *spawn* en Windows, Linux y macOS."""
+    return ProcessPoolExecutor(max_workers=max_workers,
+                               mp_context=multiprocessing.get_context("spawn"))
+
+
+def _terminar_hijos():
+    """
+    Termina los procesos de análisis que siguen vivos.
+
+    Al parar a mitad de un archivo, `shutdown(wait=False)` no detiene un análisis en curso.
+    En Windows la consola ya los cierra todos; en Linux y macOS seguirían trabajando sueltos
+    hasta acabar su archivo, cuyo resultado nadie recogería.
+    """
+    for hijo in multiprocessing.active_children():
+        hijo.terminate()
+
+
 def _marcar_error_si_sigue_procesando(grabacion, mensaje):
     grabacion.refresh_from_db(fields=["estado"])
     if grabacion.estado == Grabacion.Estado.PROCESANDO:
@@ -90,7 +113,7 @@ def _marcar_error_si_sigue_procesando(grabacion, mensaje):
 
 
 def trabajar(procesos, una_vez=False, espera_s=2.0, informar=lambda texto: None,
-             fabrica_ejecutor=ProcessPoolExecutor):
+             fabrica_ejecutor=ejecutor_spawn):
     """
     Procesa la cola con `procesos` procesos hasta que se interrumpe.
 
@@ -168,6 +191,8 @@ def trabajar(procesos, una_vez=False, espera_s=2.0, informar=lambda texto: None,
     finally:
         # Lo que estaba a medias vuelve a la cola, para que la próxima vez continúe.
         ejecutor.shutdown(wait=False, cancel_futures=True)
+        if en_vuelo:
+            _terminar_hijos()
         Grabacion.objects.filter(
             pk__in=[g.pk for g in en_vuelo.values()],
             estado=Grabacion.Estado.PROCESANDO).update(estado=Grabacion.Estado.EN_COLA)

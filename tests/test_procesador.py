@@ -1,6 +1,12 @@
 """Procesado en segundo plano: cola, worker, reanudación, reintentos y aviso en la lista."""
 
+import inspect
 import json
+import multiprocessing
+import os
+import signal
+import sys
+import time
 from concurrent.futures import Future
 from datetime import timedelta
 
@@ -11,7 +17,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from grabaciones import procesador
+from grabaciones.management.commands import procesar as comando_procesar
 from grabaciones.models import Grabacion, Lote, Procesador
+from grabaciones.recursos import lanzador
 from tests.conftest import USA_LA_WEB
 from tests.edf_sinteticos import escribir_edf
 
@@ -155,6 +163,86 @@ def test_una_senal_caducada_no_bloquea(client, settings):
 
 
 # ---------------------------------------------------------------------------
+# Windows, Linux y macOS: cómo se crean los hijos y cómo se para
+# ---------------------------------------------------------------------------
+
+class EjecutorQueNoTermina(EjecutorSincrono):
+    """Cada análisis queda en curso para siempre, como un EDF largo a medio procesar."""
+
+    def submit(self, funcion, *args):
+        return Future()
+
+
+def test_los_hijos_se_crean_con_spawn_en_todos_los_sistemas(monkeypatch):
+    # En Linux el defecto sería fork, que copiaría Django y la conexión a SQLite en cada hijo.
+    creados = []
+    monkeypatch.setattr(procesador, "ProcessPoolExecutor", lambda **kw: creados.append(kw))
+    procesador.ejecutor_spawn(3)
+    assert creados[0]["max_workers"] == 3
+    assert creados[0]["mp_context"].get_start_method() == "spawn"
+    assert inspect.signature(procesador.trabajar).parameters["fabrica_ejecutor"].default \
+        is procesador.ejecutor_spawn
+
+
+def test_parar_a_mitad_de_un_archivo_termina_los_hijos(client, bytes_edf, monkeypatch):
+    subir(client, [bytes_edf])
+    terminados = []
+    monkeypatch.setattr(procesador, "_terminar_hijos", lambda: terminados.append(True))
+
+    def llega_ctrl_c(*args, **kwargs):   # la señal llega mientras se espera al análisis
+        raise KeyboardInterrupt
+    monkeypatch.setattr(procesador, "wait", llega_ctrl_c)
+
+    with pytest.raises(KeyboardInterrupt):
+        procesador.trabajar(1, fabrica_ejecutor=EjecutorQueNoTermina())
+    assert terminados == [True]
+    assert Grabacion.objects.get().estado == "en_cola"
+    assert not Procesador.objects.exists()
+
+
+def test_sin_nada_en_curso_no_se_termina_ningun_hijo(client, bytes_edf, monkeypatch):
+    subir(client, [bytes_edf])
+    monkeypatch.setattr(procesador, "_terminar_hijos", lambda: pytest.fail("nada que terminar"))
+    procesador.trabajar(1, una_vez=True, fabrica_ejecutor=EjecutorSincrono())
+
+
+def test_terminar_hijos_mata_los_procesos_de_analisis():
+    hijo = multiprocessing.get_context("spawn").Process(target=time.sleep, args=(60,))
+    hijo.start()
+    procesador._terminar_hijos()
+    hijo.join(timeout=30)
+    assert not hijo.is_alive()
+
+
+def test_la_senal_de_terminar_para_como_ctrl_c(monkeypatch, capsys):
+    vistas = {}
+
+    def trabajar(procesos, **kw):
+        vistas.update({s: signal.getsignal(s) for s in comando_procesar.SENALES_DE_PARADA})
+        comando_procesar.parar(signal.SIGTERM, None)   # lo que hace Python al recibirla
+    monkeypatch.setattr("grabaciones.procesador.trabajar", trabajar)
+    antes = {s: signal.getsignal(s) for s in comando_procesar.SENALES_DE_PARADA}
+
+    call_command("procesar", "--procesos", "1")
+    assert signal.SIGTERM in vistas and all(h is comando_procesar.parar for h in vistas.values())
+    assert "Procesador detenido" in capsys.readouterr().out
+    # Al acabar, las señales vuelven a como estaban.
+    assert {s: signal.getsignal(s) for s in comando_procesar.SENALES_DE_PARADA} == antes
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="señales POSIX: Linux y macOS")
+@pytest.mark.parametrize("nombre", ["SIGTERM", "SIGHUP"])
+def test_cerrar_la_terminal_para_el_procesador_en_orden(monkeypatch, capsys, nombre):
+    def trabajar(procesos, **kw):
+        os.kill(os.getpid(), getattr(signal, nombre))
+        time.sleep(10)
+        pytest.fail("la señal no paró el procesador")
+    monkeypatch.setattr("grabaciones.procesador.trabajar", trabajar)
+    call_command("procesar", "--procesos", "1")
+    assert "Procesador detenido" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
 # Paralelismo (procesos reales) y lote de 20
 # ---------------------------------------------------------------------------
 
@@ -244,7 +332,8 @@ def test_aviso_si_hay_cola_y_no_hay_procesador(client, bytes_edf):
     subir(client, [bytes_edf])
     html = client.get("/grabaciones/").content.decode()
     assert "el procesador no está en marcha" in html
-    assert "iniciar.bat" in html and "terminal" not in html
+    # Nombra el lanzador del sistema en que se usa (iniciar.bat en Windows) y no habla de terminales.
+    assert lanzador() in html and "terminal" not in html
 
 
 def test_sin_aviso_si_el_procesador_da_senales(client, bytes_edf):

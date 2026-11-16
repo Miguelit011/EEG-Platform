@@ -27,7 +27,7 @@ El plan de trabajo está en `PLAN.md`. Las decisiones tomadas se registran en `d
 - Datos de participantes menores de edad: los EDF y los resultados viven en una carpeta configurable **fuera del repo**. Nunca van a git ni a servicios externos. No se usan CDN: el JS y el CSS se sirven desde `static/`, así la web funciona sin internet.
 - Honestidad en la interfaz: cada modelo muestra su resultado en el test independiente de 28 personas, con su intervalo y el nivel de azar, y sus limitaciones. Ese resultado sale de `resultados.json` del análisis confirmatorio, no de las cifras de validación cruzada de `MODELADO.md`.
 - Los modelos solo predicen si la grabación se procesó con los parámetros con que se entrenaron. Si no, la interfaz lo indica.
-- Interfaz en español. Se usa en Windows: rutas con `pathlib`.
+- Interfaz en español. Se usa en Windows, Linux y macOS (Fase 12): rutas con `pathlib`, nada propio de un sistema sin alternativa para los otros, y los lanzadores en dos versiones (`.bat` para Windows; `.sh` y `.command` para Linux y macOS).
 
 ## Stack
 - Python 3.10 (el de EEG-Library), Django 5, SQLite y plantillas Django. scikit-learn 1.7.2, fijado por EEG-Library.
@@ -60,9 +60,11 @@ Desde la carpeta `EEG-Platform`, en PowerShell. Python 3.10 y EEG-Library clonad
 - Usar: doble clic en `iniciar.bat` (abre la web y el procesador en dos ventanas y el navegador). Solo la web: `.venv\Scripts\python.exe manage.py runserver` y abrir http://127.0.0.1:8000/
 - Capturas de la guía y la memoria (datos anónimos): `.venv\Scripts\python.exe docs\generar_capturas.py`
 - Los `.bat` llevan saltos de línea CRLF y UTF-8 sin BOM (`.gitattributes` lo fija).
+- Linux y macOS: `bash instalar.sh` y `bash iniciar.sh` (en macOS, doble clic en `instalar.command` e `iniciar.command`), y los mismos comandos con `.venv/bin/python`. `iniciar.sh` ejecuta la web y el procesador en una sola terminal y los para al cerrarla. Los `.sh` y `.command` llevan LF y deben ser ejecutables en git (`git add --chmod=+x`); deben funcionar con el bash 3.2 de macOS.
+- ¿Mismo resultado en otro sistema?: `docs/comparar_sistemas.py generar <json>` en cada uno y `comparar <a> <b>` (EDF sintético por defecto). Lista de comprobación: `docs/PRUEBA_LINUX_MACOS.md`.
 - Tests: `.venv\Scripts\python.exe -m pytest`
 - Modelos: `.venv\Scripts\python.exe manage.py comprobar_modelos` valida los de `settings.MODELOS` (ficha, SHA-256, columnas, predicción). Cómo añadir uno: `docs/AÑADIR_UN_MODELO.md`. Los externos van en `EEG-Platform-datos\modelos\`.
 - Documentación de las columnas del CSV: `.venv\Scripts\python.exe manage.py documentar_csv` regenera `docs/COLUMNAS_CSV.md` (un test falla si está desactualizado).
-- Procesador (en otra terminal, abierto mientras se usa la web): `.venv\Scripts\python.exe manage.py procesar`. Procesa la cola con N procesos. N se calcula en cada equipo (mitad de los hilos, máximo 4 y un proceso por GB libre; `grabaciones/recursos.py`) y se puede fijar con `--procesos N` o `EEG_PLATFORM_PROCESOS`, porque la plataforma se usará en portátiles distintos. `--una-vez` termina al vaciar la cola. Se para con Ctrl+C y, al relanzarlo, continúa donde iba. Si hay cola y no está en marcha, la lista lo avisa. `iniciar.bat` lo lanza junto a la web.
+- Procesador (en otra terminal, abierto mientras se usa la web): `.venv\Scripts\python.exe manage.py procesar`. Procesa la cola con N procesos. N se calcula en cada equipo (mitad de los hilos, máximo 4 y un proceso por GB libre; `grabaciones/recursos.py`) y se puede fijar con `--procesos N` o `EEG_PLATFORM_PROCESOS`, porque la plataforma se usará en portátiles distintos. `--una-vez` termina al vaciar la cola. Se para con Ctrl+C y, al relanzarlo, continúa donde iba. Si hay cola y no está en marcha, la lista lo avisa nombrando el lanzador del sistema (`recursos.lanzador`). `iniciar.bat` (o `iniciar.sh`) lo lanza junto a la web. Los hijos se crean con *spawn* en todos los sistemas, y SIGTERM o SIGHUP lo paran como Ctrl+C.
 
 Los datos (base SQLite, EDF y resultados) van a `EEG_PLATFORM_DATOS`; por defecto `..\EEG-Platform-datos`. Django no arranca si apunta dentro del repo.

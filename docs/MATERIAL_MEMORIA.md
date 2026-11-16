@@ -202,7 +202,11 @@ la defensa:
 
 ## 7. Limitaciones y trabajo futuro
 
-- Uso local en un solo equipo y Windows; sin cuentas de usuario, ni varias personas a la vez.
+- Uso local en un solo equipo; sin cuentas de usuario, ni varias personas a la vez. Funciona en
+  Windows, Linux y macOS (Fase 12); qué se ha probado en cada sistema está en
+  [`PRUEBA_LINUX_MACOS.md`](PRUEBA_LINUX_MACOS.md).
+- Necesita Python 3.10, que dejó de recibir actualizaciones en octubre de 2026: los modelos se
+  guardaron con esa versión y scikit-learn 1.7.2, y cambiarla obligaría a volver a validarlos.
 - Los modelos solo se aplican con los parámetros de procesado de su entrenamiento, y el acierto de
   c3 (0,49 frente a un azar de 0,20) es modesto.
 - Un modelo nuevo debe usar las 70 características ya calculadas; con otras habría que ampliar la

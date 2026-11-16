@@ -1,6 +1,6 @@
 # EEG-Platform
 
-Aplicación web, de uso **local** en Windows, para que investigadores de Ciencias del Deporte
+Aplicación web, de uso **local** en Windows, Linux o macOS, para que investigadores de Ciencias del Deporte
 procesen grabaciones EEG del casco **Emotiv EPOC X** (EDF, 14 canales) sin programar. Usa la
 librería [EEG-Library](https://github.com/Miguelit011/EEG-Library) para todo el cálculo; la web sube, guarda y muestra.
 
@@ -29,10 +29,22 @@ Calidad, Análisis, Modelos y Tiempo en tarea son cuatro vistas de una misma gra
 
 ## Antes de empezar
 
-- **Windows 10 u 11** y conexión a internet **solo para instalar**; después funciona sin internet.
-- **Python 3.10** (puede convivir con otras versiones). Descárgalo de
-  <https://www.python.org/downloads/windows/> (instalador de 64 bits de la 3.10.x).
-- **Una ruta corta.** Windows limita las rutas a 260 caracteres y alguna dependencia tiene archivos
+- **Un sistema compatible:**
+  - **Windows 10 u 11**.
+  - **Linux** con glibc 2.28 o posterior (Ubuntu 20.04, Debian 10, Fedora 29 o posteriores), en x86_64 o ARM.
+  - **macOS 13 Ventura o posterior**, en Intel o Apple Silicon.
+
+  Qué se ha probado en cada uno: [`docs/PRUEBA_LINUX_MACOS.md`](docs/PRUEBA_LINUX_MACOS.md).
+- Conexión a internet **solo para instalar**; después funciona sin internet.
+- **Python 3.10** (puede convivir con otras versiones). Es la versión con la que se entrenaron los
+  modelos; ya no recibe actualizaciones, pero no se puede cambiar sin volver a validarlos.
+  - Windows: <https://www.python.org/downloads/windows/> (instalador de 64 bits de la 3.10.x).
+  - macOS: el instalador de la 3.10.11 de <https://www.python.org/downloads/release/python-31011/>
+    («macOS 64-bit universal2 installer»).
+  - Linux: el paquete de tu distribución. En Ubuntu 22.04, `sudo apt install python3.10 python3.10-venv`;
+    en Ubuntu 24.04 o posterior, antes `sudo add-apt-repository ppa:deadsnakes/ppa`; en Fedora,
+    `sudo dnf install python3.10`.
+- **En Windows, una ruta corta.** Windows limita las rutas a 260 caracteres y alguna dependencia tiene archivos
   con rutas muy profundas: instala en algo como `C:\TFG` y no dentro de OneDrive ni de carpetas
   con nombres largos. `instalar.bat` lo comprueba al empezar.
 - **Las dos carpetas juntas.** La plataforma instala EEG-Library desde la carpeta de al lado,
@@ -47,12 +59,20 @@ Calidad, Análisis, Modelos y Tiempo en tarea son cuatro vistas de una misma gra
 
 ## Instalar (una vez)
 
-Haz doble clic en **`instalar.bat`**. Busca Python 3.10, crea el entorno, instala las
-dependencias (la primera vez tarda unos minutos), crea la configuración y la base de datos y
-comprueba que los modelos cargan. Si algo falla, te dice qué es.
+| Sistema | Cómo |
+|---|---|
+| Windows | Doble clic en **`instalar.bat`** |
+| macOS | Doble clic en **`instalar.command`** |
+| Linux | En una terminal, desde la carpeta `EEG-Platform`: **`bash instalar.sh`** |
+
+Busca Python 3.10, crea el entorno, instala las dependencias (la primera vez tarda unos
+minutos), crea la configuración y la base de datos y comprueba que los modelos cargan. Si algo
+falla, te dice qué es.
 
 <details>
-<summary>Lo mismo, a mano, en PowerShell (desde la carpeta <code>EEG-Platform</code>)</summary>
+<summary>Lo mismo, a mano (desde la carpeta <code>EEG-Platform</code>)</summary>
+
+En PowerShell (Windows):
 
 ```powershell
 & "$env:LOCALAPPDATA\Programs\Python\Python310\python.exe" -m venv .venv
@@ -60,31 +80,52 @@ comprueba que los modelos cargan. Si algo falla, te dice qué es.
 copy .env.example .env
 .venv\Scripts\python.exe manage.py migrate
 ```
+
+En una terminal de Linux o macOS:
+
+```bash
+python3.10 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+cp .env.example .env
+.venv/bin/python manage.py migrate
+```
 </details>
 
 ## Usar
 
-Haz doble clic en **`iniciar.bat`**. Se abren dos ventanas negras (la web y el procesador) y el
-navegador en <http://127.0.0.1:8000/>. **Déjalas abiertas mientras trabajes; para terminar,
-ciérralas.** Si la lista avisa de que el procesador no está en marcha, es que esa ventana se
-cerró: vuelve a abrir `iniciar.bat`.
+| Sistema | Cómo | Qué se abre |
+|---|---|---|
+| Windows | Doble clic en **`iniciar.bat`** | Dos ventanas negras (la web y el procesador) y el navegador |
+| macOS | Doble clic en **`iniciar.command`** | Una ventana de Terminal con la web y el procesador, y el navegador |
+| Linux | **`bash iniciar.sh`** en una terminal | La web y el procesador en esa terminal, y el navegador |
+
+La plataforma está en <http://127.0.0.1:8000/>. **Deja abiertas esas ventanas mientras trabajes;
+para terminar, ciérralas** (en Linux y macOS también vale Ctrl+C). Si la lista avisa de que el
+procesador no está en marcha, es que su ventana se cerró: vuelve a abrir el lanzador.
 
 La guía paso a paso, con capturas, está en [`docs/GUIA_DE_USO.md`](docs/GUIA_DE_USO.md).
 
 Si ya hay algo funcionando en el puerto 8000 (por ejemplo, la versión anterior sin cerrar),
-`iniciar.bat` te pregunta si quieres **reiniciarla con la versión actual** (pulsa `S`) o solo abrir
+el lanzador te pregunta si quieres **reiniciarla con la versión actual** (pulsa `S`) o solo abrir
 el navegador (`N`). Reiniciar es seguro: lo que estaba en cola continúa donde iba.
+
+**macOS, la primera vez:** si la carpeta se descargó como ZIP desde el navegador (y no con
+`git clone`), macOS puede bloquear los `.command` por venir de internet. Ábrelos con clic derecho →
+**Abrir**; si no aparece esa opción, en **Ajustes del Sistema → Privacidad y seguridad**, pulsa
+**Abrir igualmente**. Si dice que no tienes permiso para abrirlo, ejecuta una vez en Terminal,
+dentro de la carpeta `EEG-Platform`: `chmod +x *.command *.sh`.
 
 ## Actualizar a una versión nueva
 
-1. **Cierra** las dos ventanas negras de la versión anterior («EEG-Platform - web» y
-   «EEG-Platform - procesador»), o pulsa `S` cuando `iniciar.bat` te pregunte por ellas. Si no,
+1. **Cierra** las ventanas de la versión anterior (en Windows, «EEG-Platform - web» y
+   «EEG-Platform - procesador»), o pulsa `S` cuando el lanzador te pregunte por ellas. Si no,
    sigues viendo la versión vieja.
 2. Actualiza las carpetas (`EEG-Platform` y, si cambió, `EEG-Library`) con la versión nueva.
    Tus datos viven aparte, en `EEG-Platform-datos`, y no se tocan.
-3. Abre **`instalar.bat`** otra vez (es seguro repetirlo: reutiliza el entorno y la configuración,
-   instala lo que falte y aplica las migraciones de la base de datos).
-4. Abre **`iniciar.bat`**.
+3. Vuelve a **instalar** (`instalar.bat`, `instalar.command` o `bash instalar.sh`). Es seguro
+   repetirlo: reutiliza el entorno y la configuración, instala lo que falte y aplica las
+   migraciones de la base de datos.
+4. **Arranca** la plataforma como siempre.
 
 La web no guarda en el navegador copias antiguas del CSS ni del JS, así que no hace falta limpiar
 la caché ni pulsar Ctrl+F5.
@@ -97,6 +138,8 @@ dentro de `.env`). La plataforma no arranca si se configura una carpeta dentro d
 Nunca se suben a git ni a servicios externos, y la web no usa recursos de internet.
 
 ## Para quien desarrolla
+
+En Windows (PowerShell). En Linux y macOS, lo mismo con `.venv/bin/python` y `/` en las rutas.
 
 ```powershell
 .venv\Scripts\python.exe -m pytest                       # tests
@@ -118,6 +161,7 @@ Nunca se suben a git ni a servicios externos, y la web no usa recursos de intern
 | [`docs/DECISIONES.md`](docs/DECISIONES.md) | Decisiones de diseño y su porqué |
 | [`docs/MATERIAL_MEMORIA.md`](docs/MATERIAL_MEMORIA.md) | Arquitectura, casos de uso, tests y capturas para la memoria |
 | [`docs/PRUEBA_LOTE_REAL.md`](docs/PRUEBA_LOTE_REAL.md) | Prueba completa con un lote de EDF reales |
+| [`docs/PRUEBA_LINUX_MACOS.md`](docs/PRUEBA_LINUX_MACOS.md) | Prueba en Linux y macOS: lista de comprobación y resultados |
 | [`docs/diseno/`](docs/diseno/) | Críticas de diseño de la interfaz (registro de la Fase 9, generadas con una herramienta de revisión) |
 | [`PLAN.md`](PLAN.md) | Plan de desarrollo por fases |
 

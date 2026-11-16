@@ -1,5 +1,6 @@
 # Dependencias de EEG-Platform. Instalar con:
-#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt     (Windows)
+#   .venv/bin/python -m pip install -r requirements.txt             (Linux y macOS)
 # (desde la carpeta EEG-Platform, con EEG-Library al lado).
 
 # Librería de procesado EEG, en modo editable: la web no copia su código.

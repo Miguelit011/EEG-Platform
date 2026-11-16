@@ -1,8 +1,11 @@
 """Cierre: instalación, arranque, documentación y que no haya datos de participantes en el repo."""
 
 import re
+import subprocess
+import sys
 from pathlib import Path
 
+import pytest
 from django.conf import settings
 
 from config.settings import leer_env
@@ -47,6 +50,56 @@ def test_iniciar_arranca_web_procesador_y_navegador():
         assert parte in bat, parte
 
 
+SCRIPTS_POSIX = ("instalar.sh", "iniciar.sh", "instalar.command", "iniciar.command")
+
+
+def test_los_scripts_de_linux_y_macos_usan_saltos_de_linea_lf():
+    for nombre in SCRIPTS_POSIX:
+        datos = (RAIZ / nombre).read_bytes()
+        assert datos.startswith(b"#!"), f"{nombre} debe empezar por #!"
+        assert not datos.startswith(b"\xef\xbb\xbf"), f"{nombre} no debe llevar BOM"
+        assert b"\r" not in datos, f"{nombre} debe usar saltos de línea LF (con CRLF bash falla)"
+    gitattributes = texto(".gitattributes")
+    assert "*.sh text eol=lf" in gitattributes and "*.command text eol=lf" in gitattributes
+
+
+def test_instalar_sh_hace_lo_mismo_que_instalar_bat():
+    sh = texto("instalar.sh")
+    for paso in ("python3.10", "-m venv .venv", "requirements.txt", ".env.example",
+                 "manage.py migrate", "manage.py check", "manage.py comprobar_modelos",
+                 "../EEG-Library/pyproject.toml", "static/models/cabeza.bin",
+                 "static/models/cerebro.bin"):
+        assert paso in sh, paso
+    # Dice cómo conseguir Python 3.10 en cada sistema, y el paquete de venv aparte de Ubuntu.
+    assert "https://www.python.org/downloads/release/python-31011/" in sh
+    assert "ppa:deadsnakes/ppa" in sh and "python3.10-venv" in sh
+    assert "ábrela" in sh
+
+
+def test_iniciar_sh_arranca_web_procesador_y_navegador():
+    sh = texto("iniciar.sh")
+    for parte in ("manage.py procesar", "manage.py runserver 127.0.0.1:8000", "--noreload",
+                  "http://127.0.0.1:8000/", "-m webbrowser", "manage.py migrate", "instalar.sh",
+                  "sigue mostrando la versión anterior", "pkill -TERM -f",
+                  "trap parar EXIT INT TERM HUP"):
+        assert parte in sh, parte
+    # macOS trae bash 3.2: sin `wait -n` ni otras novedades de bash 4.
+    assert "wait -n" not in sh and "declare -A" not in sh and ",,}" not in sh
+
+
+def test_los_command_de_macos_llaman_a_su_script():
+    for nombre, script in (("instalar.command", "instalar.sh"), ("iniciar.command", "iniciar.sh")):
+        assert f"bash ./{script}" in texto(nombre)
+
+
+@pytest.mark.skipif(sys.platform == "win32",
+                    reason="en Windows `bash` puede ser el de WSL y no ver estas rutas")
+def test_los_scripts_de_linux_y_macos_tienen_sintaxis_valida():
+    for nombre in SCRIPTS_POSIX:
+        resultado = subprocess.run(["bash", "-n", str(RAIZ / nombre)], capture_output=True, text=True)
+        assert resultado.returncode == 0, (nombre, resultado.stderr)
+
+
 def test_los_comandos_de_los_documentos_existen():
     comandos = {p.stem for p in (RAIZ / "grabaciones" / "management" / "commands").glob("*.py")
                 if p.stem != "__init__"}
@@ -78,7 +131,8 @@ def test_env_example_sin_rutas_personales_y_legible(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 
 DOCUMENTOS = ["README.md", "docs/GUIA_DE_USO.md", "docs/MATERIAL_MEMORIA.md",
-              "docs/PRUEBA_LOTE_REAL.md", "docs/AÑADIR_UN_MODELO.md", "docs/COLUMNAS_CSV.md"]
+              "docs/PRUEBA_LOTE_REAL.md", "docs/AÑADIR_UN_MODELO.md", "docs/COLUMNAS_CSV.md",
+              "docs/PRUEBA_LINUX_MACOS.md"]
 
 
 def test_los_documentos_existen_y_sus_enlaces_funcionan():
@@ -97,6 +151,9 @@ def test_el_readme_enlaza_toda_la_documentacion():
     for doc in DOCUMENTOS[1:]:
         assert doc in readme, doc
     assert "instalar.bat" in readme and "iniciar.bat" in readme
+    for script in SCRIPTS_POSIX:
+        assert script in readme, script
+    assert "macOS 13" in readme and "Linux" in readme
     assert "EEG-Library" in readme and "Python 3.10" in readme
 
 
@@ -144,7 +201,8 @@ def test_ningun_codigo_de_participante_real_en_el_repositorio():
     for ruta in RAIZ.rglob("*"):
         partes = set(ruta.relative_to(RAIZ).parts)
         if (not ruta.is_file() or partes & {".venv", ".git", "__pycache__", ".pytest_cache", "vendor"}
-                or ruta.suffix not in {".py", ".md", ".json", ".html", ".bat", ".txt", ".svg", ".js", ".css"}):
+                or ruta.suffix not in {".py", ".md", ".json", ".html", ".bat", ".sh", ".command",
+                                       ".txt", ".svg", ".js", ".css"}):
             continue
         revisados += 1
         assert not patron.search(ruta.read_text(encoding="utf-8", errors="ignore")), ruta

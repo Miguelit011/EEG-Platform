@@ -16,6 +16,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
 | 10 (A) | Tiempo en tarea con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [x] |
 | 11 (B) | Tiempo en tarea con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [x] |
+| 12 | Linux y macOS: instalar y arrancar fuera de Windows | EEG-Platform | [ ] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -299,3 +300,33 @@ Orden de trabajo (con parada del usuario en los pasos 1 y 2):
 1. Plan detallado. **Parar.**
 2. Exportación y las dos paridades. **Parar** con las cifras. Si no salen, se documenta y se cierra la fase aquí.
 3. Integración en la pestaña, CSV, documentación, tests y propuesta de mensaje de commit.
+
+## Fase 12 — Linux y macOS
+
+**Objetivo:** que la plataforma se instale y arranque también en Linux y macOS, con el mismo resultado que en Windows. Windows sigue funcionando exactamente igual: `instalar.bat` e `iniciar.bat` no se tocan.
+
+Lo que ya se sabe (análisis previo, 2026-11-16):
+- Todas las dependencias de `requirements.txt` tienen paquete precompilado para Python 3.10 en Linux (x86_64 y ARM, glibc ≥ 2.28: Ubuntu 20.04, Debian 10 o posteriores) y en macOS (Intel y Apple Silicon, **macOS 13 Ventura o posterior**, por `onnxruntime`). Comprobado con `pip download --only-binary=:all:`.
+- Las rutas ya usan `pathlib`, los archivos estáticos coinciden en mayúsculas con sus referencias y EEG-Library no tiene nada propio de Windows.
+- Lo único atado a Windows: los dos `.bat`, la memoria libre leída con la API de Windows (`recursos.py`; fuera de Windows solo cuentan los hilos) y el aviso de la lista que nombra `iniciar.bat`.
+- En Linux, `ProcessPoolExecutor` crea los hijos con *fork* por defecto; en Windows, con *spawn*, que es como se validó. Hacer *fork* de un proceso con Django y SQLite abiertos es arriesgado.
+- Python 3.10 dejó de tener soporte en octubre de 2026, pero los modelos están ligados a 3.10 y scikit-learn 1.7.2. En macOS el último instalador oficial es el 3.10.11.
+
+Incluye:
+- **Procesador:** hijos con *spawn* en todos los sistemas. `manage.py procesar` trata la señal de terminar (y el cierre de la terminal) como Ctrl+C: lo que estaba a medias vuelve a la cola, se borra el latido y no quedan procesos hijos sueltos.
+- **Memoria libre en Linux** (`/proc/meminfo`, `MemAvailable`). En macOS cuentan solo los hilos, como ya pasa cuando no se puede medir.
+- **El aviso «el procesador no está en marcha»** nombra el lanzador del sistema en que se usa (`iniciar.bat`, `iniciar.sh` o `iniciar.command`).
+- **Scripts nuevos:** `instalar.sh` (los mismos pasos que `instalar.bat`; busca `python3.10` y, si falta, explica cómo instalarlo en cada sistema con los instaladores oficiales; en Ubuntu avisa si falta `python3.10-venv`) e `iniciar.sh` (web y procesador en una sola terminal, pregunta si el puerto 8000 ya está ocupado, abre el navegador y lo para todo al cerrar la terminal o con Ctrl+C). `instalar.command` e `iniciar.command` para abrirlos con doble clic en macOS. Saltos de línea LF fijados en `.gitattributes`. El permiso de ejecución lo pone el autor al hacer el commit (`git add --chmod=+x`).
+- `docs/generar_capturas.py` encuentra también Chrome o Chromium en Linux y macOS.
+- **Documentación:** requisitos e instrucciones de cada sistema en README, `GUIA_DE_USO.md`, `CLAUDE.md`, `PRODUCT.md` y `MATERIAL_MEMORIA.md`; decisiones en `DECISIONES.md`; lista de comprobación y resultados en `docs/PRUEBA_LINUX_MACOS.md`. EEG-Memoria no se toca: se deja la lista de pasajes que dicen «solo Windows».
+
+Aceptación:
+- En Windows, los tests pasan y `iniciar.bat` arranca como antes.
+- En Ubuntu (WSL), desde una copia limpia sin datos ni `.venv`: `instalar.sh` instala, los tests pasan, `iniciar.sh` arranca la web y el procesador, la subida de EDF por HTTP, su procesado con varios procesos y el CSV funcionan, y al cerrar la terminal no queda ningún proceso ni el puerto 8000 ocupado.
+- El mismo EDF da el mismo resultado en Windows y en Linux (o se documenta la diferencia máxima y si cambia alguna predicción).
+- macOS: la lista de comprobación de `docs/PRUEBA_LINUX_MACOS.md`, hecha por el autor en un Mac. Mientras no se haga, la documentación dice «probado en Windows y Linux; macOS preparado, sin probar».
+
+Orden de trabajo:
+1. Código, scripts, tests y documentación (Windows sigue igual).
+2. Prueba en Ubuntu con WSL (la instala el autor: `wsl --install`). **Parar** con los resultados.
+3. Prueba en macOS con la lista de comprobación (autor). Cierre de la fase y propuesta de mensaje de commit.

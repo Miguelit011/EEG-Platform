@@ -21,14 +21,21 @@ los resultados en CSV para analizarlos en Excel o SPSS.
 
 ## 1. Poner en marcha la plataforma
 
-Haz doble clic en **`iniciar.bat`** (en la carpeta `EEG-Platform`). Se abren **dos ventanas
-negras** —«EEG-Platform - web» y «EEG-Platform - procesador»— y, unos segundos después, el
-navegador con la plataforma. Si es la primera vez, antes hay que ejecutar `instalar.bat` (lo
-explica el [README](../README.md)).
+En la carpeta `EEG-Platform`, abre el **lanzador** de tu sistema:
 
-- **Déjalas abiertas mientras trabajes.** La web enseña los resultados y el procesador los
-  calcula; sin el procesador, las grabaciones se quedan «en cola» y no avanzan.
-- **Para terminar, cierra las dos ventanas.**
+- **Windows:** doble clic en **`iniciar.bat`**. Se abren **dos ventanas negras** —«EEG-Platform -
+  web» y «EEG-Platform - procesador»— y, unos segundos después, el navegador con la plataforma.
+- **macOS:** doble clic en **`iniciar.command`**. Se abre **una ventana de Terminal** con la web y
+  el procesador y, unos segundos después, el navegador.
+- **Linux:** en una terminal, dentro de la carpeta, **`bash iniciar.sh`**. La web y el procesador
+  funcionan en esa terminal y se abre el navegador.
+
+Si es la primera vez, antes hay que instalar con `instalar.bat`, `instalar.command` o
+`bash instalar.sh` (lo explica el [README](../README.md)).
+
+- **Deja abiertas esas ventanas mientras trabajes.** La web enseña los resultados y el procesador
+  los calcula; sin el procesador, las grabaciones se quedan «en cola» y no avanzan.
+- **Para terminar, ciérralas** (en macOS y Linux también vale Ctrl+C en la terminal).
 - No hace falta internet: todo funciona en tu ordenador y los datos no salen de él.
 
 ## 2. Subir grabaciones
@@ -111,7 +118,8 @@ La lista **se actualiza sola** cada pocos segundos mientras haya algo pendiente.
 ![Aviso de que el procesador no está en marcha](capturas/lista_sin_procesador.png)
 
 Si hay grabaciones en cola y el procesador no da señales, la lista lo dice en un aviso naranja.
-Casi siempre es que se cerró su ventana: **abre `iniciar.bat` otra vez** y continuará donde iba.
+Casi siempre es que se cerró su ventana: **abre el lanzador otra vez** (`iniciar.bat`,
+`iniciar.command` o `iniciar.sh`; el aviso dice cuál) y continuará donde iba.
 
 ## 4. Calidad de la señal
 
@@ -292,14 +300,17 @@ Un modelo nuevo se añade con **dos archivos y una línea de configuración**, s
 
 | Qué pasa | Qué hacer |
 |---|---|
-| La lista no avanza y sale un aviso naranja | El procesador está parado: abre `iniciar.bat` de nuevo |
-| `iniciar.bat` dice que el puerto 8000 está ocupado | Ya está en marcha (se abre el navegador) o hay otro programa usando ese puerto |
+| La lista no avanza y sale un aviso naranja | El procesador está parado: abre el lanzador de nuevo (`iniciar.bat`, `iniciar.command` o `iniciar.sh`) |
+| El lanzador dice que el puerto 8000 está ocupado | Ya está en marcha (pulsa `N` y se abre el navegador) o hay otro programa usando ese puerto |
 | Un archivo sale con error al subirlo | Lee el mensaje: formato, frecuencia menor de 128 Hz, faltan electrodos o dura menos de 14 s |
 | Una grabación sale con «Fase «ica»… al menos 2 canales buenos» | Casi todos sus electrodos están descartados: la grabación no es aprovechable |
 | Excel abre el CSV con todo en una sola columna | Tu Excel usa otro separador: *Datos → Obtener datos → Desde texto/CSV* y elige `;` |
 | «No disponible con estos parámetros» en los modelos | Se procesó con parámetros distintos a los del entrenamiento (ver apartado 2) |
 | `instalar.bat` dice que la carpeta está demasiado anidada | Mueve la carpeta TFG a una ruta corta, como `C:\TFG` (Windows limita las rutas a 260 caracteres) |
-| No sale nada tras abrir `iniciar.bat` | Espera unos segundos; si no, abre `http://127.0.0.1:8000/` a mano |
+| El instalador dice que no encuentra Python 3.10 | Instálalo como indica el mensaje (cambia según el sistema) y vuelve a abrir el instalador |
+| macOS no deja abrir `iniciar.command` («desarrollador no identificado» o «procede de internet») | Clic derecho → **Abrir**; o, en **Ajustes del Sistema → Privacidad y seguridad**, **Abrir igualmente** |
+| macOS dice que no tienes permiso para abrir `iniciar.command` | En Terminal, dentro de la carpeta `EEG-Platform`: `chmod +x *.command *.sh` (una sola vez) |
+| No sale nada tras abrir el lanzador | Espera unos segundos; si no, abre `http://127.0.0.1:8000/` a mano |
 
 ## 11. Privacidad
 

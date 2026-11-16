@@ -65,3 +65,44 @@ def test_el_entorno_y_el_argumento_anulan_el_calculo(monkeypatch, settings, caps
     assert llamadas == [2, 1]
     salida = capsys.readouterr().out
     assert "fijados con EEG_PLATFORM_PROCESOS" in salida and "indicados con --procesos" in salida
+
+
+# ---------------------------------------------------------------------------
+# Windows, Linux y macOS
+# ---------------------------------------------------------------------------
+
+MEMINFO = """MemTotal:       16303428 kB
+MemFree:         1234567 kB
+MemAvailable:    6291456 kB
+Buffers:          123456 kB
+"""
+
+
+def test_memoria_libre_en_linux(tmp_path):
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(MEMINFO, encoding="ascii")
+    assert recursos._memoria_libre_linux(meminfo) == 6 * GB   # MemAvailable, no MemFree
+
+
+@pytest.mark.parametrize("contenido", ["", "MemTotal: 16303428 kB\n", "MemAvailable: mucho kB\n"])
+def test_memoria_libre_en_linux_ilegible(tmp_path, contenido):
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(contenido, encoding="ascii")
+    assert recursos._memoria_libre_linux(meminfo) is None
+    assert recursos._memoria_libre_linux(tmp_path / "no_existe") is None
+
+
+def test_memoria_libre_segun_el_sistema(monkeypatch):
+    monkeypatch.setattr(recursos, "_memoria_libre_windows", lambda: 1)
+    monkeypatch.setattr(recursos, "_memoria_libre_linux", lambda: 2)
+    assert recursos.memoria_libre_bytes("win32") == 1
+    assert recursos.memoria_libre_bytes("linux") == 2
+    assert recursos.memoria_libre_bytes("darwin") is None   # en macOS solo cuentan los hilos
+
+
+def test_el_lanzador_de_cada_sistema():
+    assert recursos.lanzador("win32") == "iniciar.bat"
+    assert recursos.lanzador("linux") == "iniciar.sh"
+    assert recursos.lanzador("darwin") == "iniciar.command"
+    for nombre in ("iniciar.bat", "iniciar.sh", "iniciar.command"):
+        assert (recursos.Path(__file__).resolve().parents[1] / nombre).is_file(), nombre

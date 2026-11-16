@@ -7,10 +7,11 @@ inventados. Nunca lee EDF ni resultados reales, porque las
 capturas se guardan en el repositorio y los participantes son menores de edad.
 
 Cómo funciona: crea una carpeta de datos temporal, la rellena con grabaciones de demostración,
-arranca la web, hace una captura de cada pantalla con Edge (o Chrome) sin ventana (tema claro, con WebGL por
+arranca la web, hace una captura de cada pantalla con Edge, Chrome o Chromium sin ventana (tema claro, con WebGL por
 software para el visor 3D) y recorta las tarjetas que interesan. Hay que ejecutarlo desde la carpeta EEG-Platform:
 
-    .venv\\Scripts\\python.exe docs\\generar_capturas.py
+    .venv\\Scripts\\python.exe docs\\generar_capturas.py      (Windows)
+    .venv/bin/python docs/generar_capturas.py                (Linux y macOS)
 """
 
 import os
@@ -39,10 +40,18 @@ def buscar_navegador():
     ]
     candidatos += sorted(Path(os.environ.get("ProgramFiles(x86)", "")).glob(
         "Microsoft/EdgeCore/*/msedge.exe"), reverse=True)
+    # macOS
+    candidatos += [Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+                   Path("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"),
+                   Path("/Applications/Chromium.app/Contents/MacOS/Chromium")]
+    # Linux
+    candidatos += [Path(r) for r in map(shutil.which, ("google-chrome", "google-chrome-stable",
+                                                        "chromium", "chromium-browser",
+                                                        "microsoft-edge")) if r]
     for c in candidatos:
         if c.is_file():
             return c
-    sys.exit("No encuentro Edge ni Chrome para hacer las capturas.")
+    sys.exit("No encuentro Edge, Chrome ni Chromium para hacer las capturas.")
 
 
 # ---------------------------------------------------------------------------

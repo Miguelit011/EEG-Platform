@@ -23,6 +23,7 @@ from grabaciones.calidad import resumen_calidad
 from grabaciones.eliminacion import eliminar_grabaciones, procesandose
 from grabaciones.exportacion import csv_de, nombre_de_archivo_seguro
 from grabaciones.models import Grabacion, Lote, Procesador
+from grabaciones.recursos import lanzador
 from grabaciones.subida import LoteForm, guardar_lote
 from grabaciones.tiempo_en_tarea import AVISO_FIJO as AVISO_TIEMPO_EN_TAREA, resumen_tiempo_en_tarea
 
@@ -42,6 +43,8 @@ def _contexto_lista():
         "hay_cola": hay_cola,
         # Solo se avisa si hay trabajo pendiente: sin cola, que no haya procesador no importa.
         "procesador": Procesador.activo() if hay_cola else None,
+        # Uso local: el sistema del servidor es el de quien usa la web.
+        "lanzador": lanzador(),
     }
 
 

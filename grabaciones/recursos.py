@@ -9,6 +9,8 @@ memoria libre de ese equipo. `EEG_PLATFORM_PROCESOS` o `--procesos` lo anulan.
 
 import ctypes
 import os
+import sys
+from pathlib import Path
 
 # Más de 4 procesos apenas acelera (medido: 4 → 14,5 s, 6 → 12,7 s con 12 EDF).
 MAXIMO_POR_DEFECTO = 4
@@ -19,8 +21,22 @@ MAXIMO_POR_DEFECTO = 4
 MEMORIA_POR_PROCESO = 1024**3
 
 
-def memoria_libre_bytes():
-    """Memoria física disponible en Windows, o None si no se puede saber."""
+def memoria_libre_bytes(plataforma=None):
+    """
+    Memoria física disponible, o None si no se puede saber.
+
+    Se lee en Windows (API del sistema) y en Linux (`/proc/meminfo`), sin dependencias.
+    En macOS no hay una forma sencilla: devuelve None y solo cuentan los hilos.
+    """
+    plataforma = plataforma or sys.platform
+    if plataforma == "win32":
+        return _memoria_libre_windows()
+    if plataforma.startswith("linux"):
+        return _memoria_libre_linux()
+    return None
+
+
+def _memoria_libre_windows():
     try:
         class Estado(ctypes.Structure):
             _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
@@ -37,6 +53,17 @@ def memoria_libre_bytes():
         return int(estado.ullAvailPhys)
     except Exception:
         return None
+
+
+def _memoria_libre_linux(ruta=Path("/proc/meminfo")):
+    """`MemAvailable` de `/proc/meminfo` (en kB), que es lo que se puede usar sin hacer swap."""
+    try:
+        for linea in Path(ruta).read_text(encoding="ascii").splitlines():
+            if linea.startswith("MemAvailable:"):
+                return int(linea.split()[1]) * 1024
+    except (OSError, ValueError, IndexError):
+        pass
+    return None
 
 
 _DETECTAR = object()
@@ -63,3 +90,13 @@ def procesos_automaticos(hilos=None, libre=_DETECTAR):
         texto += f", {libre / 1024**3:.1f} GB libres"
         n = min(n, int(por_memoria))
     return n, texto
+
+
+def lanzador(plataforma=None):
+    """El archivo con el que se arranca la plataforma en este sistema (para los avisos de la web)."""
+    plataforma = plataforma or sys.platform
+    if plataforma == "win32":
+        return "iniciar.bat"
+    if plataforma == "darwin":
+        return "iniciar.command"
+    return "iniciar.sh"

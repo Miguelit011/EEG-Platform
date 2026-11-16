@@ -1,5 +1,8 @@
 # Los .bat necesitan saltos de línea de Windows (CRLF) aunque se clonen desde otro sistema.
 *.bat text eol=crlf
+# Y los scripts de Linux y macOS, saltos de línea LF aunque se editen en Windows.
+*.sh text eol=lf
+*.command text eol=lf
 
 # Archivos binarios (mallas 3D, fuentes, imágenes): git no debe tocar sus saltos de línea.
 *.bin binary

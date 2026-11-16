@@ -1,8 +1,20 @@
+import signal
+
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from grabaciones import procesador
 from grabaciones.recursos import procesos_automaticos
+
+# Señales que paran el procesador igual que Ctrl+C: la de terminar (`kill`, o `iniciar.sh`
+# al cerrarse) y la de cerrar la terminal en Linux y macOS. SIGHUP no existe en Windows.
+SENALES_DE_PARADA = [s for s in (getattr(signal, "SIGTERM", None), getattr(signal, "SIGHUP", None))
+                     if s is not None]
+
+
+def parar(numero, marco):
+    """Convierte la señal en un Ctrl+C: lo que estaba a medias vuelve a la cola."""
+    raise KeyboardInterrupt
 
 
 class Command(BaseCommand):
@@ -28,12 +40,19 @@ class Command(BaseCommand):
             origen = f"calculados para este equipo: {equipo}"
         self.stdout.write(f"Procesador en marcha con {procesos} proceso(s), {origen}. "
                           f"Ctrl+C para parar.")
+        anteriores = {s: signal.signal(s, parar) for s in SENALES_DE_PARADA}
         try:
             hechas = procesador.trabajar(procesos, una_vez=una_vez, informar=self.stdout.write)
         except procesador.ProcesadorYaEnMarcha as error:
             raise CommandError(str(error))
         except KeyboardInterrupt:
-            self.stdout.write("Procesador detenido. Lo que quedaba a medias seguirá en la cola.")
+            try:
+                self.stdout.write("Procesador detenido. Lo que quedaba a medias seguirá en la cola.")
+            except OSError:   # la terminal ya se cerró: no hay dónde escribirlo
+                pass
             return
+        finally:
+            for senal, anterior in anteriores.items():
+                signal.signal(senal, signal.SIG_DFL if anterior is None else anterior)
         self.stdout.write(f"Cola vacía: {hechas['procesadas']} procesadas, "
                           f"{hechas['con_error']} con error.")
