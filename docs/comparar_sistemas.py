@@ -80,9 +80,14 @@ def comparar(a, b):
               f"BLAS {s['blas']}")
     hojas_a, hojas_b = dict(_hojas(datos_a["resultado"])), dict(_hojas(datos_b["resultado"]))
     solo = sorted(set(hojas_a) ^ set(hojas_b))
-    distintas, max_abs, max_rel, peor = [], 0.0, 0.0, None
+    distintas, versiones, max_abs, max_rel, peor = [], [], 0.0, 0.0, None
     for ruta in sorted(set(hojas_a) & set(hojas_b)):
         x, y = hojas_a[ruta], hojas_b[ruta]
+        if ruta.startswith("/metadatos/versiones/"):
+            # Informativo: p. ej. Python 3.10.11 en Windows y 3.10.22 en Ubuntu no es un resultado.
+            if x != y:
+                versiones.append((ruta, x, y))
+            continue
         numeros = all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (x, y))
         if numeros:
             d = abs(x - y)
@@ -97,6 +102,8 @@ def comparar(a, b):
     print(f"\nValores comparados: {len(set(hojas_a) & set(hojas_b))}")
     print(f"Diferencia máxima: {max_abs:.3g} absoluta, {max_rel:.3g} relativa"
           + (f" (en {peor})" if peor else ""))
+    for ruta, x, y in versiones:
+        print(f"Versión distinta (informativo): {ruta.rsplit('/', 1)[-1]}: {x} y {y}")
     for ruta, x, y in distintas:
         print(f"Distinto: {ruta}: {x!r} ≠ {y!r}")
     for ruta in solo:

@@ -83,6 +83,8 @@ def test_iniciar_sh_arranca_web_procesador_y_navegador():
                   "sigue mostrando la versión anterior", "pkill -TERM -f",
                   "trap parar EXIT INT TERM HUP"):
         assert parte in sh, parte
+    # Como `choice /c SN`: pregunta hasta tener S o N, y sin teclado no cierra nada (N).
+    assert "while :; do" in sh and 'respuesta="N"' in sh and "[Ss]) break" in sh
     # macOS trae bash 3.2: sin `wait -n` ni otras novedades de bash 4.
     assert "wait -n" not in sh and "declare -A" not in sh and ",,}" not in sh
 

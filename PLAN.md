@@ -327,6 +327,6 @@ Aceptación:
 - macOS: la lista de comprobación de `docs/PRUEBA_LINUX_MACOS.md`, hecha por el autor en un Mac. Mientras no se haga, la documentación dice «probado en Windows y Linux; macOS preparado, sin probar».
 
 Orden de trabajo:
-1. Código, scripts, tests y documentación (Windows sigue igual).
-2. Prueba en Ubuntu con WSL (la instala el autor: `wsl --install`). **Parar** con los resultados.
+1. Código, scripts, tests y documentación (Windows sigue igual). **Hecho** (2026-11-16, commit `29b973d`).
+2. Prueba en Ubuntu con WSL (la instala el autor: `wsl --install`). **Parar** con los resultados. **Hecho** (2026-11-16): Ubuntu 26.04, los 9 puntos de la lista bien, resultados iguales a Windows salvo redondeo (≤ 1,1·10⁻¹³) y ninguna predicción distinta. Encontró un fallo en la pregunta de reiniciar de `iniciar.sh`, ya corregido. Detalle en `docs/PRUEBA_LINUX_MACOS.md`.
 3. Prueba en macOS con la lista de comprobación (autor). Cierre de la fase y propuesta de mensaje de commit.

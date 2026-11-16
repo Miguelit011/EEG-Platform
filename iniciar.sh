@@ -51,15 +51,22 @@ if puerto_ocupado; then
     echo "Ya hay algo funcionando en el puerto 8000. Si es una copia de EEG-Platform arrancada"
     echo "antes de actualizar, sigue mostrando la versión anterior."
     echo
-    respuesta=""
-    read -r -p "¿Reiniciarla con la versión actual? [S = sí, N = solo abrir el navegador] " respuesta
-    case "$respuesta" in
-        [Nn]*)
-            abrir_navegador
-            echo "Abierto $URL en el navegador."
-            exit 0
-            ;;
-    esac
+    # Como `choice /c SN` de iniciar.bat: solo vale S o N, y se pregunta hasta tener una de las dos.
+    while :; do
+        respuesta=""
+        if ! read -r -p "¿Reiniciarla con la versión actual? [S = sí, N = solo abrir el navegador] " respuesta; then
+            respuesta="N"   # sin teclado (entrada cerrada): lo prudente es no cerrar nada
+            echo
+        fi
+        case "$respuesta" in
+            [Ss]) break ;;
+            [Nn])
+                abrir_navegador
+                echo "Abierto $URL en el navegador."
+                exit 0
+                ;;
+        esac
+    done
     echo
     echo "Cerrando la copia anterior..."
     pkill -TERM -f 'manage\.py (procesar|runserver 127\.0\.0\.1:8000)' || true
