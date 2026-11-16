@@ -138,8 +138,8 @@ sin salir de la pestaña.
 | Grupo | Qué comprueba | Tests |
 |---|---|---|
 | Subida y validación | Requisitos del EDF (leídos de la librería), patrón de condición, lotes con archivos malos | 31 |
-| Procesado en segundo plano | Cola, reanudación, errores aislados, reintentos, paralelismo con procesos reales (mismo resultado con 1 y con varios), señal de vida y avisos | 19 |
-| Recursos del equipo | Cuántos procesos usar según hilos y memoria | 13 |
+| Procesado en segundo plano | Cola, reanudación, errores aislados, reintentos, paralelismo con procesos reales (mismo resultado con 1 y con varios), señal de vida y avisos, hijos con *spawn* y parada con SIGTERM o SIGHUP (estas, solo en Linux y macOS) | 27 |
+| Recursos del equipo | Cuántos procesos usar según hilos y memoria (también con `/proc/meminfo` de Linux) y qué lanzador nombra el aviso en cada sistema | 19 |
 | Pantalla de calidad | Datos y mapa (0, 1 o varios descartados), avisos como en la librería | 35 |
 | Pantalla de análisis | Valores de la librería, escalas y contraste del mapa, avisos, gráfica, visor (datos, aviso de orientativo, sin CDN) y respaldo sin JavaScript | 32 |
 | Modelos y navegación | Grabación activa (cookie, valor por defecto, atajos), selector con buscador, anterior y siguiente, pestaña Modelos con resultado, intervalo y azar de la ficha, resumen, parámetros distintos, modelo roto, límite de filas | 23 |
@@ -148,11 +148,12 @@ sin salir de la pestaña.
 | Exportación a CSV | Columnas estables y documentadas, coincidencia valor a valor con el JSON, formato de Excel, protección contra fórmulas | 27 |
 | Eliminar grabaciones y lotes | Se borran el registro y la copia, nunca el EDF original; no se elimina lo que se está procesando; solo se borra con confirmación | 18 |
 | Esqueleto y configuración | Arranque, datos fuera del repo, `.env`, librería instalada | 18 |
-| Cierre | Instalación y arranque, documentación y enlaces, ningún dato de participantes en el repo | 12 |
+| Cierre | Instalación y arranque (también los `.sh` y `.command`: saltos de línea y sintaxis), documentación y enlaces, ningún dato de participantes en el repo | 17 |
 | Tiempo en tarea | Estados de la pestaña (PASAT, PVTB, otras condiciones, sin procesar, versión antigua, otros parámetros), veredicto y cifras iguales a la librería y a `resultados_test.json`, suavizado, datos de la animación, EEGNet (su apartado de resultado, segunda cinta, grabaciones sin EEGNet), CSV, las direcciones antiguas redirigen y «fatiga» solo aparece para decir que no se mide | 29 |
-| **Total EEG-Platform** | | **295** |
+| **Total EEG-Platform** | | **314** |
 
-*(Recuento del 2026-11-12, archivo por archivo.)*
+*(Recuento del 2026-11-16, archivo por archivo. En Windows pasan 311 y se saltan 3 que solo tienen
+sentido fuera de Windows: las 2 de señales y la de sintaxis de los guiones.)*
 
 EEG-Library, la librería que usa, tiene **589 tests** automáticos (más 7 que necesitan el
 dataset real) y mantiene la paridad exacta de las 70 características con la matriz del estudio
@@ -169,8 +170,9 @@ con Excel y las 198 pantallas sin fallo. Y la comprobación del criterio de acep
 sin datos) y siguiendo el README, `instalar.bat` deja la plataforma lista en menos de un minuto,
 los 215 tests de entonces pasan, `iniciar.bat` arranca la web y el procesador, y la subida de EDF
 reales por HTTP, el procesado y la descarga del CSV funcionan. El 2026-11-11 se repitió la parte de
-los tests desde un `git clone` limpio (sin `.env` y con la carpeta de datos vacía): pasan los 295
-actuales. Esa segunda vez no se ejecutaron `instalar.bat` ni `iniciar.bat`.
+los tests desde un `git clone` limpio (sin `.env` y con la carpeta de datos vacía): pasaban los 295
+de entonces. Esa segunda vez no se ejecutaron `instalar.bat` ni `iniciar.bat`. Linux y macOS
+tienen su propia prueba (Fase 12, `PRUEBA_LINUX_MACOS.md`).
 
 Recuento actualizado: `.venv\Scripts\python.exe -m pytest --collect-only -q`.
 
