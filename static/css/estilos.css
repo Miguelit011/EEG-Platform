@@ -425,14 +425,14 @@ details h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
 p.nota { max-width: none; }
 .ico-grande { display: block; width: 36px; height: 36px; margin: 0 auto 0.5rem; color: var(--acento); }
 /* Columnas con el mismo ancho en todos los lotes. Las estrechas llevan un ancho mínimo real (cabe «10 min 10 s» y
-   «Análisis ···» sin partirse); Archivo se queda con lo que sobra y Estado con un reparto fijo. Las filas tienen
+   «Análisis ···» y «Reintentar ···» sin partirse); Archivo se queda con lo que sobra y Estado con un reparto fijo. Las filas tienen
    una altura mínima común para que no salten al cambiar de estado. */
 @media (min-width: 901px) {
   .tabla-lista { table-layout: fixed; width: 100%; min-width: 52rem; }
   .tabla-lista th:nth-child(2) { width: 10.5rem; }
   .tabla-lista th:nth-child(3) { width: 8.5rem; }
   .tabla-lista th:nth-child(4) { width: 22%; }
-  .tabla-lista th:nth-child(5) { width: 9.5rem; }
+  .tabla-lista th:nth-child(5) { width: 11.75rem; }
   .tabla-lista tbody td { height: 4.75rem; }
   .tabla-lista td:nth-child(2) .origen, .tabla-lista td:nth-child(3) .celda { white-space: nowrap; }
 }

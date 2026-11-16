@@ -190,6 +190,16 @@ def test_reintentar_una_fallida(client, bytes_edf):
     assert g.estado == "en_cola" and g.mensaje_error == ""
 
 
+def test_reintentar_va_en_la_columna_de_acciones(client, bytes_edf):
+    subir(client, [bytes_edf])
+    g = Grabacion.objects.get()
+    Grabacion.objects.filter(pk=g.pk).update(estado="error", mensaje_error="fallo")
+    html = client.get("/grabaciones/").content.decode()
+    fila = html[html.index('data-etiqueta="Estado"'):]
+    assert ">Reintentar<" not in fila[:fila.index('data-etiqueta="Acciones"')]
+    assert ">Reintentar<" in fila[fila.index('data-etiqueta="Acciones"'):]
+
+
 def test_reprocesar_conserva_el_resultado_hasta_el_nuevo(client, bytes_edf):
     subir(client, [bytes_edf])
     procesador.trabajar(1, una_vez=True, fabrica_ejecutor=EjecutorSincrono())

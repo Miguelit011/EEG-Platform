@@ -76,12 +76,6 @@
                 {% with aviso=g.aviso_canales %}
                   {% if aviso.1 %}<br><span class="aviso-canales aviso-canales-{{ aviso.0 }}"><svg class="ico" aria-hidden="true"><use href="#i-aviso"/></svg>{{ aviso.1 }}</span>{% endif %}
                 {% endwith %}
-                {% if g.reintentable %}
-                  <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
-                    {% csrf_token %}
-                    <button type="submit" class="secundario">Reintentar</button>
-                  </form>
-                {% endif %}
               </div></td>
               <td data-etiqueta="Acciones" class="acciones-fila"><div class="celda">
                 {% if g.estado == "procesada" %}
@@ -103,6 +97,12 @@
                 {% elif g.estado == "procesando" %}
                   <span class="desactivado" aria-disabled="true" title="Se podrá eliminar cuando termine de procesarse">—</span>
                 {% else %}
+                  {% if g.reintentable %}
+                  <form method="post" action="{% url 'grabaciones:encolar' g.pk %}" class="en-linea">
+                    {% csrf_token %}
+                    <button type="submit" class="secundario">Reintentar</button>
+                  </form>
+                  {% endif %}
                   <details class="menu" data-pk="{{ g.pk }}">
                     <summary class="boton" aria-label="Más acciones de {{ g.nombre_original }}"><svg class="ico" aria-hidden="true"><use href="#i-mas"/></svg></summary>
                     <div class="menu-lista">
