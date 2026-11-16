@@ -16,7 +16,7 @@ Cada fase deja algo que funciona y se puede enseñar. No se empieza una fase sin
 | 9 | Diseño: rediseño visual y visualización topográfica 2D/3D | EEG-Platform | [x] |
 | 10 (A) | Tiempo en tarea con la logística: pestaña nueva y cerebro animado | EEG-Library + EEG-Platform | [x] |
 | 11 (B) | Tiempo en tarea con EEGNet: segunda cinta y comparación | EEG-Library + EEG-Platform | [x] |
-| 12 | Linux y macOS: instalar y arrancar fuera de Windows | EEG-Platform | [ ] |
+| 12 | Linux y macOS: instalar y arrancar fuera de Windows | EEG-Platform | [x] |
 
 Versión mínima defendible: Fases 0–6. La Fase 7 añade la parte de IA y la extensibilidad.
 
@@ -329,4 +329,4 @@ Aceptación:
 Orden de trabajo:
 1. Código, scripts, tests y documentación (Windows sigue igual). **Hecho** (2026-11-16, commit `29b973d`).
 2. Prueba en Ubuntu con WSL (la instala el autor: `wsl --install`). **Parar** con los resultados. **Hecho** (2026-11-16): Ubuntu 26.04, los 9 puntos de la lista bien, resultados iguales a Windows salvo redondeo (≤ 1,1·10⁻¹³) y ninguna predicción distinta. Encontró un fallo en la pregunta de reiniciar de `iniciar.sh`, ya corregido. Detalle en `docs/PRUEBA_LINUX_MACOS.md`.
-3. Prueba en macOS con la lista de comprobación (autor). Cierre de la fase y propuesta de mensaje de commit.
+3. Prueba en macOS con la lista de comprobación (autor). Cierre de la fase y propuesta de mensaje de commit. **Hecho** (2026-11-16), en versión reducida por decisión del autor: un compañero instaló y arrancó la plataforma con doble clic, procesó 2 EDF reales y abrió todas las pestañas sin errores. Las cifras en pantalla son iguales a las de Windows para los mismos EDF. No se pasaron los tests ni los puntos 6–8. Detalle en `docs/PRUEBA_LINUX_MACOS.md`.

@@ -9,7 +9,7 @@ Como en [`PRUEBA_LOTE_REAL.md`](PRUEBA_LOTE_REAL.md), no incluye nombres de arch
 |---|---|
 | Windows 11 (x86_64) | **Probado**: es el sistema en que se desarrolló y se hizo la prueba con un lote real |
 | Linux: Ubuntu 26.04 en WSL 2 (x86_64) | **Probado** (2026-11-16): los 9 puntos de la lista, con EDF reales |
-| macOS | Pendiente |
+| macOS | **Probado, en versión reducida** (2026-11-16): instalar, arrancar y usar las cuatro pestañas con 2 EDF reales; las cifras en pantalla, iguales a las de Windows |
 
 ## Lo que se sabe sin probar
 
@@ -98,6 +98,38 @@ Windows, 3.10.22 en Ubuntu).
 - En WSL no se abre el navegador de Windows solo: hay que abrir <http://127.0.0.1:8000/> a mano
   (WSL comparte el puerto con Windows). En un Linux con escritorio lo abre `iniciar.sh`.
 
-### macOS
+### macOS (2026-11-16)
 
-Pendiente.
+**Cómo se hizo.** La hizo un compañero del autor en su Mac, en unos minutos y sin programar, así
+que se redujo a lo que ve quien usa la plataforma (decisión del autor). Partió de un ZIP con el
+commit `8130a57` de EEG-Platform y, de EEG-Library, solo `src`, `pyproject.toml` y `LICENSE`, sin
+`.venv`, `.env` ni datos. Llevaba **2 EDF reales de un sujeto de entrenamiento** (uno de OA y otro
+de PASAT), tal cual. Después se borró todo del Mac. El Mac tiene 8 hilos.
+
+| Punto | Resultado |
+|---|---|
+| 1. Sin Python 3.10 | No se probó |
+| 2. Instalar | `instalar.command` con doble clic: instala, y los tres modelos cargan y predicen (punto 5) |
+| 3. Tests | No se pasaron |
+| 4. Arrancar | `iniciar.command` con doble clic: una ventana de Terminal con la web y el procesador, y el navegador abierto en la portada. El procesador elige **4 procesos** con 8 hilos; en macOS solo cuentan los hilos, como estaba previsto |
+| 5. Usar | Los 2 EDF, en un lote, procesados en unos 35 s. Se abrieron Grabaciones, Calidad, Análisis (con el cerebro 3D y los cuatro mapas), Modelos y Tiempo en tarea (los dos modelos, los mapas animados y la cinta). En el registro del servidor, todas las páginas y archivos responden bien; el único 404 es `/favicon.ico`, que pide el navegador por su cuenta y no se usa. No se descargó el CSV |
+| 6–8 | No se probaron |
+| 9. Mismo resultado que en Windows | No con `comparar_sistemas.py`, sino cotejando las capturas con el resultado de Windows para los mismos 2 EDF. Ver abajo |
+
+**Mismo resultado que en Windows**, con las cifras que muestra la pantalla:
+
+| Pantalla | Valores comparados | Diferencias |
+|---|---|---|
+| Grabaciones | Duración de las 2 grabaciones | Ninguna |
+| Calidad (OA) | Electrodos descartados (los mismos 2) | Ninguna |
+| Análisis (OA) | Extremos de la escala de potencia relativa de delta y theta | Ninguna (con un decimal) |
+| Modelos | c2 en OA (reposo, 82,4 %) y c3 en PASAT (las probabilidades que se ven de las 5 clases y la predicción) | Ninguna (con un decimal) |
+| Tiempo en tarea (PASAT) | Veredicto de tercios de la logística y de EEGNet | Ninguna |
+
+Es una comprobación más débil que la de Linux: solo cubre lo que se ve en pantalla, redondeado.
+Basta para descartar cualquier diferencia que cambie lo que lee el usuario, pero no mide las
+diferencias en los últimos decimales que podría dar Accelerate en Apple Silicon. La versión de
+macOS y el procesador del Mac no se anotaron.
+
+Las capturas y el registro del servidor llevan nombres de archivo de un participante y no van al
+repositorio.
