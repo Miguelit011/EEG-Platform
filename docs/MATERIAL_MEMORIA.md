@@ -74,7 +74,7 @@ Decisiones de arquitectura que conviene explicar:
 | UC4 Reintentar o reprocesar | Investigador | Repite las grabaciones que fallaron o reprocesa las que ya estaban hechas | Grabaciones |
 | UC5 Ver la calidad de la señal | Investigador | Mapa de electrodos, motivo de cada descarte y lo que aplicó el procesado | Calidad |
 | UC6 Ver el análisis espectral | Investigador | Potencia por banda, por zona y mapa de la cabeza por banda | Análisis |
-| UC7 Consultar los modelos y el tiempo en tarea | Investigador | Clase y probabilidades, comparadas con la condición, con el resultado de cada modelo en el test | Análisis |
+| UC7 Consultar los modelos y el tiempo en tarea | Investigador | Clase y probabilidades, comparadas con la condición, con el resultado de cada modelo en el test | Modelos, Tiempo en tarea |
 | UC8 Descargar el CSV | Investigador | Una grabación o el lote completo, listo para Excel | Grabaciones, Análisis |
 | UC9 Añadir un modelo | Autor de modelos | Añade un modelo con su ficha, su archivo y una línea de configuración | (configuración) |
 | UC10 Procesar en segundo plano | Procesador (sistema) | Procesa la cola sin bloquear la web, en paralelo y reanudable | — |
@@ -99,9 +99,11 @@ depende solo del color (forma, símbolo y texto).
 
 ![Pantalla Análisis](capturas/pantalla_3_analisis.png)
 
-Gráfica de barras, tabla zona × banda, mapa de la cabeza por banda y bloque de modelos con su
-ficha y su advertencia. Las capturas se han generado con **datos anónimos de ejemplo**, no con
-grabaciones reales.
+Mapas de potencia por banda (el cerebro en 3D y las cuatro bandas vistas desde arriba, con el aviso
+de que el color entre sensores no localiza fuentes), tabla zona × banda, gráfica de barras de la
+potencia relativa y valores por electrodo y potencia absoluta. Los modelos no están en esta
+pantalla: tienen su propia pestaña (pantalla 4), a la que lleva un botón. Las capturas se han
+generado con **datos anónimos de ejemplo**, no con grabaciones reales.
 
 ### Pantalla 4. Modelos (por grabación)
 
