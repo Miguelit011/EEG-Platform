@@ -148,6 +148,8 @@ En Windows (PowerShell). En Linux y macOS, lo mismo con `.venv/bin/python` y `/`
 .venv\Scripts\python.exe manage.py comprobar_modelos     # valida los modelos registrados
 .venv\Scripts\python.exe manage.py documentar_csv        # regenera docs/COLUMNAS_CSV.md
 .venv\Scripts\python.exe docs\generar_capturas.py        # regenera las capturas de docs/capturas (datos anónimos)
+.venv\Scripts\python.exe docs\comparar_sistemas.py generar <json>   # resultado de un EDF sintético, para comparar sistemas
+.venv\Scripts\python.exe docs\comparar_sistemas.py comparar <a> <b> # compara dos JSON de sistemas distintos, número a número
 .venv\Scripts\python.exe docs\generar_mallas.py --pial-izq <pial_left.gii.gz> --pial-der <pial_right.gii.gz>   # regenera static/models (ver su docstring)
 ```
 
